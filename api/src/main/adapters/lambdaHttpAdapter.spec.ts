@@ -1,9 +1,9 @@
 import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { Schema } from '../../kernel/decorators/Schema.js';
 import { Controller } from '../../application/contracts/Controller.js';
 import { HttpError } from '../../application/errors/HttpError.js';
+import { Schema } from '../../kernel/decorators/Schema.js';
 import { lambdaHttpAdapter } from './lambdaHttpAdapter.js';
 
 const context = {} as Context;
@@ -110,7 +110,7 @@ describe('lambdaHttpAdapter', () => {
   });
 
   it('formats HttpError through errorHandler', async () => {
-    class NotFoundController extends Controller {
+    class NotFoundController extends Controller<'public'> {
       protected async handle(): Promise<Controller.Response> {
         throw new HttpError(404, 'Resource not found', { resourceId: '123' });
       }
@@ -128,7 +128,7 @@ describe('lambdaHttpAdapter', () => {
   });
 
   it('catches generic errors and returns 500 with standard message', async () => {
-    class ErrorController extends Controller {
+    class ErrorController extends Controller<'public'> {
       protected async handle(): Promise<Controller.Response> {
         throw new Error('Database connection failed');
       }

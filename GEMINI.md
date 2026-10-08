@@ -173,10 +173,11 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
    - Criar em `src/application/controllers/<modulo>/<Nome>Controller.ts`.
    - Decorar com `@Injectable()` e `@Schema(schemaZod)`.
    - Estender `Controller<'public' | 'private', <Nome>Controller.Response>`.
-   - Em rotas `'private'`, `request.accountId` está disponível e tipado obrigatoriamente.
-   - Em rotas `'public'`, `request.accountId` não existe.
+   - Em rotas `'private'`, `request.accountId` é uma `string` (extraída pelo autorizador).
+   - Em rotas `'public'`, `request.accountId` é tipado como `null`.
    - Implementar método `protected override async handle({ body, ... }: Controller.Request<'public' | 'private', ActionBody>)`.
    - Definir `namespace <Nome>Controller { export type Response = ...; }`.
+   - *(Nota: O `lambdaHttpAdapter` repassa a requisição sanitizada com `accountId: null` até que a lógica de decodificação JWT/authorizer seja plugada na branch de autenticação).*
 6. **Entrypoint da Lambda:**
    - Criar em `src/main/functions/<modulo>.ts`.
    - **Primeira linha obrigatória:** `import 'reflect-metadata';`.
