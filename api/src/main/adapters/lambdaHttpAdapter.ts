@@ -42,5 +42,3 @@ export function lambdaHttpAdapter(
     .use(errorHandler())
     .use(httpJsonBodyParser({ disableContentTypeError: true }));
 }
-
-export const HandlerAdpter = lambdaHttpAdapter;
