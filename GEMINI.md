@@ -60,7 +60,7 @@ trezzy-store/
 | **`kernel/`** | Container IoC (`Registry.ts`), decorators fundamentais (`@Injectable`, `@Schema`). | Importar qualquer arquivo de `application`, `infra` ou `main`. Depender de regras de negócio. |
 | **`shared/`** | `AppConfig.ts`, `env.ts`, tipos globais (`Constructor.ts`). | Lógica de negócio, queries de banco de dados ou acoplamento a requisições HTTP. |
 | **`application/contracts/`** | Classes abstratas base (`Controller.ts`), contratos globais. | Implementações concretas de controllers ou acesso a bancos de dados. |
-| **`application/errors/`** | Erros de domínio e operacionais (`HttpError.ts`). | Classes de infraestrutura ou dependências de frameworks externos. |
+| **`application/errors/`** | Erros de domínio e operacionais (`HttpError.ts`, `ApplicationError.ts`, `ErrorCode.ts`). | Classes de infraestrutura ou dependências de frameworks externos. |
 | **`application/controllers/`** | Receber requisições tratadas, validar payload via `@Schema()`, delegar para UseCases e formatar o envelope HTTP. | Executar queries SQL diretamente, importar SDKs de infraestrutura ou acessar a AWS. |
 | **`application/useCases/`** | Regras de negócio puras, orquestração de repositórios e serviços de domínio. Método único `execute()`. | Acessar objetos HTTP (`event`, `headers`, `res`), definir status code HTTP ou depender de Middy/AWS Lambda. |
 | **`infra/database/drizzle/`** | `DrizzleClient.ts`, `schema.ts`, repositórios concretos, queries Drizzle, migrations. | Conter lógica de apresentação HTTP ou regras de negócio pertencentes aos UseCases. |
@@ -206,9 +206,10 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
     "statusCode": 400,
     "headers": { "Content-Type": "application/json" },
     "body": {
+      "code": "VALIDATION",
       "message": "Validation failed",
       "issues": [
-        { "field": "priceInCents", "message": "Expected number, received string" }
+        { "field": "priceInCents", "error": "Expected number, received string", "message": "Expected number, received string" }
       ]
     }
   }
@@ -219,6 +220,7 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
     "statusCode": 404,
     "headers": { "Content-Type": "application/json" },
     "body": {
+      "code": "NOT_FOUND",
       "message": "Product not found"
     }
   }
@@ -229,7 +231,8 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
     "statusCode": 500,
     "headers": { "Content-Type": "application/json" },
     "body": {
-      "message": "Internal server error"
+      "code": "INTERNAL_SERVER_ERROR",
+      "message": "Internal server error."
     }
   }
   ```

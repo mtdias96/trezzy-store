@@ -2,6 +2,8 @@ import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import { Controller } from '../../application/contracts/Controller.js';
+import { ApplicationError } from '../../application/errors/ApplicationError.js';
+import { ErrorCode } from '../../application/errors/ErrorCode.js';
 import { HttpError } from '../../application/errors/HttpError.js';
 import { Schema } from '../../kernel/decorators/Schema.js';
 import { lambdaHttpAdapter } from './lambdaHttpAdapter.js';
@@ -104,8 +106,9 @@ describe('lambdaHttpAdapter', () => {
     });
     expect(failRes.statusCode).toBe(400);
     expect(JSON.parse(failRes.body!)).toEqual({
+      code: ErrorCode.VALIDATION,
       message: 'Validation failed',
-      issues: [{ field: 'title', message: 'title is required' }],
+      issues: [{ field: 'title', error: 'title is required', message: 'title is required' }],
     });
   });
 
@@ -122,8 +125,27 @@ describe('lambdaHttpAdapter', () => {
     expect(res.statusCode).toBe(404);
     expect(res.headers?.['Content-Type']).toBe('application/json');
     expect(JSON.parse(res.body!)).toEqual({
+      code: ErrorCode.NOT_FOUND,
       message: 'Resource not found',
       details: { resourceId: '123' },
+    });
+  });
+
+  it('formats ApplicationError through errorHandler', async () => {
+    class BusinessRuleController extends Controller<'public'> {
+      protected async handle(): Promise<Controller.Response> {
+        throw new ApplicationError(ErrorCode.BAD_REQUEST, 'Email already in use', 409);
+      }
+    }
+
+    const handler = lambdaHttpAdapter(new BusinessRuleController());
+    const res = await call(handler);
+
+    expect(res.statusCode).toBe(409);
+    expect(res.headers?.['Content-Type']).toBe('application/json');
+    expect(JSON.parse(res.body!)).toEqual({
+      code: ErrorCode.BAD_REQUEST,
+      message: 'Email already in use',
     });
   });
 
@@ -139,7 +161,8 @@ describe('lambdaHttpAdapter', () => {
 
     expect(res.statusCode).toBe(500);
     expect(JSON.parse(res.body!)).toEqual({
-      message: 'Internal server error',
+      code: ErrorCode.INTERNAL_SERVER_ERROR,
+      message: 'Internal server error.',
     });
   });
 });

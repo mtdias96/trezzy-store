@@ -6,7 +6,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from '
 import { Controller, type IController } from '../../application/contracts/Controller.js';
 import type { Constructor } from '../../shared/types/Constructor.js';
 import { sanitizeObject } from '../utils/sanitizeObject.js';
-import { errorHandler } from './middlewares/erroHandler.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 export function lambdaHttpAdapter(
   controllerOrClass: IController<unknown> | Constructor<IController<unknown>>,
@@ -26,7 +26,7 @@ export function lambdaHttpAdapter(
         serializers: [
           {
             regex: /^application\/json$/,
-            serializer: ({ body }) => JSON.stringify(body),
+            serializer: ({ body }) => (body !== undefined ? JSON.stringify(body) : ''),
           },
         ],
       }),
