@@ -1,0 +1,65 @@
+name: CI Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+jobs:
+  branch-flow-check:
+    name: Validate Branch Flow (develop -> main)
+    runs-on: ubuntu-latest
+    if: github.base_ref == 'main'
+    steps:
+      - name: Verify source branch is develop
+        run: |
+          if [ "${{ github.head_ref }}" != "develop" ]; then
+            echo "❌ ERROR: Pull Requests to 'main' must originate from the 'develop' branch."
+            echo "Found source branch: '${{ github.head_ref }}'"
+            echo "Please open your Pull Request against the 'develop' branch first."
+            exit 1
+          else
+            echo "✅ SUCCESS: Pull Request originates from 'develop'."
+          fi
+
+  validate-api:
+    name: Lint, Typecheck, and Test (API)
+    runs-on: ubuntu-latest
+    needs: [branch-flow-check]
+    if: always() && (needs.branch-flow-check.result == 'success' || needs.branch-flow-check.result == 'skipped')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: pnpm --filter trezzy-api lint
+
+      - name: Run Typecheck
+        run: pnpm --filter trezzy-api typecheck
+
+      - name: Run Tests
+        run: pnpm --filter trezzy-api test

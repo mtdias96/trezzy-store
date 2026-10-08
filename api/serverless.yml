@@ -1,0 +1,27 @@
+org: treezy
+app: trezzy-api
+service: trezzy-api
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  region: sa-east-1
+  memorySize: 128
+  stage: ${opt:stage, 'dev'}
+  environment: ${file(./sls/config/env.yml)}
+
+package:
+  individually: true
+
+build:
+  esbuild:
+    configFile: ./esbuild.config.mjs
+
+functions:
+  health:
+    handler: src/main/functions/health.handler
+    events:
+      - httpApi:
+          path: /health
+          method: get
+
