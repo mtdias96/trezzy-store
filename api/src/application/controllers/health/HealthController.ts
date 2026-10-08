@@ -3,7 +3,7 @@ import { HealthUseCase } from '@application/useCases/health/HealthUseCase.js';
 import { Injectable } from '@kernel/decorators/Injectable.js';
 
 @Injectable()
-export class HealthController extends Controller<HealthController.Response> {
+export class HealthController extends Controller<'public', HealthController.Response> {
   constructor(private readonly healthUseCase: HealthUseCase) {
     super();
   }

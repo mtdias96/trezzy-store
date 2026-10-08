@@ -16,11 +16,11 @@ const call = (handler: ReturnType<typeof lambdaHttpAdapter>, event: Partial<APIG
 
 describe('lambdaHttpAdapter', () => {
   it('parses JSON body, sanitizes params and headers, and serializes response', async () => {
-    let capturedRequest: Controller.Request<{ name: string }> | undefined;
+    let capturedRequest: Controller.Request<'public', { name: string }> | undefined;
 
-    class CreateProductController extends Controller<{ id: string }, { name: string }> {
+    class CreateProductController extends Controller<'public', { id: string }> {
       protected async handle(
-        request: Controller.Request<{ name: string }>,
+        request: Controller.Request<'public', { name: string }>,
       ): Promise<Controller.Response<{ id: string }>> {
         capturedRequest = request;
         return {
@@ -54,7 +54,7 @@ describe('lambdaHttpAdapter', () => {
   });
 
   it('handles requests without body cleanly and resolves from class directly', async () => {
-    class SimpleController extends Controller<{ ok: boolean }> {
+    class SimpleController extends Controller<'public', { ok: boolean }> {
       protected async handle(): Promise<Controller.Response<{ ok: boolean }>> {
         return {
           statusCode: 200,
@@ -76,9 +76,9 @@ describe('lambdaHttpAdapter', () => {
     });
 
     @Schema(ProductSchema)
-    class ValidatedController extends Controller<{ title: string }, { title: string }> {
+    class ValidatedController extends Controller<'public', { title: string }> {
       protected async handle(
-        request: Controller.Request<{ title: string }>,
+        request: Controller.Request<'public', { title: string }>,
       ): Promise<Controller.Response<{ title: string }>> {
         return {
           statusCode: 200,

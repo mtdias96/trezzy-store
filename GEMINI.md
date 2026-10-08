@@ -136,7 +136,9 @@ functions:
           method: PUT
 ```
 
-### 4.2. Fluxo Passo a Passo para Criar uma Nova Feature
+### 4.2. Fluxo Passo a Passo para Criar uma Nova Feature (Respeitando o S do SOLID)
+
+Cada classe e arquivo deve possuir uma única responsabilidade clara:
 
 1. **Modelagem de Dados (se houver persistência):**
    - Declarar tabelas e relações no [`src/infra/database/drizzle/schema.ts`](file:///home/matheus/projetos/trezzy-store/api/src/infra/database/drizzle/schema.ts) usando `casing: 'snake_case'`.
@@ -152,20 +154,36 @@ functions:
    - Definir `namespace <Nome>UseCase { export type Input = ...; export type Output = ...; }`.
    - Implementar método único `execute(input: Input): Promise<Output>`.
    - Lançar `HttpError(statusCode, message)` em caso de falhas de negócio esperadas.
-4. **Controller:**
+4. **Validação de Schema (Pasta `schemas/` - SRP):**
+   - Criar em `src/application/controllers/<modulo>/schemas/<acao>Schema.ts`.
+   - Isolar a validação Zod e exportar o schema e o tipo inferido:
+     ```typescript
+     import { z } from 'zod';
+
+     export const signUpSchema = z.object({
+       account: z.object({
+         email: z.string().email(),
+         password: z.string().min(8),
+       }),
+     });
+
+     export type SignUpBody = z.infer<typeof signUpSchema>;
+     ```
+5. **Controller (`'public'` vs `'private'`):**
    - Criar em `src/application/controllers/<modulo>/<Nome>Controller.ts`.
-   - Decorar com `@Injectable()`.
-   - Se houver payload de entrada, validar com `@Schema(schemaZod)`.
-   - Estender `Controller<Response, Body, Params, QueryParams>`.
-   - Implementar método `protected override async handle(request)`.
+   - Decorar com `@Injectable()` e `@Schema(schemaZod)`.
+   - Estender `Controller<'public' | 'private', <Nome>Controller.Response>`.
+   - Em rotas `'private'`, `request.accountId` está disponível e tipado obrigatoriamente.
+   - Em rotas `'public'`, `request.accountId` não existe.
+   - Implementar método `protected override async handle({ body, ... }: Controller.Request<'public' | 'private', ActionBody>)`.
    - Definir `namespace <Nome>Controller { export type Response = ...; }`.
-5. **Entrypoint da Lambda:**
+6. **Entrypoint da Lambda:**
    - Criar em `src/main/functions/<modulo>.ts`.
    - **Primeira linha obrigatória:** `import 'reflect-metadata';`.
    - Exportar o handler usando `lambdaHttpAdapter(Controller)`.
-6. **Declaração no Serverless:**
+7. **Declaração no Serverless:**
    - Registrar a função em `serverless.yml` usando eventos `httpApi` (v2).
-7. **Testes Unitários:**
+8. **Testes Unitários:**
    - Criar `*.spec.ts` co-localizado cobrindo Use Case e Controller.
 
 ### 4.3. Envelopes Padrão de Resposta HTTP

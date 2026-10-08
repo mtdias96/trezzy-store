@@ -32,11 +32,24 @@ export function lambdaHttpAdapter(
       }),
     )
     .handler(async (event) => {
+      const requestContext = event.requestContext as
+        | {
+            authorizer?: {
+              jwt?: { claims?: Record<string, unknown> };
+              lambda?: Record<string, unknown>;
+            };
+          }
+        | undefined;
+      const accountId =
+        (requestContext?.authorizer?.jwt?.claims?.sub as string | undefined) ??
+        (requestContext?.authorizer?.lambda?.accountId as string | undefined);
+
       return controller.execute({
         body: event.body,
         headers: sanitizeObject(event.headers),
         params: sanitizeObject(event.pathParameters),
         queryParams: sanitizeObject(event.queryStringParameters),
+        ...(accountId ? { accountId } : {}),
       });
     })
     .use(errorHandler())

@@ -1,30 +1,30 @@
 import { getSchema } from '@kernel/decorators/Schema.js';
 
-export interface IController<TBody = unknown> {
-  execute(request: Controller.Request): Promise<Controller.Response<TBody>>;
+export type RouteType = 'public' | 'private';
+
+export interface IController<TResponseBody = unknown> {
+  execute(
+    request: Controller.ExecuteRequest,
+  ): Promise<Controller.Response<TResponseBody>>;
 }
 
 export abstract class Controller<
-  TBody = undefined,
-  TRequestBody = unknown,
-  TParams = Record<string, string>,
-  TQueryParams = Record<string, string>,
-> implements IController<TBody> {
+  TRouteType extends RouteType = 'public',
+  TResponseBody = undefined,
+> implements IController<TResponseBody> {
   protected abstract handle(
-    request: Controller.Request<TRequestBody, TParams, TQueryParams>,
-  ): Promise<Controller.Response<TBody>>;
+    request: Controller.Request<TRouteType, never>,
+  ): Promise<Controller.Response<TResponseBody>>;
 
   public execute(
-    request: Controller.Request<unknown, unknown, unknown>,
-  ): Promise<Controller.Response<TBody>> {
-    const body = this.validateBody(request.body) as TRequestBody;
+    request: Controller.ExecuteRequest,
+  ): Promise<Controller.Response<TResponseBody>> {
+    const body = this.validateBody(request.body);
 
     return this.handle({
       ...request,
       body,
-      params: request.params as TParams,
-      queryParams: request.queryParams as TQueryParams,
-    });
+    } as unknown as Controller.Request<TRouteType, never>);
   }
 
   private validateBody(body: unknown) {
@@ -39,7 +39,15 @@ export abstract class Controller<
 }
 
 export namespace Controller {
-  export type Request<
+  export type ExecuteRequest = {
+    body: unknown;
+    headers: Record<string, string | undefined>;
+    params: Record<string, string>;
+    queryParams: Record<string, string>;
+    accountId?: string;
+  };
+
+  type BaseRequest<
     TBody = unknown,
     TParams = Record<string, string>,
     TQueryParams = Record<string, string>,
@@ -49,6 +57,14 @@ export namespace Controller {
     params: TParams;
     queryParams: TQueryParams;
   };
+
+  export type Request<
+    TRouteType extends RouteType = 'public',
+    TBody = unknown,
+    TParams = Record<string, string>,
+    TQueryParams = Record<string, string>,
+  > = BaseRequest<TBody, TParams, TQueryParams> &
+    (TRouteType extends 'private' ? { accountId: string } : { accountId?: never });
 
   export type Response<TBody = undefined> = {
     statusCode: number;
