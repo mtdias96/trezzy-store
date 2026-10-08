@@ -171,4 +171,49 @@ describe('lambdaHttpAdapter', () => {
       },
     });
   });
+
+  it('dispatches to correct controller when using RouteMap and returns 404 for unknown route', async () => {
+    class ListController extends Controller<'public', { items: string[] }> {
+      protected async handle(): Promise<Controller.Response<{ items: string[] }>> {
+        return { statusCode: 200, body: { items: ['item1'] } };
+      }
+    }
+
+    class CreateController extends Controller<'public', { id: string }> {
+      protected async handle(): Promise<Controller.Response<{ id: string }>> {
+        return { statusCode: 201, body: { id: 'created-1' } };
+      }
+    }
+
+    const routerHandler = lambdaHttpAdapter({
+      'GET /products': ListController,
+      'POST /products': CreateController,
+    });
+
+    // Test GET /products
+    const getRes = await call(routerHandler, {
+      routeKey: 'GET /products',
+    });
+    expect(getRes.statusCode).toBe(200);
+    expect(JSON.parse(getRes.body!)).toEqual({ items: ['item1'] });
+
+    // Test POST /products
+    const postRes = await call(routerHandler, {
+      routeKey: 'POST /products',
+    });
+    expect(postRes.statusCode).toBe(201);
+    expect(JSON.parse(postRes.body!)).toEqual({ id: 'created-1' });
+
+    // Test unknown route
+    const notFoundRes = await call(routerHandler, {
+      routeKey: 'DELETE /products/1',
+    });
+    expect(notFoundRes.statusCode).toBe(404);
+    expect(JSON.parse(notFoundRes.body!)).toEqual({
+      error: {
+        code: ErrorCode.NOT_FOUND,
+        message: 'Route \'DELETE /products/1\' not found.',
+      },
+    });
+  });
 });

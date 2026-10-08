@@ -141,7 +141,7 @@ functions:
 Cada classe e arquivo deve possuir uma única responsabilidade clara:
 
 1. **Modelagem de Dados (se houver persistência):**
-   - Declarar tabelas e relações no [`src/infra/database/drizzle/schema.ts`](file:///home/matheus/projetos/trezzy-store/api/src/infra/database/drizzle/schema.ts) usando `casing: 'snake_case'`.
+   - Declarar tabelas e relações em `api/src/infra/database/drizzle/schema.ts` usando `casing: 'snake_case'`.
    - Gerar e rodar migrações com `pnpm db:generate` e `pnpm db:migrate`.
 2. **Repositório Concreto:**
    - Criar em `src/infra/database/repositories/<Modulo>Repository.ts`.
@@ -178,10 +178,34 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
    - Implementar método `protected override async handle({ body, ... }: Controller.Request<'public' | 'private', ActionBody>)`.
    - Definir `namespace <Nome>Controller { export type Response = ...; }`.
    - *(Nota: O `lambdaHttpAdapter` repassa a requisição sanitizada com `accountId: null` até que a lógica de decodificação JWT/authorizer seja plugada na branch de autenticação).*
-6. **Entrypoint da Lambda:**
+6. **Entrypoint da Lambda e Roteamento Interno do Módulo:**
    - Criar em `src/main/functions/<modulo>.ts`.
    - **Primeira linha obrigatória:** `import 'reflect-metadata';`.
-   - Exportar o handler usando `lambdaHttpAdapter(Controller)`.
+   - **Para Lambdas mono-endpoint (ex: `health.ts`):** exportar diretamente:
+     ```typescript
+     import 'reflect-metadata';
+     import { HealthController } from '@application/controllers/health/HealthController.js';
+     import { lambdaHttpAdapter } from '@main/adapters/lambdaHttpAdapter.js';
+
+     export const handler = lambdaHttpAdapter(HealthController);
+     ```
+   - **Para Lambdas modulares multi-rotas (ex: `products.ts`, `orders.ts`):** exportar passando o mapa de rotas:
+     ```typescript
+     import 'reflect-metadata';
+     import { lambdaHttpAdapter } from '@main/adapters/lambdaHttpAdapter.js';
+     import { ListProductsController } from '@application/controllers/products/ListProductsController.js';
+     import { CreateProductController } from '@application/controllers/products/CreateProductController.js';
+     import { GetProductByIdController } from '@application/controllers/products/GetProductByIdController.js';
+     import { UpdateProductController } from '@application/controllers/products/UpdateProductController.js';
+
+     export const handler = lambdaHttpAdapter({
+       'GET /products': ListProductsController,
+       'POST /products': CreateProductController,
+       'GET /products/{id}': GetProductByIdController,
+       'PUT /products/{id}': UpdateProductController,
+     });
+     ```
+     *(O `lambdaHttpAdapter` despacha automaticamente para o controller correto com base no `event.routeKey` provido nativamente pelo HTTP API v2 da AWS).*
 7. **Declaração no Serverless:**
    - Registrar a função em `serverless.yml` usando eventos `httpApi` (v2).
 8. **Testes Unitários:**
@@ -247,11 +271,11 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
 ## 5. Padrão para Novas Variáveis de Ambiente
 
 Ao introduzir qualquer nova variável de ambiente no sistema:
-1. Validar no Zod em [`src/shared/config/env.ts`](file:///home/matheus/projetos/trezzy-store/api/src/shared/config/env.ts).
-2. Mapear e tipar no [`src/shared/config/AppConfig.ts`](file:///home/matheus/projetos/trezzy-store/api/src/shared/config/AppConfig.ts).
-3. Adicionar em [`api/sls/config/env.yml`](file:///home/matheus/projetos/trezzy-store/api/sls/config/env.yml) com fallback.
-4. Adicionar valor fictício em `test.env` no [`api/vitest.config.mts`](file:///home/matheus/projetos/trezzy-store/api/vitest.config.mts).
-5. Documentar no [`api/.env.example`](file:///home/matheus/projetos/trezzy-store/api/.env.example).
+1. Validar no Zod em `api/src/shared/config/env.ts`.
+2. Mapear e tipar em `api/src/shared/config/AppConfig.ts`.
+3. Adicionar em `api/sls/config/env.yml` com fallback.
+4. Adicionar valor fictício em `test.env` no `api/vitest.config.mts`.
+5. Documentar no `api/.env.example`.
 
 ---
 
