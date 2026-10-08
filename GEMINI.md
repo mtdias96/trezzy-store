@@ -189,7 +189,7 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
 
      export const handler = lambdaHttpAdapter(HealthController);
      ```
-   - **Para Lambdas modulares multi-rotas (ex: `products.ts`, `orders.ts`):** exportar passando o mapa de rotas:
+   - **Para Lambdas modulares multi-rotas (ex: `products.ts`, `orders.ts`):** exportar passando o array de rotas:
      ```typescript
      import 'reflect-metadata';
      import { lambdaHttpAdapter } from '@main/adapters/lambdaHttpAdapter.js';
@@ -198,12 +198,28 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
      import { GetProductByIdController } from '@application/controllers/products/GetProductByIdController.js';
      import { UpdateProductController } from '@application/controllers/products/UpdateProductController.js';
 
-     export const handler = lambdaHttpAdapter({
-       'GET /products': ListProductsController,
-       'POST /products': CreateProductController,
-       'GET /products/{id}': GetProductByIdController,
-       'PUT /products/{id}': UpdateProductController,
-     });
+     export const handler = lambdaHttpAdapter([
+       {
+         path: '/products',
+         method: 'GET',
+         handler: ListProductsController,
+       },
+       {
+         path: '/products',
+         method: 'POST',
+         handler: CreateProductController,
+       },
+       {
+         path: '/products/{id}',
+         method: 'GET',
+         handler: GetProductByIdController,
+       },
+       {
+         path: '/products/{id}',
+         method: 'PUT',
+         handler: UpdateProductController,
+       },
+     ]);
      ```
      *(O `lambdaHttpAdapter` despacha automaticamente para o controller correto com base no `event.routeKey` provido nativamente pelo HTTP API v2 da AWS).*
 7. **Declaração no Serverless:**

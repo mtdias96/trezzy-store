@@ -1,5 +1,6 @@
-import { ErrorCode } from '@application/errors/ErrorCode.js';
 import type { APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
+
+import { ErrorCode } from '@application/errors/ErrorCode.js';
 
 export interface ILambdaErrorResponseParams {
   statusCode: number;

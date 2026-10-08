@@ -7,8 +7,7 @@ export interface IController<TBody = unknown> {
 }
 
 export abstract class Controller<TType extends RouteType, TBody = undefined>
-  implements IController<TBody>
-{
+  implements IController<TBody> {
   protected abstract handle(request: Controller.Request<TType>): Promise<Controller.Response<TBody>>;
 
   public execute(request: Controller.ExecuteRequest): Promise<Controller.Response<TBody>> {

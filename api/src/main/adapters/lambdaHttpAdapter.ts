@@ -1,25 +1,52 @@
-import { Registry } from '@kernel/di/Registry.js';
 import middy from '@middy/core';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpResponseSerializer from '@middy/http-response-serializer';
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
+
+import { Registry } from '@kernel/di/Registry.js';
+
 import { Controller, type IController } from '../../application/contracts/Controller.js';
 import { ErrorCode } from '../../application/errors/ErrorCode.js';
 import { HttpError } from '../../application/errors/HttpError.js';
 import type { Constructor } from '../../shared/types/Constructor.js';
 import { sanitizeObject } from '../utils/sanitizeObject.js';
+
 import { errorHandler } from './middlewares/errorHandler.js';
+
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD';
+
+export type RouteDefinition = {
+  method: HttpMethod;
+  path: string;
+  handler: IController<unknown> | Constructor<IController<unknown>>;
+};
 
 export type RouteMap = Record<
   string,
   IController<unknown> | Constructor<IController<unknown>>
 >;
 
-export function lambdaHttpAdapter(
-  target: IController<unknown> | Constructor<IController<unknown>> | RouteMap,
-) {
+export type AdapterTarget =
+  | IController<unknown>
+  | Constructor<IController<unknown>>
+  | RouteDefinition[]
+  | RouteMap;
+
+export function lambdaHttpAdapter(target: AdapterTarget) {
+  const routeMap = new Map<string, IController<unknown> | Constructor<IController<unknown>>>();
   const isRouter =
-    typeof target === 'object' && target !== null && !('execute' in target);
+    Array.isArray(target) ||
+    (typeof target === 'object' && target !== null && !('execute' in target));
+
+  if (Array.isArray(target)) {
+    for (const route of target) {
+      routeMap.set(`${route.method.toUpperCase()} ${route.path}`, route.handler);
+    }
+  } else if (isRouter) {
+    for (const [key, handler] of Object.entries(target as RouteMap)) {
+      routeMap.set(key, handler);
+    }
+  }
 
   return middy<
     APIGatewayProxyEventV2,
@@ -46,7 +73,7 @@ export function lambdaHttpAdapter(
             ? `${event.requestContext.http.method} ${event.rawPath}`
             : undefined);
 
-        const controllerOrClass = routeKey ? (target as RouteMap)[routeKey] : undefined;
+        const controllerOrClass = routeKey ? routeMap.get(routeKey) : undefined;
 
         if (!controllerOrClass) {
           throw new HttpError(

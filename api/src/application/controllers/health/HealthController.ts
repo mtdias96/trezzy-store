@@ -1,6 +1,6 @@
+import { Injectable } from '@kernel/decorators/Injectable.js';
 import { Controller } from '@application/contracts/Controller.js';
 import { HealthUseCase } from '@application/useCases/health/HealthUseCase.js';
-import { Injectable } from '@kernel/decorators/Injectable.js';
 
 @Injectable()
 export class HealthController extends Controller<'public', HealthController.Response> {

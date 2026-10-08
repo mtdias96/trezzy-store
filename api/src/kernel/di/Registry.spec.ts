@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+
 import { Injectable } from '../decorators/Injectable.js';
+
 import { Registry } from './Registry.js';
 
 describe('Registry', () => {

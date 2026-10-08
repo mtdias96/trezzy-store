@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import { defineConfig } from 'eslint/config';
+import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
@@ -9,7 +10,10 @@ export default defineConfig([
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
-    plugins: { js },
+    plugins: {
+      js,
+      'simple-import-sort': simpleImportSort,
+    },
     extends: ['js/recommended'],
     rules: {
       quotes: ['error', 'single'],
@@ -26,6 +30,24 @@ export default defineConfig([
       curly: ['error', 'all'],
       'no-duplicate-imports': 'error',
       'no-console': 'warn',
+      'simple-import-sort/imports': [
+        'error',
+        {
+          groups: [
+            // 1. Side effects (ex: reflect-metadata)
+            ['^\\u0000'],
+            // 2. Node.js built-ins e bibliotecas externas (npm packages)
+            ['^node:', '^@?\\w'],
+            // 3. Aliases internos do projeto
+            ['^@kernel', '^@shared', '^@application', '^@infra', '^@main'],
+            // 4. Importações relativas superiores (../)
+            ['^\\.\\.(?!/?$)', '^\\.\\./?$'],
+            // 5. Importações relativas locais (./)
+            ['^\\./(?=.*/)(?!/?$)', '^\\.(?!/?$)', '^\\./?$'],
+          ],
+        },
+      ],
+      'simple-import-sort/exports': 'error',
       '@typescript-eslint/naming-convention': [
         'error',
         {
@@ -48,4 +70,3 @@ export default defineConfig([
     },
   },
 ]);
-

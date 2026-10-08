@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it } from 'vitest';
+
 import { handler } from './health.js';
 
 describe('Health Handler', () => {

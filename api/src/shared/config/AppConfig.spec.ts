@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
+
 import { Registry } from '@kernel/di/Registry.js';
+
 import { AppConfig } from './AppConfig.js';
 
 describe('AppConfig', () => {

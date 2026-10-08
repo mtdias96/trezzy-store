@@ -1,11 +1,13 @@
 import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+
 import { Controller } from '../../application/contracts/Controller.js';
 import { ApplicationError } from '../../application/errors/ApplicationError.js';
 import { ErrorCode } from '../../application/errors/ErrorCode.js';
 import { HttpError } from '../../application/errors/HttpError.js';
 import { Schema } from '../../kernel/decorators/Schema.js';
+
 import { lambdaHttpAdapter } from './lambdaHttpAdapter.js';
 
 const context = {} as Context;
@@ -215,5 +217,46 @@ describe('lambdaHttpAdapter', () => {
         message: 'Route \'DELETE /products/1\' not found.',
       },
     });
+  });
+
+  it('dispatches to correct controller when using RouteDefinition array shape', async () => {
+    class ListUsersController extends Controller<'public', { users: string[] }> {
+      protected async handle(): Promise<Controller.Response<{ users: string[] }>> {
+        return { statusCode: 200, body: { users: ['user1', 'user2'] } };
+      }
+    }
+
+    class UpdateUserController extends Controller<'public', { updated: boolean }> {
+      protected async handle(): Promise<Controller.Response<{ updated: boolean }>> {
+        return { statusCode: 200, body: { updated: true } };
+      }
+    }
+
+    const handler = lambdaHttpAdapter([
+      {
+        path: '/users',
+        method: 'GET',
+        handler: ListUsersController,
+      },
+      {
+        path: '/users/{userId}',
+        method: 'PUT',
+        handler: UpdateUserController,
+      },
+    ]);
+
+    // Test GET /users
+    const getRes = await call(handler, {
+      routeKey: 'GET /users',
+    });
+    expect(getRes.statusCode).toBe(200);
+    expect(JSON.parse(getRes.body!)).toEqual({ users: ['user1', 'user2'] });
+
+    // Test PUT /users/{userId}
+    const putRes = await call(handler, {
+      routeKey: 'PUT /users/{userId}',
+    });
+    expect(putRes.statusCode).toBe(200);
+    expect(JSON.parse(putRes.body!)).toEqual({ updated: true });
   });
 });
