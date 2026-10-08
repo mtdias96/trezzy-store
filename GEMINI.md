@@ -206,11 +206,12 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
     "statusCode": 400,
     "headers": { "Content-Type": "application/json" },
     "body": {
-      "code": "VALIDATION",
-      "message": "Validation failed",
-      "issues": [
-        { "field": "priceInCents", "error": "Expected number, received string", "message": "Expected number, received string" }
-      ]
+      "error": {
+        "code": "VALIDATION",
+        "message": [
+          { "field": "priceInCents", "error": "Expected number, received string" }
+        ]
+      }
     }
   }
   ```
@@ -220,8 +221,10 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
     "statusCode": 404,
     "headers": { "Content-Type": "application/json" },
     "body": {
-      "code": "NOT_FOUND",
-      "message": "Product not found"
+      "error": {
+        "code": "NOT_FOUND",
+        "message": "Product not found"
+      }
     }
   }
   ```
@@ -231,8 +234,10 @@ Cada classe e arquivo deve possuir uma única responsabilidade clara:
     "statusCode": 500,
     "headers": { "Content-Type": "application/json" },
     "body": {
-      "code": "INTERNAL_SERVER_ERROR",
-      "message": "Internal server error."
+      "error": {
+        "code": "INTERNAL_SERVER_ERROR",
+        "message": "Internal server error."
+      }
     }
   }
   ```

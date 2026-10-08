@@ -106,16 +106,17 @@ describe('lambdaHttpAdapter', () => {
     });
     expect(failRes.statusCode).toBe(400);
     expect(JSON.parse(failRes.body!)).toEqual({
-      code: ErrorCode.VALIDATION,
-      message: 'Validation failed',
-      issues: [{ field: 'title', error: 'title is required', message: 'title is required' }],
+      error: {
+        code: ErrorCode.VALIDATION,
+        message: [{ field: 'title', error: 'title is required' }],
+      },
     });
   });
 
   it('formats HttpError through errorHandler', async () => {
     class NotFoundController extends Controller<'public'> {
       protected async handle(): Promise<Controller.Response> {
-        throw new HttpError(404, 'Resource not found', { resourceId: '123' });
+        throw new HttpError(404, ErrorCode.NOT_FOUND, 'Resource not found');
       }
     }
 
@@ -125,9 +126,10 @@ describe('lambdaHttpAdapter', () => {
     expect(res.statusCode).toBe(404);
     expect(res.headers?.['Content-Type']).toBe('application/json');
     expect(JSON.parse(res.body!)).toEqual({
-      code: ErrorCode.NOT_FOUND,
-      message: 'Resource not found',
-      details: { resourceId: '123' },
+      error: {
+        code: ErrorCode.NOT_FOUND,
+        message: 'Resource not found',
+      },
     });
   });
 
@@ -144,8 +146,10 @@ describe('lambdaHttpAdapter', () => {
     expect(res.statusCode).toBe(409);
     expect(res.headers?.['Content-Type']).toBe('application/json');
     expect(JSON.parse(res.body!)).toEqual({
-      code: ErrorCode.BAD_REQUEST,
-      message: 'Email already in use',
+      error: {
+        code: ErrorCode.BAD_REQUEST,
+        message: 'Email already in use',
+      },
     });
   });
 
@@ -161,8 +165,10 @@ describe('lambdaHttpAdapter', () => {
 
     expect(res.statusCode).toBe(500);
     expect(JSON.parse(res.body!)).toEqual({
-      code: ErrorCode.INTERNAL_SERVER_ERROR,
-      message: 'Internal server error.',
+      error: {
+        code: ErrorCode.INTERNAL_SERVER_ERROR,
+        message: 'Internal server error.',
+      },
     });
   });
 });

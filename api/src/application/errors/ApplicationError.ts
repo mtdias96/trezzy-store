@@ -10,3 +10,4 @@ export class ApplicationError extends Error {
     this.name = 'ApplicationError';
   }
 }
+

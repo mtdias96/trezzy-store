@@ -7,3 +7,4 @@ export enum ErrorCode {
   CONFLICT = 'CONFLICT',
   INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR',
 }
+
