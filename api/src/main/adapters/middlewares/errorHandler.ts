@@ -2,10 +2,10 @@ import type { MiddlewareObj } from '@middy/core';
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 import { ZodError } from 'zod';
 
-import { ApplicationError } from '../../../application/errors/ApplicationError.js';
-import { ErrorCode } from '../../../application/errors/ErrorCode.js';
-import { HttpError } from '../../../application/errors/HttpError.js';
-import { lambdaErrorResponse } from '../../utils/lambdaErrorResponse.js';
+import { ApplicationError } from '@application/errors/ApplicationError';
+import { ErrorCode } from '@application/errors/ErrorCode';
+import { HttpError } from '@application/errors/HttpError';
+import { lambdaErrorResponse } from '@main/utils/lambdaErrorResponse';
 
 export function errorHandler(): MiddlewareObj<
   APIGatewayProxyEventV2,

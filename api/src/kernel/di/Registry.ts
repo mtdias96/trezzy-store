@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import type { Constructor } from '@shared/types/Constructor.js';
+import type { Constructor } from '@shared/types/Constructor';
 
 export class Registry {
   private static instance: Registry | undefined;

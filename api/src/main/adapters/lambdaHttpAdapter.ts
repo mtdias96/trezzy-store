@@ -3,15 +3,14 @@ import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpResponseSerializer from '@middy/http-response-serializer';
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
 
-import { Registry } from '@kernel/di/Registry.js';
+import { Registry } from '@kernel/di/Registry';
+import type { Constructor } from '@shared/types/Constructor';
+import { Controller, type IController } from '@application/contracts/Controller';
+import { ErrorCode } from '@application/errors/ErrorCode';
+import { HttpError } from '@application/errors/HttpError';
+import { sanitizeObject } from '@main/utils/sanitizeObject';
 
-import { Controller, type IController } from '../../application/contracts/Controller.js';
-import { ErrorCode } from '../../application/errors/ErrorCode.js';
-import { HttpError } from '../../application/errors/HttpError.js';
-import type { Constructor } from '../../shared/types/Constructor.js';
-import { sanitizeObject } from '../utils/sanitizeObject.js';
-
-import { errorHandler } from './middlewares/errorHandler.js';
+import { errorHandler } from './middlewares/errorHandler';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD';
 

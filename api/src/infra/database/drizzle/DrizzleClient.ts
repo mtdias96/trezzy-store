@@ -1,10 +1,10 @@
 import { Pool } from '@neondatabase/serverless';
 import { drizzle, type NeonDatabase } from 'drizzle-orm/neon-serverless';
 
-import { Injectable } from '@kernel/decorators/Injectable.js';
-import { AppConfig } from '@shared/config/AppConfig.js';
+import { Injectable } from '@kernel/decorators/Injectable';
+import { AppConfig } from '@shared/config/AppConfig';
 
-import * as schema from './schema.js';
+import * as schema from './schema';
 
 @Injectable()
 export class DrizzleClient {

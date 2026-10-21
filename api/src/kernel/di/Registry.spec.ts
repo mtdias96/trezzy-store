@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { Injectable } from '../decorators/Injectable.js';
+import { Injectable } from '@kernel/decorators/Injectable';
 
-import { Registry } from './Registry.js';
+import { Registry } from './Registry';
 
 describe('Registry', () => {
   it('resolves a class with no dependencies as a singleton', () => {

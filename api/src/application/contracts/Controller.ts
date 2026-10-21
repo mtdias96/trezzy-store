@@ -1,4 +1,4 @@
-import { getSchema } from '@kernel/decorators/Schema.js';
+import { getSchema } from '@kernel/decorators/Schema';
 
 export type RouteType = 'public' | 'private';
 

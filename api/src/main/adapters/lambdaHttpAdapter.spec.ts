@@ -2,13 +2,13 @@ import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
-import { Controller } from '../../application/contracts/Controller.js';
-import { ApplicationError } from '../../application/errors/ApplicationError.js';
-import { ErrorCode } from '../../application/errors/ErrorCode.js';
-import { HttpError } from '../../application/errors/HttpError.js';
-import { Schema } from '../../kernel/decorators/Schema.js';
+import { Schema } from '@kernel/decorators/Schema';
+import { Controller } from '@application/contracts/Controller';
+import { ApplicationError } from '@application/errors/ApplicationError';
+import { ErrorCode } from '@application/errors/ErrorCode';
+import { HttpError } from '@application/errors/HttpError';
 
-import { lambdaHttpAdapter } from './lambdaHttpAdapter.js';
+import { lambdaHttpAdapter } from './lambdaHttpAdapter';
 
 const context = {} as Context;
 const call = (handler: ReturnType<typeof lambdaHttpAdapter>, event: Partial<APIGatewayProxyEventV2> = {}) =>

@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it } from 'vitest';
 
-import { handler } from './health.js';
+import { handler } from './health';
 
 describe('Health Handler', () => {
   it('should return status 200 and healthy payload via DI and adapter', async () => {
