@@ -1,4 +1,7 @@
+import type { z } from 'zod';
+
 import { getSchema } from '@kernel/decorators/Schema';
+import { ValidationError } from '@application/errors/ValidationError';
 
 export type RouteType = 'public' | 'private';
 
@@ -10,8 +13,9 @@ export abstract class Controller<TType extends RouteType, TBody = undefined>
   implements IController<TBody> {
   protected abstract handle(request: Controller.Request<TType>): Promise<Controller.Response<TBody>>;
 
-  public execute(request: Controller.ExecuteRequest): Promise<Controller.Response<TBody>> {
-    const body = this.validateBody(request.body);
+  public async execute(request: Controller.ExecuteRequest): Promise<Controller.Response<TBody>> {
+    const schema = getSchema(this);
+    const body = schema ? this.validate(schema, request.body) : request.body;
 
     return this.handle({
       ...request,
@@ -19,14 +23,19 @@ export abstract class Controller<TType extends RouteType, TBody = undefined>
     } as unknown as Controller.Request<TType>);
   }
 
-  private validateBody(body: unknown) {
-    const schema = getSchema(this);
+  protected validate<TSchema extends z.ZodType>(schema: TSchema, value: unknown): z.infer<TSchema> {
+    const result = schema.safeParse(value);
 
-    if (!schema) {
-      return body;
+    if (!result.success) {
+      throw new ValidationError(
+        result.error.issues.map((issue) => ({
+          field: issue.path.map(String).join('.'),
+          error: issue.message,
+        })),
+      );
     }
 
-    return schema.parse(body);
+    return result.data;
   }
 }
 

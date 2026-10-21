@@ -1,10 +1,11 @@
 import type { MiddlewareObj } from '@middy/core';
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
-import { ZodError } from 'zod';
 
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
 import { HttpError } from '@application/errors/HttpError';
+import { ValidationError } from '@application/errors/ValidationError';
+import { httpStatusByErrorCode } from '@main/utils/httpStatusByErrorCode';
 import { lambdaErrorResponse } from '@main/utils/lambdaErrorResponse';
 
 export function errorHandler(): MiddlewareObj<
@@ -19,36 +20,38 @@ export function errorHandler(): MiddlewareObj<
         return;
       }
 
-      // 1. Erro de Validação de Schema (Zod)
-      if (error instanceof ZodError) {
+      if (error instanceof ValidationError) {
         request.response = lambdaErrorResponse({
-          statusCode: 400,
-          code: ErrorCode.VALIDATION,
-          message: error.issues.map((issue) => ({
-            field: issue.path.join('.'),
-            error: issue.message,
-          })),
+          statusCode: httpStatusByErrorCode[error.code],
+          code: error.code,
+          message: error.issues,
         });
         return;
       }
 
-      // 2. Erro HTTP Operacional (HttpError)
       if (error instanceof HttpError) {
         request.response = lambdaErrorResponse(error);
         return;
       }
 
-      // 3. Erro de Aplicação / Domínio (ApplicationError)
       if (error instanceof ApplicationError) {
         request.response = lambdaErrorResponse({
-          statusCode: error.statusCode,
+          statusCode: error.statusCode ?? httpStatusByErrorCode[error.code],
           code: error.code,
           message: error.message,
         });
         return;
       }
 
-      // 4. Erro Inesperado (500)
+      if (isExposedClientError(error)) {
+        request.response = lambdaErrorResponse({
+          statusCode: 400,
+          code: ErrorCode.BAD_REQUEST,
+          message: error.message,
+        });
+        return;
+      }
+
       // eslint-disable-next-line no-console
       console.error(error);
 
@@ -59,4 +62,11 @@ export function errorHandler(): MiddlewareObj<
       });
     },
   };
+}
+
+// Erros do Middy (ex: JSON inválido) marcam com expose: true os que podem ser mostrados ao cliente.
+function isExposedClientError(error: Error): boolean {
+  const { statusCode, expose } = error as Error & { statusCode?: unknown; expose?: unknown };
+
+  return expose === true && typeof statusCode === 'number' && statusCode >= 400 && statusCode < 500;
 }

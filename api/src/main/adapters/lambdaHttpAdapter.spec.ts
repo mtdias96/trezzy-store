@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 import { Schema } from '@kernel/decorators/Schema';
@@ -93,7 +93,6 @@ describe('lambdaHttpAdapter', () => {
 
     const handler = lambdaHttpAdapter(new ValidatedController());
 
-    // Valid payload
     const successRes = await call(handler, {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ title: 'camisa' }),
@@ -101,7 +100,6 @@ describe('lambdaHttpAdapter', () => {
     expect(successRes.statusCode).toBe(200);
     expect(JSON.parse(successRes.body!)).toEqual({ title: 'CAMISA' });
 
-    // Invalid payload
     const failRes = await call(handler, {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({}),
@@ -174,6 +172,85 @@ describe('lambdaHttpAdapter', () => {
     });
   });
 
+  it('responds 400 BAD_REQUEST when the JSON body is malformed or missing', async () => {
+    class EchoController extends Controller<'public', unknown> {
+      protected async handle(request: Controller.Request<'public'>): Promise<Controller.Response<unknown>> {
+        return { statusCode: 200, body: request.body };
+      }
+    }
+
+    const handler = lambdaHttpAdapter(new EchoController());
+    const malformed = await call(handler, {
+      headers: { 'content-type': 'application/json' },
+      body: '{"name": "abc",,}',
+    });
+    const missing = await call(handler, { headers: { 'content-type': 'application/json' } });
+
+    for (const res of [malformed, missing]) {
+      expect(res.statusCode).toBe(400);
+      expect(JSON.parse(res.body!)).toEqual({
+        error: { code: ErrorCode.BAD_REQUEST, message: 'Invalid or malformed JSON was provided' },
+      });
+    }
+  });
+
+  it('treats a ZodError outside request validation as an internal error', async () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    class GatewayController extends Controller<'public'> {
+      protected async handle(): Promise<Controller.Response> {
+        z.object({ status: z.string() }).parse({ status: 42 });
+        return { statusCode: 200 };
+      }
+    }
+
+    const res = await call(lambdaHttpAdapter(new GatewayController()));
+
+    expect(res.statusCode).toBe(500);
+    expect(JSON.parse(res.body!)).toEqual({
+      error: { code: ErrorCode.INTERNAL_SERVER_ERROR, message: 'Internal server error.' },
+    });
+    expect(consoleError).toHaveBeenCalledOnce();
+    consoleError.mockRestore();
+  });
+
+  it('derives the HTTP status from the ErrorCode when ApplicationError has no explicit status', async () => {
+    class MissingProductController extends Controller<'public'> {
+      protected async handle(): Promise<Controller.Response> {
+        throw new ApplicationError(ErrorCode.NOT_FOUND, 'Product not found.');
+      }
+    }
+
+    const res = await call(lambdaHttpAdapter(new MissingProductController()));
+
+    expect(res.statusCode).toBe(404);
+    expect(JSON.parse(res.body!)).toEqual({
+      error: { code: ErrorCode.NOT_FOUND, message: 'Product not found.' },
+    });
+  });
+
+  it('validates params with Controller.validate and responds 400 VALIDATION', async () => {
+    const paramsSchema = z.object({ id: z.uuid() });
+
+    class GetByIdController extends Controller<'public', { id: string }> {
+      protected async handle({ params }: Controller.Request<'public'>): Promise<Controller.Response<{ id: string }>> {
+        const { id } = this.validate(paramsSchema, params);
+
+        return { statusCode: 200, body: { id } };
+      }
+    }
+
+    const handler = lambdaHttpAdapter(new GetByIdController());
+    const valid = await call(handler, { pathParameters: { id: '0d8f7a8e-6c1b-4a5e-9a37-2f1c3b4d5e6f' } });
+    const invalid = await call(handler, { pathParameters: { id: 'not-a-uuid' } });
+
+    expect(valid.statusCode).toBe(200);
+    expect(invalid.statusCode).toBe(400);
+    expect(JSON.parse(invalid.body!)).toMatchObject({
+      error: { code: ErrorCode.VALIDATION, message: [{ field: 'id' }] },
+    });
+  });
+
   it('dispatches to correct controller when using RouteMap and returns 404 for unknown route', async () => {
     class ListController extends Controller<'public', { items: string[] }> {
       protected async handle(): Promise<Controller.Response<{ items: string[] }>> {
@@ -192,21 +269,18 @@ describe('lambdaHttpAdapter', () => {
       'POST /products': CreateController,
     });
 
-    // Test GET /products
     const getRes = await call(routerHandler, {
       routeKey: 'GET /products',
     });
     expect(getRes.statusCode).toBe(200);
     expect(JSON.parse(getRes.body!)).toEqual({ items: ['item1'] });
 
-    // Test POST /products
     const postRes = await call(routerHandler, {
       routeKey: 'POST /products',
     });
     expect(postRes.statusCode).toBe(201);
     expect(JSON.parse(postRes.body!)).toEqual({ id: 'created-1' });
 
-    // Test unknown route
     const notFoundRes = await call(routerHandler, {
       routeKey: 'DELETE /products/1',
     });
@@ -245,14 +319,12 @@ describe('lambdaHttpAdapter', () => {
       },
     ]);
 
-    // Test GET /users
     const getRes = await call(handler, {
       routeKey: 'GET /users',
     });
     expect(getRes.statusCode).toBe(200);
     expect(JSON.parse(getRes.body!)).toEqual({ users: ['user1', 'user2'] });
 
-    // Test PUT /users/{userId}
     const putRes = await call(handler, {
       routeKey: 'PUT /users/{userId}',
     });
