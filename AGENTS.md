@@ -94,7 +94,26 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - PROIBIDO `expect` dentro de `if`.
 - Conventional Commits com escopo minúsculo 🔒, ex: `feat(api/products): add create product endpoint`.
 - Fluxo: feature → `develop` → `main` 🔒.
-- Identificadores e commits em inglês; comentários e docs em pt-BR.
+- Identificadores e commits em inglês; comentários, docs e PRs em pt-BR.
+
+## Commits e PRs
+
+- Um commit por contexto (tooling, lint, erros, banco, infra, docs…), e cada um passa typecheck, lint e testes sozinho. PROIBIDO juntar assuntos num commit só.
+- Assunto curto (≤ 60 caracteres), no imperativo. Corpo com três blocos, sem repetir o assunto (pode omitir em mudança trivial):
+
+  ```text
+  fix(api/errors): return 4xx for client errors, 500 for bugs
+
+  Why: malformed JSON returned 500 and internal ZodErrors returned 400.
+
+  What:
+  - ValidationError for request validation (body, params, query)
+  - stray ZodError becomes 500 and is logged
+
+  Impact: clients get correct statuses; server bugs are logged.
+  ```
+
+- PR: título no padrão do commit e corpo seguindo `.github/pull_request_template.md` (o GitHub preenche sozinho). Seja direto: contexto, o que foi feito, ganhos, arquivos principais, validação e atenção no deploy.
 
 ## Criar um endpoint (checklist)
 
