@@ -51,5 +51,46 @@ describe('Registry', () => {
     const instance = registry.resolve(DuplicateService);
     expect(instance).toBeInstanceOf(DuplicateService);
   });
+
+  it('keeps distinct classes with the same name isolated', () => {
+    const makeService = (module: string) => {
+      class ListService {
+        readonly module = module;
+      }
+
+      return ListService;
+    };
+    const OrdersListService = makeService('orders');
+    const ProductsListService = makeService('products');
+
+    const registry = Registry.getInstance();
+
+    expect(registry.resolve(OrdersListService).module).toBe('orders');
+    expect(registry.resolve(ProductsListService).module).toBe('products');
+  });
+
+  it('fails fast when a constructor parameter is not an injectable class', () => {
+    type Clock = { now(): Date };
+
+    expect(() => {
+      @Injectable()
+      class BrokenService {
+        constructor(public clock: Clock) {}
+      }
+
+      return BrokenService;
+    }).toThrow('Cannot inject parameter #0 of BrokenService: expected an injectable class, received Object.');
+  });
+
+  it('detects circular dependencies', () => {
+    class ServiceA {}
+    class ServiceB {}
+    Reflect.defineMetadata('design:paramtypes', [ServiceB], ServiceA);
+    Reflect.defineMetadata('design:paramtypes', [ServiceA], ServiceB);
+
+    expect(() => Registry.getInstance().resolve(ServiceA)).toThrow(
+      'Circular dependency detected: ServiceA -> ServiceB -> ServiceA.',
+    );
+  });
 });
 
