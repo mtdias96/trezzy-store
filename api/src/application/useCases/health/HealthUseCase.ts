@@ -1,4 +1,4 @@
-import { Injectable } from '@kernel/decorators/Injectable.js';
+import { Injectable } from '@kernel/decorators/Injectable';
 
 @Injectable()
 export class HealthUseCase {

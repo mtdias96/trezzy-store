@@ -1,6 +1,6 @@
-import { Injectable } from '@kernel/decorators/Injectable.js';
+import { Injectable } from '@kernel/decorators/Injectable';
 
-import { env } from './env.js';
+import { env } from './env';
 
 @Injectable()
 export class AppConfig {

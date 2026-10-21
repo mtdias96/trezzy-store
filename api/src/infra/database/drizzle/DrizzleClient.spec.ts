@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { Registry } from '@kernel/di/Registry.js';
+import { Registry } from '@kernel/di/Registry';
 
-import { DrizzleClient } from './DrizzleClient.js';
+import { DrizzleClient } from './DrizzleClient';
 
 describe('DrizzleClient', () => {
   it('should resolve via DI Registry as a singleton with AppConfig autowired', () => {
