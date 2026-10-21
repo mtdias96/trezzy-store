@@ -1,4 +1,4 @@
-import { ErrorCode } from './ErrorCode.js';
+import { ErrorCode } from './ErrorCode';
 
 export class HttpError extends Error {
   constructor(

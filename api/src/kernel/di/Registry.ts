@@ -1,6 +1,9 @@
 import 'reflect-metadata';
 
-import type { Constructor } from '@shared/types/Constructor.js';
+import type { Constructor } from '@shared/types/Constructor';
+
+// O que o TS emite em design:paramtypes para interface, primitivo ou `import type`.
+const NON_INJECTABLE_TYPES = new Set<unknown>([Object, String, Number, Boolean, Symbol, BigInt, Array, Function, Promise]);
 
 export class Registry {
   private static instance: Registry | undefined;
@@ -15,40 +18,62 @@ export class Registry {
 
   private constructor() {}
 
-  private readonly providers = new Map<string, Registry.Provider>();
-  private readonly singletons = new Map<string, unknown>();
+  private readonly providers = new Map<Constructor, Registry.Provider>();
+  private readonly singletons = new Map<Constructor, unknown>();
+  private readonly resolving: Constructor[] = [];
 
   register(impl: Constructor): void {
-    const token = impl.name;
-
-    if (this.providers.has(token)) {
+    if (this.providers.has(impl)) {
       return;
     }
 
-    const deps = Reflect.getMetadata('design:paramtypes', impl) ?? [];
-
-    this.providers.set(token, { impl, deps });
+    this.providers.set(impl, { impl, deps: Registry.readDependencies(impl) });
   }
 
   resolve<TImpl extends Constructor>(impl: TImpl): InstanceType<TImpl> {
-    const token = impl.name;
-
-    if (this.singletons.has(token)) {
-      return this.singletons.get(token) as InstanceType<TImpl>;
+    if (this.singletons.has(impl)) {
+      return this.singletons.get(impl) as InstanceType<TImpl>;
     }
 
-    let provider = this.providers.get(token);
-
-    if (!provider) {
-      this.register(impl);
-      provider = this.providers.get(token)!;
+    if (this.resolving.includes(impl)) {
+      const cycle = [...this.resolving.slice(this.resolving.indexOf(impl)), impl];
+      throw new Error(`Circular dependency detected: ${cycle.map((dep) => dep.name).join(' -> ')}.`);
     }
 
-    const deps = provider.deps.map((dep) => this.resolve(dep));
-    const instance = new provider.impl(...deps);
+    this.register(impl);
+    const provider = this.providers.get(impl)!;
 
-    this.singletons.set(token, instance);
-    return instance as InstanceType<TImpl>;
+    this.resolving.push(impl);
+
+    try {
+      const instance = new provider.impl(...provider.deps.map((dep) => this.resolve(dep)));
+      this.singletons.set(impl, instance);
+
+      return instance as InstanceType<TImpl>;
+    } finally {
+      this.resolving.pop();
+    }
+  }
+
+  private static readDependencies(impl: Constructor): Constructor[] {
+    const paramTypes: unknown = Reflect.getMetadata('design:paramtypes', impl);
+
+    if (!Array.isArray(paramTypes)) {
+      return [];
+    }
+
+    return paramTypes.map((dep: unknown, index) => {
+      if (typeof dep !== 'function' || NON_INJECTABLE_TYPES.has(dep)) {
+        const received = typeof dep === 'function' ? dep.name : String(dep);
+
+        throw new Error(
+          `Cannot inject parameter #${index} of ${impl.name}: expected an injectable class, received ${received}. ` +
+          'Use a concrete class imported as a value (not "import type"); "undefined" usually means a circular import.',
+        );
+      }
+
+      return dep as Constructor;
+    });
   }
 }
 

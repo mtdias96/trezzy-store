@@ -4,6 +4,75 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
+// Valem para todo src/. Regex porque glob não expressa "começa com ../" nem ".js só em import interno".
+const BASE_IMPORT_RULES = [
+  {
+    regex: '^\\.\\./',
+    message: 'Fora da pasta atual, importe via alias (@kernel, @shared, @application, @infra, @main).',
+  },
+  {
+    regex: '^(\\.{1,2}/|@(kernel|shared|application|infra|main)/).*\\.js$',
+    message: 'Imports internos não levam extensão (moduleResolution: Bundler).',
+  },
+];
+
+const MIDDY = { group: ['@middy/*', 'aws-lambda'], message: 'Middy e tipos do AWS Lambda pertencem a main/.' };
+const DATABASE = { group: ['drizzle-orm', 'drizzle-orm/*', '@neondatabase/*'], message: 'Acesso a banco pertence a infra/ (repositórios).' };
+const AWS_SDK = { group: ['@aws-sdk/*'], message: 'SDKs da AWS pertencem a infra/.' };
+
+// Matriz de camadas do AGENTS.md: o que cada pasta NÃO pode importar ("!" abre exceção).
+const LAYERS = [
+  {
+    files: ['src/kernel/**/*.ts'],
+    deny: [
+      { group: ['@application/*', '@infra/*', '@main/*'], message: 'kernel/ não depende de outras camadas.' },
+      { group: ['@shared/*', '!@shared/types'], message: 'kernel/ só pode importar @shared/types.' },
+      MIDDY, DATABASE, AWS_SDK,
+    ],
+  },
+  {
+    files: ['src/shared/**/*.ts'],
+    deny: [
+      { group: ['@application/*', '@infra/*', '@main/*'], message: 'shared/ só pode depender de kernel/.' },
+      MIDDY, DATABASE, AWS_SDK,
+    ],
+  },
+  {
+    files: ['src/application/contracts/**/*.ts', 'src/application/errors/**/*.ts'],
+    deny: [
+      {
+        group: ['@infra/*', '@main/*', '@application/controllers/*', '@application/useCases/*'],
+        message: 'contracts/ e errors/ não dependem de infra/, main/, controllers/ ou useCases/.',
+      },
+      MIDDY, DATABASE, AWS_SDK,
+    ],
+  },
+  {
+    files: ['src/application/useCases/**/*.ts'],
+    deny: [
+      { group: ['@main/*', '@application/controllers/*'], message: 'useCases/ não dependem de main/ nem de controllers/.' },
+      MIDDY, DATABASE, AWS_SDK,
+    ],
+  },
+  {
+    files: ['src/application/controllers/**/*.ts'],
+    deny: [
+      { group: ['@infra/*', '@main/*'], message: 'controllers/ só conversam com useCases/: nada de infra/ ou main/.' },
+      MIDDY, DATABASE, AWS_SDK,
+    ],
+  },
+  {
+    files: ['src/infra/**/*.ts'],
+    deny: [
+      { group: ['@main/*', '@application/*', '!@application/errors'], message: 'infra/ só pode importar @application/errors.' },
+      MIDDY,
+    ],
+  },
+];
+
+// O flat config não mescla opções de uma regra (a última vence): por isso BASE_IMPORT_RULES entra em toda camada.
+const restrictImports = (deny = []) => ['error', { patterns: [...BASE_IMPORT_RULES, ...deny] }];
+
 export default defineConfig([
   {
     ignores: ['**/dist/**', '**/.serverless/**', '**/node_modules/**'],
@@ -16,12 +85,11 @@ export default defineConfig([
     },
     extends: ['js/recommended'],
     rules: {
-      quotes: ['error', 'single'],
+      quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'always'],
       'comma-dangle': ['error', 'always-multiline'],
       'object-curly-spacing': ['error', 'always'],
       'array-bracket-spacing': ['error', 'never'],
-      'no-empty': 'off',
       'arrow-spacing': ['error', { before: true, after: true }],
       'key-spacing': ['error', { beforeColon: false, afterColon: true }],
       'no-multiple-empty-lines': ['error', { max: 1 }],
@@ -29,7 +97,7 @@ export default defineConfig([
       eqeqeq: ['error', 'always'],
       curly: ['error', 'all'],
       'no-duplicate-imports': 'error',
-      'no-console': 'warn',
+      'no-console': 'error',
       'simple-import-sort/imports': [
         'error',
         {
@@ -66,7 +134,42 @@ export default defineConfig([
   {
     rules: {
       '@typescript-eslint/no-namespace': 'off',
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+
+  { files: ['src/**/*.ts'], rules: { 'no-restricted-imports': restrictImports() } },
+  ...LAYERS.map(({ files, deny }) => ({ files, rules: { 'no-restricted-imports': restrictImports(deny) } })),
+
+  {
+    files: ['src/**/*.ts'],
+    ignores: [
+      'src/shared/config/env.ts',
+      // TODO: remover quando STAGE/REGION/SERVICE_NAME passarem por env.ts/AppConfig.
+      'src/application/useCases/health/HealthUseCase.ts',
+    ],
+    rules: {
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'process',
+          property: 'env',
+          message: 'Leia variáveis de ambiente só em src/shared/config/env.ts e injete AppConfig.',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/application/**/*.ts', 'src/infra/**/*.ts', 'src/shared/**/*.ts'],
+    ignores: ['**/*.spec.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "CallExpression[callee.object.name='Registry'][callee.property.name='getInstance']",
+          message: 'Service locator proibido fora de main/ e testes: receba dependências pelo construtor (@Injectable).',
+        },
+      ],
     },
   },
 ]);

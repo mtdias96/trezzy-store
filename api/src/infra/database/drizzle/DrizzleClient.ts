@@ -1,10 +1,10 @@
 import { Pool } from '@neondatabase/serverless';
 import { drizzle, type NeonDatabase } from 'drizzle-orm/neon-serverless';
 
-import { Injectable } from '@kernel/decorators/Injectable.js';
-import { AppConfig } from '@shared/config/AppConfig.js';
+import { Injectable } from '@kernel/decorators/Injectable';
+import { AppConfig } from '@shared/config/AppConfig';
 
-import * as schema from './schema.js';
+import * as schema from './schema';
 
 @Injectable()
 export class DrizzleClient {
@@ -17,6 +17,12 @@ export class DrizzleClient {
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 30000,
       max: 1,
+    });
+
+    // Sem este listener, uma conexão ociosa derrubada pelo Neon vira exceção não tratada e derruba o runtime.
+    this.pool.on('error', (error: unknown) => {
+      // eslint-disable-next-line no-console -- log central da infra
+      console.error('Idle database connection error', error);
     });
 
     this.db = drizzle(this.pool, { schema, casing: 'snake_case' });

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { Registry } from '@kernel/di/Registry.js';
+import { Registry } from '@kernel/di/Registry';
 
-import { AppConfig } from './AppConfig.js';
+import { AppConfig } from './AppConfig';
 
 describe('AppConfig', () => {
   it('should initialize and provide neon database configuration', () => {
