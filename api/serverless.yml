@@ -56,6 +56,16 @@ functions:
           path: /health
           method: get
 
+  auth:
+    handler: src/main/functions/auth.handler
+    events:
+      - httpApi:
+          path: /auth/signup
+          method: post
+      - httpApi:
+          path: /auth/signin
+          method: post
+
   # Triggers do UserPool, ligados em sls/resources/cognito.yml (LambdaConfig).
   cognitoPreSignUp:
     handler: src/main/functions/cognito/preSignUp.handler

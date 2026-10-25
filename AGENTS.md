@@ -59,11 +59,13 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 - Um controller por rota (`<Ação><Recurso>Controller`). Ele estende `Controller<'public' | 'private', Response>`, declara `protected override readonly routeType` com o mesmo valor do genérico, implementa `protected override async handle()`, valida a entrada, chama **um** use case e devolve `{ statusCode, body }`.
 - Body: `@Schema(schema)`, com o schema em `schemas/<acao>Schema.ts`. O `handle` é tipado com `z.infer` desse schema.
+- OBRIGATÓRIO: desestruturar o body e repassar ao use case **só** os campos que ele usa (`const { email, password } = body`), nunca o body inteiro.
 - Params e query: `this.validate(schema, params)`. PROIBIDO `schema.parse()` direto (um `ZodError` solto vira 500).
 - Autenticação é do API Gateway (JWT authorizer do Cognito). A identidade vem só de `request.accountId`, nunca de body, headers ou query.
 - `accountId` é o nosso `accounts.id`, lido pelo adapter da claim `internalId` do access token (injetada pelo trigger `PreTokenGeneration`). Controller `'private'` sem `accountId` (token sem a claim ou rota sem authorizer) responde 401 antes do `handle`.
 - Rota `'private'` no `serverless.yml` OBRIGATORIAMENTE leva `authorizer: { name: cognito }`.
 - PROIBIDO chamar o SDK do Cognito fora do `infra/gateways/AuthGateway.ts`. Os dados do usuário ficam no nosso banco; o Cognito só autentica, ligado por `accounts.externalId` (o `sub`).
+- O id da conta nasce na entidade `Account` e vai para o Cognito no `SignUp` (`custom:internalId`, imutável). O client do Cognito é confidencial: toda chamada pública leva `SECRET_HASH`.
 - Entrypoint: `main/functions/<modulo>.ts`. A primeira linha é `import 'reflect-metadata';`, e ele exporta `handler = lambdaHttpAdapter([...rotas])` (ou a classe, quando há um único endpoint).
 - Toda rota do array existe no `serverless.yml` (`httpApi`, mesmo método e path), e vice-versa.
 
