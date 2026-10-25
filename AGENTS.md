@@ -61,6 +61,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - Body: `@Schema(schema)`, com o schema em `schemas/<acao>Schema.ts`. O `handle` é tipado com `z.infer` desse schema.
 - Params e query: `this.validate(schema, params)`. PROIBIDO `schema.parse()` direto (um `ZodError` solto vira 500).
 - Autenticação é do API Gateway (JWT authorizer do Cognito). A identidade vem só de `request.accountId`, nunca de body, headers ou query.
+- PROIBIDO chamar o SDK do Cognito fora do `infra/gateways/AuthGateway.ts`. Os dados do usuário ficam no nosso banco; o Cognito só autentica, ligado por `accounts.externalId` (o `sub`).
 - Entrypoint: `main/functions/<modulo>.ts`. A primeira linha é `import 'reflect-metadata';`, e ele exporta `handler = lambdaHttpAdapter([...rotas])` (ou a classe, quando há um único endpoint).
 - Toda rota do array existe no `serverless.yml` (`httpApi`, mesmo método e path), e vice-versa.
 
