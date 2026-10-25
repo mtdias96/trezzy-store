@@ -66,6 +66,15 @@ functions:
           path: /auth/signin
           method: post
 
+  account:
+    handler: src/main/functions/account.handler
+    events:
+      - httpApi:
+          path: /me
+          method: get
+          authorizer:
+            name: cognito
+
   # Triggers do UserPool, ligados em sls/resources/cognito.yml (LambdaConfig).
   cognitoPreSignUp:
     handler: src/main/functions/cognito/preSignUp.handler
