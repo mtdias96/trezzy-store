@@ -122,6 +122,22 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 - PR: título no padrão do commit e corpo seguindo `.github/pull_request_template.md` (o GitHub preenche sozinho). Seja direto: contexto, o que foi feito, ganhos, arquivos principais, validação e atenção no deploy.
 
+## Versionamento (SemVer)
+
+- A versão fica em `api/package.json`, no formato `MAJOR.MINOR.PATCH`, e é **derivada dos commits** desde a última tag, nunca escolhida no gosto. Vários commits no mesmo release: vale a maior mudança.
+- **Fase `0.x` (atual, até o primeiro lançamento em produção):** o contrato ainda pode mudar. `feat` ou breaking change sobe o MINOR (`0.2.0` → `0.3.0`); `fix` e `perf` sobem o PATCH (`0.2.0` → `0.2.1`).
+- **`1.0.0`:** primeiro lançamento em produção com o frontend consumindo a API. A partir daí o contrato HTTP é público:
+
+| Mudança | Exemplos | Sobe |
+| :--- | :--- | :--- |
+| Quebra quem consome (`feat!:` + rodapé `BREAKING CHANGE:`) | remover ou renomear rota ou campo, campo novo obrigatório no body, mudar o formato do erro, exigir auth numa rota pública | MAJOR |
+| Adiciona sem quebrar (`feat`) | rota nova, campo novo na resposta, campo opcional no body | MINOR |
+| Corrige sem mudar o contrato (`fix`, `perf`) | bug, performance, correção de segurança | PATCH |
+| Não muda o que roda para quem consome (`docs`, `test`, `refactor`, `chore`, `ci`, `build`, `style`) | — | nada |
+
+- Quando: só no release (PR `develop` → `main`), num commit `chore(release): vX.Y.Z` que atualiza `api/package.json`. Depois do merge, tag anotada `vX.Y.Z` no `main`, e o corpo do PR vira a release no GitHub.
+- PROIBIDO mudar a versão em branch de feature: duas features em paralelo disputariam o mesmo número.
+
 ## Criar um endpoint (checklist)
 
 1. Tabela em `schema.ts`, depois `db:generate`.
