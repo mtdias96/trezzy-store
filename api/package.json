@@ -1,6 +1,6 @@
 {
   "name": "trezzy-api",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,6 +36,7 @@
     "vitest": "^5.0.1"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1154.0",
     "@middy/core": "^7.9.2",
     "@middy/http-json-body-parser": "^7.9.2",
     "@middy/http-response-serializer": "^7.9.2",

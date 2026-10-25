@@ -1,6 +1,8 @@
 import type { z } from 'zod';
 
 import { getSchema } from '@kernel/decorators/Schema';
+import { ApplicationError } from '@application/errors/ApplicationError';
+import { ErrorCode } from '@application/errors/ErrorCode';
 import { ValidationError } from '@application/errors/ValidationError';
 
 export type RouteType = 'public' | 'private';
@@ -11,9 +13,15 @@ export interface IController<TBody = unknown> {
 
 export abstract class Controller<TType extends RouteType, TBody = undefined>
   implements IController<TBody> {
+  protected abstract readonly routeType: TType;
+
   protected abstract handle(request: Controller.Request<TType>): Promise<Controller.Response<TBody>>;
 
   public async execute(request: Controller.ExecuteRequest): Promise<Controller.Response<TBody>> {
+    if (this.routeType === 'private' && !request.accountId) {
+      throw new ApplicationError(ErrorCode.UNAUTHORIZED, 'Token has no account identity.');
+    }
+
     const schema = getSchema(this);
     const body = schema ? this.validate(schema, request.body) : request.body;
 
