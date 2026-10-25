@@ -38,6 +38,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - OBRIGATÓRIO 🔒: fora da pasta atual, importar via alias (`@kernel/*`, `@shared/*`, `@application/*`, `@infra/*`, `@main/*`). `../` é proibido.
 - PROIBIDO 🔒: extensão em imports internos (`moduleResolution: Bundler`).
 - PROIBIDO: barrel files (`index.ts` que só reexporta).
+- OBRIGATÓRIO 🔒: `import * as z from 'zod'`. O `import { z }` impede o tree-shaking e arrasta ~260 KB de locales para cada Lambda (medido: bundle 731 → 361 KB, carga a frio −15%).
 
 ## TypeScript
 

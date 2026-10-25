@@ -1,6 +1,6 @@
 import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it, vi } from 'vitest';
-import { z } from 'zod';
+import * as z from 'zod';
 
 import { Schema } from '@kernel/decorators/Schema';
 import { Controller } from '@application/contracts/Controller';

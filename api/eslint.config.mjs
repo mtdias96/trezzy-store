@@ -73,6 +73,17 @@ const LAYERS = [
 // O flat config não mescla opções de uma regra (a última vence): por isso BASE_IMPORT_RULES entra em toda camada.
 const restrictImports = (deny = []) => ['error', { patterns: [...BASE_IMPORT_RULES, ...deny] }];
 
+// Medido: `import { z } from 'zod'` arrasta ~260 KB de locales para o bundle; o namespace permite tree-shaking.
+const ZOD_NAMESPACE = {
+  selector: "ImportDeclaration[source.value=/^zod/][importKind!='type'] > ImportSpecifier[imported.name='z'][importKind!='type']",
+  message: "Use `import * as z from 'zod'`: o import nomeado impede o tree-shaking dos locales (~260 KB).",
+};
+
+const REGISTRY_SERVICE_LOCATOR = {
+  selector: "CallExpression[callee.object.name='Registry'][callee.property.name='getInstance']",
+  message: 'Service locator proibido fora de main/ e testes: receba dependências pelo construtor (@Injectable).',
+};
+
 export default defineConfig([
   {
     ignores: ['**/dist/**', '**/.serverless/**', '**/node_modules/**'],
@@ -138,7 +149,7 @@ export default defineConfig([
     },
   },
 
-  { files: ['src/**/*.ts'], rules: { 'no-restricted-imports': restrictImports() } },
+  { files: ['src/**/*.ts'], rules: { 'no-restricted-imports': restrictImports(), 'no-restricted-syntax': ['error', ZOD_NAMESPACE] } },
   ...LAYERS.map(({ files, deny }) => ({ files, rules: { 'no-restricted-imports': restrictImports(deny) } })),
 
   {
@@ -163,13 +174,8 @@ export default defineConfig([
     files: ['src/application/**/*.ts', 'src/infra/**/*.ts', 'src/shared/**/*.ts'],
     ignores: ['**/*.spec.ts'],
     rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: "CallExpression[callee.object.name='Registry'][callee.property.name='getInstance']",
-          message: 'Service locator proibido fora de main/ e testes: receba dependências pelo construtor (@Injectable).',
-        },
-      ],
+      // O flat config não mescla opções: o seletor do zod precisa vir junto aqui também.
+      'no-restricted-syntax': ['error', ZOD_NAMESPACE, REGISTRY_SERVICE_LOCATOR],
     },
   },
 ]);

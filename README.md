@@ -54,7 +54,8 @@ As dependências entre camadas são **impostas pelo ESLint**: um controller que 
 - **Decisões de build tomadas por medição:**
   - `moduleResolution: Bundler` gera build e bundle idênticos aos do `NodeNext`, então os imports ficaram limpos;
   - `minify` foi mantido porque reduz ~11% do tempo de carga a frio;
-  - source maps ficaram de fora (+15%).
+  - source maps ficaram de fora (+15%);
+  - `import * as z from 'zod'` (imposto pelo lint) corta o bundle de 731 para 361 KB e a carga a frio em 15%; o `zod/mini` foi avaliado e descartado.
 - **Infra de produção:**
   - arm64 (Graviton), 512 MB, logs JSON com retenção de 30 dias;
   - versão do Serverless fixada;
