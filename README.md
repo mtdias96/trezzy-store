@@ -2,7 +2,7 @@
 
 E-commerce serverless na AWS. O backend roda em Node.js no AWS Lambda, sobre um mini-framework próprio (injeção de dependências, Controllers e Use Cases sobre Middy). O frontend será em Next.js.
 
-> **Status:** fundação do backend pronta (DI, pipeline HTTP, erros, banco e infra). Módulos de negócio e frontend em construção.
+> **Status:** fundação do backend pronta (DI, pipeline HTTP, erros, banco e infra) e autenticação com Cognito (signup, signin e rotas privadas). Módulos de negócio e frontend em construção.
 
 ## Stack
 
@@ -12,7 +12,7 @@ E-commerce serverless na AWS. O backend roda em Node.js no AWS Lambda, sobre um 
 | API | API Gateway HTTP API v2 · Middy 7 |
 | Infra como código | Serverless Framework v4 (esbuild) |
 | Banco | Neon Postgres · Drizzle ORM |
-| Auth | Amazon Cognito + JWT authorizer do API Gateway (planejado) |
+| Auth | Amazon Cognito (Essentials) + JWT authorizer do API Gateway |
 | Validação | Zod 4 |
 | Qualidade | TypeScript strict · ESLint · Vitest · Husky · commitlint · GitHub Actions |
 
@@ -51,6 +51,8 @@ As dependências entre camadas são **impostas pelo ESLint**: um controller que 
 - **Erros desacoplados de HTTP.** O use case lança `ApplicationError(ErrorCode.NOT_FOUND, …)` e a camada HTTP deriva o status por um mapa exaustivo: um código novo sem status não compila.
 - **Neon com Pool WebSocket**, para ter transações interativas (checkout e SAGA). Cada container mantém uma conexão no máximo, e o PgBouncer do Neon absorve a concorrência.
 - **Autenticação no API Gateway** (Cognito): token inválido é rejeitado antes de invocar a Lambda.
+- **Conta no nosso banco, Cognito só autentica.** O id nasce na entidade `Account`, vai para o Cognito no cadastro (`custom:internalId`, imutável) e o trigger `PreTokenGeneration` o injeta no access token. A tabela `accounts` guarda o `sub` em `externalId`: trocar de provedor de auth custa remapear uma coluna e um gateway.
+- **Saga no cadastro.** Cognito e banco não compartilham transação: cada passo registra sua compensação e uma falha desfaz os anteriores na ordem inversa. O client do Cognito é confidencial (`SECRET_HASH`), então ninguém cadastra direto no Cognito sem passar pela API.
 - **Decisões de build tomadas por medição:**
   - `moduleResolution: Bundler` gera build e bundle idênticos aos do `NodeNext`, então os imports ficaram limpos;
   - `minify` foi mantido porque reduz ~11% do tempo de carga a frio;
