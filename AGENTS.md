@@ -28,11 +28,11 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 | Camada | Responsabilidade | PODE importar | PROIBIDO |
 | :--- | :--- | :--- | :--- |
 | `kernel/` | DI (`Registry`), `@Injectable`, `@Schema` | `@shared/types` | o resto do projeto, Middy, `aws-lambda`, Drizzle/Neon, `@aws-sdk` |
-| `shared/` | `env.ts`, `AppConfig`, tipos | `@kernel` | `@application`, `@infra`, `@main`, SDKs |
-| `application/contracts`, `errors` | `Controller`, `ApplicationError`, `ErrorCode` | `@kernel`, `@shared` | `controllers/`, `useCases/`, `@infra`, `@main`, SDKs |
-| `application/useCases/<modulo>` | Regras de negócio | `@kernel`, `@shared`, `@application` (exceto controllers), `@infra` (repositórios e `DrizzleClient` para transação) | `@main`, `drizzle-orm` direto, Middy, `aws-lambda`, `@aws-sdk` |
+| `shared/` | `env.ts`, `AppConfig`, `saga/`, tipos | `@kernel` | `@application`, `@infra`, `@main`, SDKs |
+| `application/contracts`, `errors`, `entities` | `Controller`, `ApplicationError`, `ErrorCode`, entidades de domínio | `@kernel`, `@shared` | `controllers/`, `useCases/`, `@infra`, `@main`, SDKs |
+| `application/useCases/<modulo>` | Regras de negócio | `@kernel`, `@shared`, `@application` (exceto controllers), `@infra` (repositórios, gateways e `DrizzleClient` para transação) | `@main`, `drizzle-orm` direto, Middy, `aws-lambda`, `@aws-sdk` |
 | `application/controllers/<modulo>` | HTTP → use case (`schemas/` com Zod) | `@kernel`, `@shared`, `@application` | `@infra`, `@main`, SDKs |
-| `infra/` | `DrizzleClient`, schema, `repositories/`, integrações | `@kernel`, `@shared`, `@application/errors` | demais `@application`, `@main`, Middy |
+| `infra/` | `DrizzleClient`, schema, `repositories/`, `clients/` (SDKs), `gateways/` (integrações) | `@kernel`, `@shared`, `@application/errors`, `@application/entities` | demais `@application`, `@main`, Middy |
 | `main/` | Adapter Middy, middlewares, `functions/` (1 Lambda por módulo) | tudo | — |
 
 - OBRIGATÓRIO 🔒: fora da pasta atual, importar via alias (`@kernel/*`, `@shared/*`, `@application/*`, `@infra/*`, `@main/*`). `../` é proibido.

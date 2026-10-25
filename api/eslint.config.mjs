@@ -38,11 +38,11 @@ const LAYERS = [
     ],
   },
   {
-    files: ['src/application/contracts/**/*.ts', 'src/application/errors/**/*.ts'],
+    files: ['src/application/contracts/**/*.ts', 'src/application/errors/**/*.ts', 'src/application/entities/**/*.ts'],
     deny: [
       {
         group: ['@infra/*', '@main/*', '@application/controllers/*', '@application/useCases/*'],
-        message: 'contracts/ e errors/ não dependem de infra/, main/, controllers/ ou useCases/.',
+        message: 'contracts/, errors/ e entities/ não dependem de infra/, main/, controllers/ ou useCases/.',
       },
       MIDDY, DATABASE, AWS_SDK,
     ],
@@ -64,7 +64,10 @@ const LAYERS = [
   {
     files: ['src/infra/**/*.ts'],
     deny: [
-      { group: ['@main/*', '@application/*', '!@application/errors'], message: 'infra/ só pode importar @application/errors.' },
+      {
+        group: ['@main/*', '@application/*', '!@application/errors', '!@application/entities'],
+        message: 'infra/ só pode importar @application/errors e @application/entities.',
+      },
       MIDDY,
     ],
   },
