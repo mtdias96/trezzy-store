@@ -80,7 +80,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - `DATABASE_URL` aponta para o endpoint **`-pooler`** do Neon. O pool tem `max: 1` por container, e o PgBouncer absorve a escala.
 - Tabelas em `infra/database/drizzle/schema.ts`, com colunas em camelCase (o snake_case no banco é automático).
 - Mudança de schema: `db:generate`, revisar o SQL, commitar e rodar `db:migrate`. PROIBIDO `db:push` fora do banco local e PROIBIDO editar migration já aplicada.
-- Repositório em `infra/database/repositories/<Recurso>Repository.ts`. "Não encontrado" retorna `null`, e escritas aceitam `tx?: DrizzleClient.Transaction`.
+- Repositório em `infra/database/repositories/<Recurso>Repository.ts`. "Não encontrado" retorna `null`, e escritas aceitam `tx?: DrizzleClient.Transaction`. Quando existe entidade, o repositório recebe e devolve a entidade, não a linha do banco.
 - OBRIGATÓRIO: dentro de `transaction()`, **toda** query usa o `tx`. Com `max: 1`, usar o `db` ali causa deadlock.
 - Dinheiro em centavos inteiros (`priceInCents`). Datas em `timestamp with time zone`. PROIBIDO SQL montado por interpolação.
 
