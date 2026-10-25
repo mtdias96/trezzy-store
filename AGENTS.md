@@ -71,7 +71,8 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - Erro de negócio: `throw new ApplicationError(ErrorCode.X, 'mensagem')`, **sem** status. O status vem de `main/utils/httpStatusByErrorCode.ts`, um mapa exaustivo: um código novo sem status não compila.
 - PROIBIDO `HttpError` fora de `main/`.
 - PROIBIDO `catch` vazio. Erro inesperado propaga, e o `errorHandler` responde 500 e loga.
-- PROIBIDO 🔒 `console.*` fora do `errorHandler` e do listener de erro do pool no `DrizzleClient`. Os logs da Lambda saem em JSON.
+- PROIBIDO 🔒 `console.*` fora do `errorHandler`, do listener de erro do pool no `DrizzleClient` e da compensação que falha na `Saga`. Os logs da Lambda saem em JSON.
+- Fluxo que escreve em mais de um sistema (ex: Cognito + banco) roda em `saga.run(async ({ addCompensation }) => …)`: cada passo concluído registra como desfazê-lo, e um erro dispara as compensações na ordem inversa. As compensações vivem só dentro do `run`, nunca na instância (ela é singleton).
 
 ## Banco (Drizzle + Neon)
 
