@@ -131,9 +131,10 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 | Item | Até resolver |
 | :--- | :--- |
 | Identidade do Cognito | O adapter envia `accountId: null`. Ao plugar o Cognito, mapear `requestContext.authorizer.jwt.claims.sub` e responder 401 em rota privada sem claims. Rota `'private'` só no `serverless.yml` com o authorizer configurado. |
+| Auto-confirmação no signup | O trigger `PreSignUp` confirma o usuário sem verificar o e-mail. Só para testes: trocar por confirmação real antes de produção. |
 | `Content-Type` | PROIBIDO definir `Content-Type` no retorno do controller: o serializer pula a serialização do body. |
 | Config do health | O `HealthUseCase` lê `process.env` (exceção temporária no lint). Não copie. |
-| Segredos | O `DATABASE_URL` ainda é variável de ambiente. Alvo: SSM lido em runtime. |
+| Segredos | O `DATABASE_URL` e o `COGNITO_CLIENT_SECRET` ainda são variáveis de ambiente. Alvo: SSM lido em runtime. |
 
 ## Regras para agentes de IA
 
