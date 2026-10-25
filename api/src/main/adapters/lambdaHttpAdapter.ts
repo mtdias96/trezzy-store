@@ -1,7 +1,11 @@
 import middy from '@middy/core';
 import httpJsonBodyParser from '@middy/http-json-body-parser';
 import httpResponseSerializer from '@middy/http-response-serializer';
-import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from 'aws-lambda';
+import type {
+  APIGatewayProxyEventV2,
+  APIGatewayProxyEventV2WithJWTAuthorizer,
+  APIGatewayProxyStructuredResultV2,
+} from 'aws-lambda';
 
 import { Registry } from '@kernel/di/Registry';
 import type { Constructor } from '@shared/types/Constructor';
@@ -98,9 +102,20 @@ export function lambdaHttpAdapter(target: AdapterTarget) {
         headers: sanitizeObject(event.headers),
         params: sanitizeObject(event.pathParameters),
         queryParams: sanitizeObject(event.queryStringParameters),
-        accountId: null,
+        accountId: getAccountId(event),
       });
     })
     .use(errorHandler())
     .use(httpJsonBodyParser({ disableContentTypeError: true }));
+}
+
+// Só extrai a claim que liga o usuário ao nosso banco; quem exige que ela exista é o Controller privado.
+function getAccountId(event: APIGatewayProxyEventV2 | APIGatewayProxyEventV2WithJWTAuthorizer): string | null {
+  if (!event.requestContext || !('authorizer' in event.requestContext)) {
+    return null;
+  }
+
+  const { internalId } = event.requestContext.authorizer.jwt.claims;
+
+  return typeof internalId === 'string' && internalId.length > 0 ? internalId : null;
 }

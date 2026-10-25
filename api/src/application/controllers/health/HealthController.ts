@@ -4,6 +4,8 @@ import { HealthUseCase } from '@application/useCases/health/HealthUseCase';
 
 @Injectable()
 export class HealthController extends Controller<'public', HealthController.Response> {
+  protected override readonly routeType = 'public';
+
   constructor(private readonly healthUseCase: HealthUseCase) {
     super();
   }
