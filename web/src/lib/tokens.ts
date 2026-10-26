@@ -88,6 +88,8 @@ export const textTokens = [
   'body-sm',
   'caption',
   'micro',
+  'seal',
+  'hand',
 ] as const;
 
 export const radiusTokens = ['seal', 'md', 'lg', 'xl', '2xl', '3xl', 'card', 'block', 'pill'] as const;
