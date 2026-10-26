@@ -49,7 +49,7 @@ export async function signInToPanel(_state: ActionResult | null, formData: FormD
     return { ok: false, error: message ?? SIGN_IN_UNAVAILABLE, values };
   }
 
-  if (!readSession(tokens.accessToken)?.isAdmin) {
+  if (!readSession(tokens.accessToken, Date.now())?.isAdmin) {
     // A conta existe, mas não é admin: revoga os tokens que acabaram de sair em vez de guardá-los.
     await requestSignOut(tokens.refreshToken).catch(ignoreRequestFailure);
 

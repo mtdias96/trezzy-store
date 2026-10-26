@@ -15,7 +15,7 @@ export function guardPanel(request: NextRequest): NextResponse {
     return NextResponse.next();
   }
 
-  if (readSession(request.cookies.get(ACCESS_TOKEN_COOKIE)?.value)?.isAdmin) {
+  if (readSession(request.cookies.get(ACCESS_TOKEN_COOKIE)?.value, Date.now())?.isAdmin) {
     return NextResponse.next();
   }
 

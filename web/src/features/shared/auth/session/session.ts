@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { cache } from 'react';
+import { io } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
@@ -15,7 +16,14 @@ const REMEMBER_FOR_SECONDS = 30 * 24 * 60 * 60;
 
 // O cache do React lê o cookie uma vez por requisição, mesmo com várias páginas e queries chamando.
 export const getSession = cache(async (): Promise<Session | null> => {
-  return readSession((await cookies()).get(ACCESS_TOKEN_COOKIE)?.value);
+  const accessToken = (await cookies()).get(ACCESS_TOKEN_COOKIE)?.value;
+
+  // A validade compara o token com a hora atual, e o Next recusa a hora no prerender. Ler o cookie não basta:
+  // a casca do partialPrefetching (prerender-runtime) renderiza com os cookies da sessão. O io() para a casca aqui
+  // e resolve na hora em requisição de verdade (página ou Server Action).
+  await io();
+
+  return readSession(accessToken, Date.now());
 });
 
 // Toda query e action do painel começa por aqui: o proxy só faz o redirect otimista.

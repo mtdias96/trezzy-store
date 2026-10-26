@@ -14,7 +14,8 @@ const claimsSchema = z.object({
 // Lê o access token sem validar a assinatura: serve só para decidir o que mostrar e para onde redirecionar.
 // Quem valida o token é o API Gateway, em toda chamada; um token forjado não traz dado nenhum.
 // Token expirado, malformado ou sem o internalId (que a api/ exige nas rotas privadas) não vira sessão.
-export function readSession(token: string | undefined, now = Date.now()): Session | null {
+// O `now` vem de quem chama: num componente de servidor, ler a hora exige `await io()` antes (ver session.ts).
+export function readSession(token: string | undefined, now: number): Session | null {
   const payload = token?.split('.')[1];
 
   if (!payload) {

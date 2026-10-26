@@ -194,6 +194,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - Página inteira dinâmica (ex: área logada) usa o `loading.tsx` do grupo como boundary.
 - Página cacheada com um pedaço dinâmico isola esse pedaço num `<Suspense>` com skeleton, e o resto entra no shell estático.
 - PROIBIDO ler cookie ou sessão no topo de um `layout.tsx`: o `await` segura o segmento inteiro, inclusive o `children`, atrás da requisição.
+- Hora atual e valores aleatórios (`Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`) em componente de servidor: `await io()` (de `next/cache`) antes. Ler `cookies()` antes não basta: com o `partialPrefetching`, a casca da rota renderiza com os cookies da sessão, e o Next recusa a hora nesse prerender. O `connection()` fica para quando a renderização precisa esperar a requisição real, porque ele bloqueia também o prefetch.
 
 ### Cache
 
