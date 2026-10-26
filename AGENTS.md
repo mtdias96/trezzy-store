@@ -1,11 +1,11 @@
 # AGENTS.md — Regras do repositório
 
-> Fonte única das regras para pessoas e agentes de IA. **OBRIGATÓRIO**/**PROIBIDO** não admitem exceção. 🔒 = imposto por ferramenta (`tsc`, ESLint, commitlint ou CI). Quem muda uma regra atualiza este arquivo no mesmo commit.
+> Fonte única das regras para pessoas e agentes de IA. **OBRIGATÓRIO**/**PROIBIDO** não admitem exceção. 🔒 = imposto por ferramenta (`tsc`, ESLint, commitlint ou CI). Quem muda uma regra atualiza este arquivo no mesmo commit. Este arquivo vale para o repositório inteiro e para a `api/`. As regras do frontend ficam em [web/AGENTS.md](web/AGENTS.md).
 
 E-commerce em monorepo pnpm:
 
 - `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle e Neon.
-- `web/`: Next.js (planejado).
+- `web/`: Next.js 16, React 19, Tailwind v4 e shadcn/ui, com deploy na Vercel. Regras em [web/AGENTS.md](web/AGENTS.md).
 
 O backend usa um mini-framework próprio: DI, `Controller`, Use Cases e um adapter Middy. Visão geral no [README](README.md).
 
@@ -18,6 +18,7 @@ pnpm --filter trezzy-api test
 pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL no api/.env
 ```
 
+- Mudou o `web/`: rode também a [Definition of Done do web](web/AGENTS.md#definition-of-done).
 - Tudo deve passar com zero erros.
 - PROIBIDO enfraquecer `tsconfig`, ESLint, hooks ou CI.
 - PROIBIDO `--no-verify`.
@@ -135,9 +136,11 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 ## Versionamento (SemVer)
 
-- A versão fica em `api/package.json`, no formato `MAJOR.MINOR.PATCH`, e é **derivada dos commits** desde a última tag, nunca escolhida no gosto. Vários commits no mesmo release: vale a maior mudança.
+- Cada app tem a própria versão, porque o deploy é separado (AWS e Vercel): `api/package.json`, com tag `vX.Y.Z`, e `web/package.json`, com tag `web-vX.Y.Z`. Tudo no formato `MAJOR.MINOR.PATCH`.
+- A versão de cada app é **derivada dos commits** que mudam aquele app (escopo `api/…` ou `web/…`) desde a última tag dele, nunca escolhida no gosto. Vários commits no mesmo release: vale a maior mudança. Commit só de `root`, de CI ou de lockfile não sobe versão nenhuma.
 - **Fase `0.x` (atual, até o primeiro lançamento em produção):** o contrato ainda pode mudar. `feat` ou breaking change sobe o MINOR (`0.2.0` → `0.3.0`); `fix` e `perf` sobem o PATCH (`0.2.0` → `0.2.1`).
-- **`1.0.0`:** primeiro lançamento em produção com o frontend consumindo a API. A partir daí o contrato HTTP é público:
+- **No web:** `feat` (tela ou fluxo novo) sobe o MINOR, e `fix`/`perf` sobem o PATCH. Ele não tem contrato consumido por outro sistema, então o MAJOR vem de decisão de produto (redesenho, troca de URLs).
+- **`1.0.0`:** primeiro lançamento em produção com o frontend consumindo a API. A partir daí o contrato HTTP da api é público:
 
 | Mudança | Exemplos | Sobe |
 | :--- | :--- | :--- |
@@ -146,7 +149,8 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 | Corrige sem mudar o contrato (`fix`, `perf`) | bug, performance, correção de segurança | PATCH |
 | Não muda o que roda para quem consome (`docs`, `test`, `refactor`, `chore`, `ci`, `build`, `style`) | — | nada |
 
-- Quando: só no release (PR `develop` → `main`), num commit `chore(release): vX.Y.Z` que atualiza `api/package.json`. Depois do merge, tag anotada `vX.Y.Z` no `main`, e o corpo do PR vira a release no GitHub.
+- Quando: só no release (PR `develop` → `main`). O commit de release vai no `develop` antes de abrir o PR, atualiza o `package.json` de cada app que mudou e cita as versões, ex: `chore(release): v0.3.0, web-v0.2.0`. A primeira versão de um app (`0.1.0`) não tem commit de release.
+- Depois do merge, entra uma tag anotada no merge commit do `main` para cada app que mudou (`vX.Y.Z` e/ou `web-vX.Y.Z`), e o corpo do PR vira a release no GitHub.
 - PROIBIDO mudar a versão em branch de feature: duas features em paralelo disputariam o mesmo número.
 
 ## Criar um endpoint (checklist)
