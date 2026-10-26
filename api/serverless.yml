@@ -80,6 +80,18 @@ functions:
           authorizer:
             name: cognito
 
+  dashboard:
+    handler: src/main/functions/dashboard.handler
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/dashboard
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
   # Triggers do UserPool, ligados em sls/resources/cognito.yml (LambdaConfig).
   cognitoPreSignUp:
     handler: src/main/functions/cognito/preSignUp.handler

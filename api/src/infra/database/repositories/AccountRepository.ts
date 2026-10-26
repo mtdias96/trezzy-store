@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { count, eq } from 'drizzle-orm';
 
 import { Injectable } from '@kernel/decorators/Injectable';
 import { Account } from '@application/entities/Account';
@@ -27,6 +27,12 @@ export class AccountRepository {
       .limit(1);
 
     return row ? new Account(row) : null;
+  }
+
+  async count(): Promise<number> {
+    const [row] = await this.drizzle.db.select({ total: count() }).from(accounts);
+
+    return row?.total ?? 0;
   }
 
   async create(account: Account, tx?: DrizzleClient.Transaction): Promise<void> {
