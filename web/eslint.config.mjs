@@ -71,6 +71,7 @@ const ELEMENTS = [
   { type: 'hooks', pattern: 'src/hooks' },
   { type: 'lib', pattern: 'src/lib' },
   { type: 'config', pattern: 'src/config' },
+  { type: 'styles', pattern: 'src/styles' },
 ];
 
 // Elemento do boundaries é sempre uma pasta: arquivo solto de convenção do Next entra como descritor de arquivo.
@@ -80,7 +81,7 @@ const SAME_AREA = { area: '{{ from.element.captured.area }}' };
 const SAME_FEATURE = { ...SAME_AREA, feature: '{{ from.element.captured.feature }}' };
 const same = (type, extra = {}) => ({ type, captured: SAME_FEATURE, ...extra });
 const anyOf = (...types) => ({ types: { anyOf: types } });
-const SHARED = ['ui', 'common', 'layout', 'hooks', 'lib', 'config'];
+const SHARED = ['ui', 'common', 'layout', 'hooks', 'lib', 'config', 'styles'];
 
 // Rota de uma área compõe features da própria área e da shared, e os componentes da própria área.
 const areaRoute = (area) => [
@@ -113,7 +114,7 @@ const IMPORTS = {
     same('feature-components'),
     same('feature-model'),
     { type: 'area-components', captured: SAME_AREA },
-    anyOf('ui', 'common', 'layout', 'hooks', 'lib'),
+    anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles'),
   ],
   // Lógica de client: estado da feature e chamada das Server Actions, nunca das queries.
   'feature-hooks': [
@@ -128,14 +129,16 @@ const IMPORTS = {
     { types: { anyOf: ['feature-data', 'feature-model'] }, captured: { area: 'shared', feature: 'auth' } },
     anyOf('lib', 'config'),
   ],
-  ui: [anyOf('ui', 'hooks', 'lib')],
-  common: [anyOf('ui', 'common', 'layout', 'hooks', 'lib')],
-  layout: [anyOf('ui', 'common', 'layout', 'hooks', 'lib')],
+  ui: [anyOf('ui', 'hooks', 'lib', 'styles')],
+  common: [anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles')],
+  layout: [anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles')],
   // Componentes de uma área (header da loja, sidebar do painel): não enxergam a outra área.
-  'area-components': [anyOf('ui', 'common', 'layout', 'hooks', 'lib')],
+  'area-components': [anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles')],
   hooks: [anyOf('hooks', 'lib')],
   lib: [anyOf('lib', 'config')],
   config: [anyOf('config')],
+  // Estilo global (CSS, nomes dos tokens e fontes): todos leem, e ele não importa nada do projeto.
+  styles: [anyOf('styles')],
 };
 
 const POLICIES = [
@@ -230,7 +233,7 @@ const eslintConfig = defineConfig([
       'boundaries/include': ['src/**/*'],
       'better-tailwindcss': {
         cwd: import.meta.dirname,
-        entryPoint: 'src/app/globals.css',
+        entryPoint: 'src/styles/globals.css',
       },
     },
     rules: {
@@ -275,8 +278,8 @@ const eslintConfig = defineConfig([
               message: 'Fora da pasta atual, importe pelo alias @/.',
             },
             {
-              regex: '^(?!\\./globals\\.css$).*\\.css$',
-              message: 'O único CSS do web é o src/app/globals.css: estilo vai em classe com token.',
+              regex: '^(?!@/styles/globals\\.css$).*\\.css$',
+              message: 'O único CSS do web é o src/styles/globals.css: estilo vai em classe com token.',
             },
           ],
         },

@@ -1,10 +1,10 @@
 'use client';
 
-import './globals.css';
+import '@/styles/globals.css';
 
 import { RouteError } from '@/components/common/route-error';
-import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
+import { fontVariables } from '@/styles/fonts';
 
 // Substitui o layout raiz quando ele falha: por isso traz o próprio <html>, o CSS e as fontes.
 export default function GlobalError({ retry }: { error: unknown; retry: () => void }) {

@@ -45,9 +45,11 @@ src/
 │   ├── store/<feature>/         ← catalog, cart, checkout, orders…
 │   ├── admin/<feature>/         ← dashboard, products, orders…
 │   └── shared/<feature>/        ← auth
-└── components/
-    ├── ui/ · common/ · layout/  ← das duas áreas
-    └── store/ · admin/          ← de uma área só
+├── components/
+│   ├── ui/ · common/ · layout/  ← das duas áreas
+│   └── store/ · admin/          ← de uma área só
+├── hooks/ · lib/ · config/      ← lógica sem domínio, das duas áreas
+└── styles/                      ← estilo global: globals.css, tokens.ts e fonts.ts
 ```
 
 - Um app só, e não dois: localizar o código se resolve com pastas, e o Next já divide o bundle por rota, então o JS do painel não vai para quem compra. Dividir em dois apps só faz sentido com um motivo de deploy, segurança ou time, como deixar o painel atrás de SSO ou publicar em ritmos diferentes. Essa estrutura já deixa a separação pronta.
@@ -57,16 +59,20 @@ src/
 
 ```text
 app → features → components · hooks → lib → config
+                    ↘ styles
 ```
 
 - Só desce, nunca sobe: `components/` e `hooks/` não importam de `features/`, `lib/` não importa de ninguém acima e `config/` é a base. O `proxy.ts` fica no nível do `app/`.
+- `styles/` é base como o `config/`: o `app/` e os componentes leem dele, e ele não importa nada do projeto. Lógica (`hooks`, `lib`, `data`, `model`) não depende de estilo.
 - Imposta pelo `eslint-plugin-boundaries` 🔒 (tabela em [Quem importa o quê](#quem-importa-o-quê)). Arquivo fora das pastas desta seção também é erro.
 
 ### `app/`
 
-- Só arquivos de convenção do Next: rotas (`page`, `layout`, `loading`, `error`, `global-error`, `not-found`, `route`, `template`, `default`), metadados (`favicon.ico`, `icon`, `opengraph-image`, `sitemap`, `robots`, `manifest`) e o `globals.css` (referenciado pelo `components.json`).
-- A raiz do `app/` tem só o layout raiz, o `not-found`, o `global-error` e o `globals.css`. Cada área é um route group:
-  - `(admin)`: painel, com `layout` (que aplica `data-area="admin"`), `loading` e `error`. As rotas ficam em `(admin)/admin/…`.
+- Só arquivos de convenção do Next: rotas (`page`, `layout`, `loading`, `error`, `global-error`, `not-found`, `route`, `template`, `default`), e metadados (`favicon.ico`, `icon`, `opengraph-image`, `sitemap`, `robots`, `manifest`). O CSS global fica em `styles/`.
+- A raiz do `app/` tem só o layout raiz, o `not-found` e o `global-error`. Cada área é um route group:
+  - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`, em sub-grupos como na loja:
+    - `(auth)`: entrar (`/admin/entrar`), na tela dividida do `AuthShell`, sem a navegação do painel;
+    - `(panel)`: o painel logado (`/admin`…), com o cabeçalho (depois a sidebar) no layout. O layout não lê a sessão (seção 6).
   - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
@@ -97,7 +103,7 @@ features/<área>/<feature>/
 ├── containers/  *.tsx                                                    ← lógica: busca e decide
 ├── hooks/       use-*.ts                                                 ← lógica de client
 ├── components/  *.tsx                                                    ← UI: só props
-└── session/     session.ts · guard.ts                                    ← só em shared/auth
+└── session/     session.ts · cookies.ts · authorized-http.ts · guard.ts  ← só em shared/auth
 ```
 
 - `data/`: todo o I/O. `api.ts` é o transporte HTTP (sobre o `lib/http.ts`), `queries.ts` a leitura e `actions.ts` (`'use server'`) a escrita.
@@ -120,7 +126,7 @@ A lógica fica separada da UI. No App Router, o container costuma ser um Server 
 
 ### Quem importa o quê
 
-Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `layout`, `hooks`, `lib` e `config`.
+Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `layout`, `hooks`, `lib`, `config` e `styles`.
 
 | De | Pode importar |
 | :--- | :--- |
@@ -128,14 +134,14 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 | `app/(store)` e `app/(admin)` | `containers`, `components`, `data` e `model` das features da própria área e da `shared`; `components/<própria área>`; `shared/auth/session` e compartilhados |
 | `proxy.ts` | `shared/auth/session`, `lib` e `config` |
 | `containers/` | da feature: `data`, `model`, `components`, `hooks` e `containers`; `components/<própria área>`; `shared/auth/session` e compartilhados |
-| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `layout`, `hooks` e `lib` |
+| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `layout`, `hooks`, `lib` e `styles` |
 | `hooks/` da feature | da feature: `hooks`, `model` e `data/actions.ts`; `hooks` e `lib` |
 | `data/` | da feature: `data` e `model`; `shared/auth/session`, `lib` e `config` |
 | `model/` | da feature: `model`; `lib` |
 | `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
-| `components/ui` | `components/ui`, `hooks` e `lib` |
-| `components/common`, `layout`, `store` e `admin` | `ui`, `common`, `layout`, `hooks` e `lib`, e nunca a outra área |
-| `hooks/` · `lib/` · `config/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config` |
+| `components/ui` | `components/ui`, `hooks`, `lib` e `styles` |
+| `components/common`, `layout`, `store` e `admin` | `ui`, `common`, `layout`, `hooks`, `lib` e `styles`, e nunca a outra área |
+| `hooks/` · `lib/` · `config/` · `styles/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config`; `styles` → só `styles` |
 
 ### Camadas compartilhadas
 
@@ -144,11 +150,12 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - `components/layout/`: primitivos de composição de página (`Screen`, `Section`).
 - `components/store/` e `components/admin/`: apresentação de uma área só, como o header e o footer da loja ou a sidebar e a tabela de dados do painel.
 - `hooks/`: hooks de client sem domínio (é o alias `hooks` do `components.json`).
-- `lib/`: utilitários sem domínio (`cn`, `http`, formatadores) e os nomes dos tokens (`tokens.ts`).
+- `lib/`: utilitários sem domínio (`cn`, `http`, `ActionResult`, formatadores).
 - `config/`: variáveis de ambiente validadas com zod no boot. PROIBIDO ler `process.env` fora de `config/`.
   - `config/env.ts` começa com `import 'server-only'`.
   - Variável pública (`NEXT_PUBLIC_*`) fica em `config/public-env.ts`, lida por extenso (`process.env.NEXT_PUBLIC_X`). O Next só embute no bundle o acesso literal: desestruturar ou ler o `process.env` inteiro devolve `undefined` no browser.
   - Variável nova entra no `config/` e no `.env.example`.
+- `styles/`: o estilo global do design system (seção 8). O `globals.css` guarda os tokens, o `tokens.ts` repete os nomes para tipar props, e o `fonts.ts` carrega as fontes pelo `next/font`. Só o layout raiz e o `global-error` importam o CSS e as fontes.
 
 ### Sem barrel
 
@@ -187,6 +194,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - Página inteira dinâmica (ex: área logada) usa o `loading.tsx` do grupo como boundary.
 - Página cacheada com um pedaço dinâmico isola esse pedaço num `<Suspense>` com skeleton, e o resto entra no shell estático.
 - PROIBIDO ler cookie ou sessão no topo de um `layout.tsx`: o `await` segura o segmento inteiro, inclusive o `children`, atrás da requisição.
+- Hora atual e valores aleatórios (`Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`) em componente de servidor: `await io()` (de `next/cache`) antes. Ler `cookies()` antes não basta: com o `partialPrefetching`, a casca da rota renderiza com os cookies da sessão, e o Next recusa a hora nesse prerender. O `connection()` fica para quando a renderização precisa esperar a requisição real, porque ele bloqueia também o prefetch.
 
 ### Cache
 
@@ -207,10 +215,13 @@ Server Action é endpoint público. Toda action:
 3. Devolve resultado tipado. PROIBIDO `throw` para erro de negócio:
 
    ```ts
-   type ActionResult<T> =
+   // src/lib/action-result.ts
+   type ActionResult<T = void> =
      | { ok: true; data: T }
-     | { ok: false; error: string; fieldErrors?: Record<string, string[]> };
+     | { ok: false; error: string; fieldErrors?: Partial<Record<string, string[]>>; values?: Record<string, string> };
    ```
+
+   O React limpa o formulário depois da action: o `values` devolve o que foi digitado (nunca a senha), e o campo o usa como `defaultValue`.
 
 4. É consumida no client com `useActionState`.
 
@@ -227,7 +238,21 @@ Server Action é endpoint público. Toda action:
 - `src/proxy.ts` é convenção do Next (substitui o `middleware.ts`): fica na raiz de `src/`, ao lado de `app/`. Movido dali, ele para de rodar sem aviso. Um só por projeto.
 - A lógica não mora nele: ele importa `features/shared/auth/session/guard.ts` e exporta o `matcher`.
 - Se o painel ganhar um subdomínio próprio (`admin.…`), quem roteia pelo host é o `proxy.ts`, sem virar outro app.
-- O proxy faz só o redirect otimista (sem sessão → login). A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
+- O proxy faz só o redirect otimista (sem sessão → login, com o destino em `?next=`). Ele roda em toda navegação, até no prefetch, então só lê o cookie e nunca chama a API. A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
+- Quem está logado e abre o login vê o formulário: mandá-lo ao painel com um token revogado criaria um loop de redirects.
+
+### Sessão (BFF)
+
+A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda rota). O Next só guarda a sessão e a repassa.
+
+- O login é uma Server Action que chama `POST /auth/signin` e grava os tokens em cookies `__Host-`, `httpOnly`, `Secure` e `SameSite=Lax`. O browser nunca vê os tokens, então um XSS não consegue roubá-los. Com "Manter conectado", o access token vive o quanto vale e o refresh token, 30 dias; sem ele, os dois somem ao fechar o browser.
+- O login do painel recusa conta sem o scope `trezzy/admin` e revoga os tokens que acabaram de sair. O `?next=` só aceita caminhos do painel (`toPanelPath`), para não virar redirecionamento para fora do site.
+- Ler a sessão: `getSession()` e `requireAdminSession()` em `features/shared/auth/session/session.ts`. Toda query e action do painel começa por `requireAdminSession()`.
+- Chamar a API em nome do usuário: `authorizedHttp()` manda o `Bearer` e, se a API responder 401, volta ao login. A feature usa no `data/api.ts`, nunca o `http()` com o token na mão.
+- PROIBIDO passar token para componente ou para o client: o `Session` não leva tokens, e só o `session/` os lê.
+- O Next lê o token sem validar a assinatura, só para decidir tela e redirect. Um cookie forjado chega no máximo à casca do painel: a primeira chamada à API responde 401 e volta ao login.
+- PROIBIDO ler a sessão no topo de um `layout.tsx` (seção 4). A página da área logada põe o dado num `<Suspense>`, e a casca continua estática.
+- Logout: a action `signOut` revoga o refresh token (melhor esforço: com a API fora do ar, o logout local segue), apaga os cookies e volta ao login.
 
 ## 7. Formulários
 
@@ -239,8 +264,8 @@ Server Action é endpoint público. Toda action:
 
 ### Onde vivem
 
-- Os tokens ficam no bloco `@theme` do `src/app/globals.css`, a única fonte dos valores de estilo. PROIBIDO `tailwind.config.js` e `theme.ts` de runtime (o Tailwind v4 é CSS-first).
-- Os nomes também ficam em `src/lib/tokens.ts`, para tipar props. O `tokens.spec.ts` falha se as duas listas divergirem 🔒: token novo entra nos dois arquivos.
+- Os tokens ficam no bloco `@theme` do `src/styles/globals.css`, a única fonte dos valores de estilo. PROIBIDO `tailwind.config.js` e `theme.ts` de runtime (o Tailwind v4 é CSS-first).
+- Os nomes também ficam em `src/styles/tokens.ts`, para tipar props. O `tokens.spec.ts` falha se as duas listas divergirem 🔒: token novo entra nos dois arquivos.
 - Os grupos de cor, breakpoint, fonte, raio e sombra começam com `--*: initial`, então só existe o utilitário que um token define: `bg-red-500` e `2xl:` não existem.
 
 | Grupo | Exemplos |
@@ -284,7 +309,7 @@ Server Action é endpoint público. Toda action:
 - Os slots apontam para tokens no `:root` (superfícies da loja). No painel, o container com `data-area="admin"` troca as superfícies para os cinzas frios e aplica `bg-background`.
 - Elemento com papel de interface usa o slot (`bg-primary`, `text-muted-foreground`, `border-border`). O token direto fica para o que não tem slot (`bg-lime`, `bg-status-paid-bg`).
 - Manter `cn()`, `data-slot` e os aliases do `components.json`. A composição de primitivo é pela prop `render` do Base UI, que não tem `asChild`/`Slot`.
-- Fonte pelo `next/font`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
+- Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
 - O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar.
 
 ### Imagens
@@ -312,7 +337,7 @@ Server Action é endpoint público. Toda action:
 - Com o `partialPrefetching`, o `<Link>` pré-carrega o App Shell da rota, a parte que não depende da URL, um por rota. O `prefetch={true}` num link só entra quando a rota precisa de mais que o shell, com o motivo em comentário.
 - Headers de segurança em todas as rotas: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` com `frame-ancestors 'none'` e `Permissions-Policy`. O HSTS vem da Vercel, e a CSP completa entra junto com o primeiro script de terceiro.
 - Node 24: o `.nvmrc` da raiz vale para a CI e o ambiente local, e o `engines` do `package.json` vale para a Vercel.
-- TypeScript 🔒: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns` e `noFallthroughCasesInSwitch`. O `typecheck` roda `next typegen` antes do `tsc`, porque tipos como `LayoutProps` são gerados pelo Next.
+- TypeScript 🔒: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns` e `noFallthroughCasesInSwitch`. O `typecheck` roda `next typegen` antes do `tsc`, porque tipos como `LayoutProps` são gerados pelo Next. O `lint` e o `lint:fix` também: as regras type-aware leem esses tipos, e sem eles o resultado muda. Num checkout limpo, como o da CI, o `as Route` do `redirect()` vira "desnecessário", e o `lint:fix` o removeria.
 - Lint type-aware 🔒, que lê os tipos pelo `projectService`:
   - promise solta ou mal usada (`no-floating-promises`, `no-misused-promises`);
   - `any` e valor inseguro (`no-explicit-any`, `no-unsafe-*`);
@@ -351,8 +376,12 @@ Server Action é endpoint público. Toda action:
 | Dependências | nuqs, react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
-| Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. |
+| Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. Os links para `/` usam `'/' as Route`, porque o `typedRoutes` só aceita rota com página: tirar o cast quando a home entrar. |
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
+| `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |
+| Renovação da sessão | A API não tem `POST /auth/refresh`: a sessão dura o access token (60 min em dev). O refresh token já fica guardado, e a renovação entra no `proxy.ts` quando a rota existir. |
+| Recuperação de senha | A API não tem o fluxo: o "Esqueci a senha" abre um e-mail para o suporte. |
+| Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |

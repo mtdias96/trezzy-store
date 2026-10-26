@@ -1,4 +1,4 @@
-// Nomes dos tokens do src/app/globals.css (@theme), para tipar props que escolhem um token.
+// Nomes dos tokens do src/styles/globals.css (@theme), para tipar props que escolhem um token.
 // Os valores vivem só no CSS. O tokens.spec.ts falha se as duas listas divergirem.
 //
 // O Tailwind não gera classe montada por interpolação (`bg-${tone}`): mapeie o token para a classe
@@ -88,6 +88,8 @@ export const textTokens = [
   'body-sm',
   'caption',
   'micro',
+  'seal',
+  'hand',
 ] as const;
 
 export const radiusTokens = ['seal', 'md', 'lg', 'xl', '2xl', '3xl', 'card', 'block', 'pill'] as const;

@@ -12,8 +12,8 @@
     "build:vercel": "pnpm dlx --allow-build=esbuild vercel@65.2.0 build --yes",
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "next typegen && eslint .",
+    "lint:fix": "next typegen && eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest"
   },

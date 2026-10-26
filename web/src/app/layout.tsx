@@ -1,9 +1,9 @@
-import './globals.css';
+import '@/styles/globals.css';
 
 import type { Metadata } from 'next';
 
-import { fontVariables } from '@/lib/fonts';
 import { cn } from '@/lib/utils';
+import { fontVariables } from '@/styles/fonts';
 
 export const metadata: Metadata = {
   title: { default: 'Trezzy', template: '%s | Trezzy' },
