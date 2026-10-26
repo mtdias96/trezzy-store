@@ -70,6 +70,8 @@ Resources:
         - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
       PreventUserExistenceErrors: ENABLED
+      # O POST /auth/signout depende disto (RevokeToken).
+      EnableTokenRevocation: true
       # TODO: reduzir para 15–30 min antes de produção. O API Gateway não consulta revogação,
       # então tirar alguém do grupo admin só vale quando o access token expira. 60 min só enquanto for dev.
       AccessTokenValidity: 60

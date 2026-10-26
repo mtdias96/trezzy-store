@@ -67,6 +67,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - Rota `'private'` no `serverless.yml` OBRIGATORIAMENTE leva `authorizer: { name: cognito }`.
 - PROIBIDO chamar o SDK do Cognito em `src/` fora do `infra/gateways/AuthGateway.ts`. O Cognito guarda a identidade e o tipo de conta (grupo `admin` ou nenhum); os dados do usuário e os cargos ficam no nosso banco, ligados por `accounts.externalId` (o `sub`).
 - O id da conta nasce na entidade `Account` e vai para o Cognito no `SignUp` (`custom:internalId`, imutável). O client do Cognito é confidencial: toda chamada pública leva `SECRET_HASH`.
+- Logout: `POST /auth/signout` (pública, recebe o `refreshToken`) revoga o refresh token no Cognito e é idempotente. O access token já emitido continua passando no API Gateway até expirar, então o front descarta os dois tokens.
 - Entrypoint: `main/functions/<modulo>.ts`. A primeira linha é `import 'reflect-metadata';`, e ele exporta `handler = lambdaHttpAdapter([...rotas])` (ou a classe, quando há um único endpoint).
 - Toda rota do array existe no `serverless.yml` (`httpApi`, mesmo método e path), e vice-versa.
 

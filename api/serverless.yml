@@ -65,6 +65,9 @@ functions:
       - httpApi:
           path: /auth/signin
           method: post
+      - httpApi:
+          path: /auth/signout
+          method: post
 
   account:
     handler: src/main/functions/account.handler
