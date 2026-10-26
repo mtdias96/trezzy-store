@@ -8,7 +8,7 @@
  * Tokens da Trezzy: única fonte dos valores de estilo do web.
  * Cada grupo resetado com `--*: initial` só tem os utilitários listados aqui: `bg-red-500` ou
  * `md:` em 768px deixam de existir, e o lint (no-unknown-classes) acusa o uso.
- * Os nomes também estão em src/lib/tokens.ts, e o tokens.spec.ts falha se as listas divergirem.
+ * Os nomes também estão em src/styles/tokens.ts, e o tokens.spec.ts falha se as listas divergirem.
  * Valores em rem na base de 16px; o px do design está no comentário.
  */
 @theme {

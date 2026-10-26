@@ -16,7 +16,7 @@ import {
   rotateTokens,
   shadowTokens,
   textTokens,
-} from '@/lib/tokens';
+} from '@/styles/tokens';
 
 const NAMESPACES: Record<string, readonly string[]> = {
   breakpoint: breakpointTokens,
@@ -31,7 +31,7 @@ const NAMESPACES: Record<string, readonly string[]> = {
   rotate: rotateTokens,
 };
 
-const css = readFileSync(new URL('../app/globals.css', import.meta.url), 'utf8');
+const css = readFileSync(new URL('./globals.css', import.meta.url), 'utf8');
 
 // Só o bloco `@theme {`, que guarda os tokens. O `@theme inline` liga os slots do shadcn e fica de fora.
 const tokenBlock = /^@theme \{\n([\s\S]*?)^\}/m.exec(css)?.[1] ?? '';

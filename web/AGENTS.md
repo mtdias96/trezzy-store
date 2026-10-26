@@ -45,9 +45,11 @@ src/
 │   ├── store/<feature>/         ← catalog, cart, checkout, orders…
 │   ├── admin/<feature>/         ← dashboard, products, orders…
 │   └── shared/<feature>/        ← auth
-└── components/
-    ├── ui/ · common/ · layout/  ← das duas áreas
-    └── store/ · admin/          ← de uma área só
+├── components/
+│   ├── ui/ · common/ · layout/  ← das duas áreas
+│   └── store/ · admin/          ← de uma área só
+├── hooks/ · lib/ · config/      ← lógica sem domínio, das duas áreas
+└── styles/                      ← estilo global: globals.css, tokens.ts e fonts.ts
 ```
 
 - Um app só, e não dois: localizar o código se resolve com pastas, e o Next já divide o bundle por rota, então o JS do painel não vai para quem compra. Dividir em dois apps só faz sentido com um motivo de deploy, segurança ou time, como deixar o painel atrás de SSO ou publicar em ritmos diferentes. Essa estrutura já deixa a separação pronta.
@@ -57,15 +59,17 @@ src/
 
 ```text
 app → features → components · hooks → lib → config
+                    ↘ styles
 ```
 
 - Só desce, nunca sobe: `components/` e `hooks/` não importam de `features/`, `lib/` não importa de ninguém acima e `config/` é a base. O `proxy.ts` fica no nível do `app/`.
+- `styles/` é base como o `config/`: o `app/` e os componentes leem dele, e ele não importa nada do projeto. Lógica (`hooks`, `lib`, `data`, `model`) não depende de estilo.
 - Imposta pelo `eslint-plugin-boundaries` 🔒 (tabela em [Quem importa o quê](#quem-importa-o-quê)). Arquivo fora das pastas desta seção também é erro.
 
 ### `app/`
 
-- Só arquivos de convenção do Next: rotas (`page`, `layout`, `loading`, `error`, `global-error`, `not-found`, `route`, `template`, `default`), metadados (`favicon.ico`, `icon`, `opengraph-image`, `sitemap`, `robots`, `manifest`) e o `globals.css` (referenciado pelo `components.json`).
-- A raiz do `app/` tem só o layout raiz, o `not-found`, o `global-error` e o `globals.css`. Cada área é um route group:
+- Só arquivos de convenção do Next: rotas (`page`, `layout`, `loading`, `error`, `global-error`, `not-found`, `route`, `template`, `default`), e metadados (`favicon.ico`, `icon`, `opengraph-image`, `sitemap`, `robots`, `manifest`). O CSS global fica em `styles/`.
+- A raiz do `app/` tem só o layout raiz, o `not-found` e o `global-error`. Cada área é um route group:
   - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`, em sub-grupos como na loja:
     - `(auth)`: entrar (`/admin/entrar`), na tela dividida do `AuthShell`, sem a navegação do painel;
     - previsto: o painel logado, com a sidebar no layout do sub-grupo.
@@ -122,7 +126,7 @@ A lógica fica separada da UI. No App Router, o container costuma ser um Server 
 
 ### Quem importa o quê
 
-Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `layout`, `hooks`, `lib` e `config`.
+Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `layout`, `hooks`, `lib`, `config` e `styles`.
 
 | De | Pode importar |
 | :--- | :--- |
@@ -130,14 +134,14 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 | `app/(store)` e `app/(admin)` | `containers`, `components`, `data` e `model` das features da própria área e da `shared`; `components/<própria área>`; `shared/auth/session` e compartilhados |
 | `proxy.ts` | `shared/auth/session`, `lib` e `config` |
 | `containers/` | da feature: `data`, `model`, `components`, `hooks` e `containers`; `components/<própria área>`; `shared/auth/session` e compartilhados |
-| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `layout`, `hooks` e `lib` |
+| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `layout`, `hooks`, `lib` e `styles` |
 | `hooks/` da feature | da feature: `hooks`, `model` e `data/actions.ts`; `hooks` e `lib` |
 | `data/` | da feature: `data` e `model`; `shared/auth/session`, `lib` e `config` |
 | `model/` | da feature: `model`; `lib` |
 | `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
-| `components/ui` | `components/ui`, `hooks` e `lib` |
-| `components/common`, `layout`, `store` e `admin` | `ui`, `common`, `layout`, `hooks` e `lib`, e nunca a outra área |
-| `hooks/` · `lib/` · `config/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config` |
+| `components/ui` | `components/ui`, `hooks`, `lib` e `styles` |
+| `components/common`, `layout`, `store` e `admin` | `ui`, `common`, `layout`, `hooks`, `lib` e `styles`, e nunca a outra área |
+| `hooks/` · `lib/` · `config/` · `styles/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config`; `styles` → só `styles` |
 
 ### Camadas compartilhadas
 
@@ -146,11 +150,12 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - `components/layout/`: primitivos de composição de página (`Screen`, `Section`).
 - `components/store/` e `components/admin/`: apresentação de uma área só, como o header e o footer da loja ou a sidebar e a tabela de dados do painel.
 - `hooks/`: hooks de client sem domínio (é o alias `hooks` do `components.json`).
-- `lib/`: utilitários sem domínio (`cn`, `http`, formatadores) e os nomes dos tokens (`tokens.ts`).
+- `lib/`: utilitários sem domínio (`cn`, `http`, formatadores).
 - `config/`: variáveis de ambiente validadas com zod no boot. PROIBIDO ler `process.env` fora de `config/`.
   - `config/env.ts` começa com `import 'server-only'`.
   - Variável pública (`NEXT_PUBLIC_*`) fica em `config/public-env.ts`, lida por extenso (`process.env.NEXT_PUBLIC_X`). O Next só embute no bundle o acesso literal: desestruturar ou ler o `process.env` inteiro devolve `undefined` no browser.
   - Variável nova entra no `config/` e no `.env.example`.
+- `styles/`: o estilo global do design system (seção 8). O `globals.css` guarda os tokens, o `tokens.ts` repete os nomes para tipar props, e o `fonts.ts` carrega as fontes pelo `next/font`. Só o layout raiz e o `global-error` importam o CSS e as fontes.
 
 ### Sem barrel
 
@@ -241,8 +246,8 @@ Server Action é endpoint público. Toda action:
 
 ### Onde vivem
 
-- Os tokens ficam no bloco `@theme` do `src/app/globals.css`, a única fonte dos valores de estilo. PROIBIDO `tailwind.config.js` e `theme.ts` de runtime (o Tailwind v4 é CSS-first).
-- Os nomes também ficam em `src/lib/tokens.ts`, para tipar props. O `tokens.spec.ts` falha se as duas listas divergirem 🔒: token novo entra nos dois arquivos.
+- Os tokens ficam no bloco `@theme` do `src/styles/globals.css`, a única fonte dos valores de estilo. PROIBIDO `tailwind.config.js` e `theme.ts` de runtime (o Tailwind v4 é CSS-first).
+- Os nomes também ficam em `src/styles/tokens.ts`, para tipar props. O `tokens.spec.ts` falha se as duas listas divergirem 🔒: token novo entra nos dois arquivos.
 - Os grupos de cor, breakpoint, fonte, raio e sombra começam com `--*: initial`, então só existe o utilitário que um token define: `bg-red-500` e `2xl:` não existem.
 
 | Grupo | Exemplos |
@@ -286,7 +291,7 @@ Server Action é endpoint público. Toda action:
 - Os slots apontam para tokens no `:root` (superfícies da loja). No painel, o container com `data-area="admin"` troca as superfícies para os cinzas frios e aplica `bg-background`.
 - Elemento com papel de interface usa o slot (`bg-primary`, `text-muted-foreground`, `border-border`). O token direto fica para o que não tem slot (`bg-lime`, `bg-status-paid-bg`).
 - Manter `cn()`, `data-slot` e os aliases do `components.json`. A composição de primitivo é pela prop `render` do Base UI, que não tem `asChild`/`Slot`.
-- Fonte pelo `next/font`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
+- Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
 - O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar.
 
 ### Imagens
