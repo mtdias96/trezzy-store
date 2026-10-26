@@ -8,6 +8,13 @@
       "when": 1792947161982,
       "tag": "0000_create_accounts",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792986003210,
+      "tag": "0001_create_catalog",
+      "breakpoints": true
     }
   ]
 }
