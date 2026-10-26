@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 
-import { SignInForm } from '@/features/admin/auth/components/sign-in-form';
+import { SignInContainer } from '@/features/admin/auth/containers/sign-in-container';
+import { signInToPanel } from '@/features/shared/auth/data/actions';
 
 export const metadata: Metadata = {
   title: 'Entrar no painel',
 };
 
 export default function Page() {
-  return <SignInForm />;
+  return <SignInContainer action={signInToPanel} />;
 }

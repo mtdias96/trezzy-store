@@ -379,8 +379,8 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
 | `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |
-| Login do painel | A tela está pronta, mas o formulário ainda não tem a Server Action (o `method="post"` só evita a senha na URL). O "Esqueci a senha" abre um e-mail para o suporte até a API ter a recuperação de senha. |
 | Renovação da sessão | A API não tem `POST /auth/refresh`: a sessão dura o access token (60 min em dev). O refresh token já fica guardado, e a renovação entra no `proxy.ts` quando a rota existir. |
+| Recuperação de senha | A API não tem o fluxo: o "Esqueci a senha" abre um e-mail para o suporte. |
 | Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |
