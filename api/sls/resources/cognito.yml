@@ -1,0 +1,101 @@
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: ${self:service}-${sls:stage}-users
+      # Essentials: necessário para o PreTokenGeneration V2 customizar o access token.
+      UserPoolTier: ESSENTIALS
+      DeletionProtection: ${param:cognitoDeletionProtection}
+      MfaConfiguration: 'OFF'
+      AutoVerifiedAttributes:
+        - email
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      UsernameAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      # Gravado só no SignUp (client confidencial) e imutável depois: nem o próprio usuário altera.
+      # Atributo custom não pode ser removido nem alterado depois de criado.
+      Schema:
+        - Name: internalId
+          Required: false
+          Mutable: false
+          AttributeDataType: String
+      # Espelhada no signUpSchema: mudou aqui, muda lá.
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireUppercase: true
+          RequireNumbers: true
+          RequireSymbols: false
+          TemporaryPasswordValidityDays: 7
+      # ARNs montados pelo nome em vez de GetAtt: as funções recebem o id do pool por env var,
+      # e GetAtt aqui fecharia um ciclo (UserPool -> função -> UserPool) no CloudFormation.
+      LambdaConfig:
+        PreSignUp: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-cognitoPreSignUp'
+        PreTokenGenerationConfig:
+          LambdaArn: !Sub 'arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${self:service}-${sls:stage}-cognitoPreTokenGeneration'
+          LambdaVersion: V2_0
+
+  CognitoPreSignUpLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CognitoPreSignUpLambdaFunction.Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  CognitoPreTokenGenerationLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt CognitoPreTokenGenerationLambdaFunction.Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: ${self:service}-${sls:stage}-UserPoolClient
+      UserPoolId: !Ref UserPool
+      # Client confidencial: só o backend (que tem o secret) consegue chamar SignUp/InitiateAuth.
+      GenerateSecret: true
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      PreventUserExistenceErrors: ENABLED
+      # O POST /auth/signout depende disto (RevokeToken).
+      EnableTokenRevocation: true
+      # TODO: reduzir para 15–30 min antes de produção. O API Gateway não consulta revogação,
+      # então tirar alguém do grupo admin só vale quando o access token expira. 60 min só enquanto for dev.
+      AccessTokenValidity: 60
+      TokenValidityUnits:
+        AccessToken: minutes
+      ReadAttributes:
+        - email
+        - email_verified
+        - custom:internalId
+      WriteAttributes:
+        - email
+        - custom:internalId
+
+  # Separa admin de customer. O cargo do admin (financeiro, gerente…) fica no nosso banco, não aqui.
+  # O PreTokenGeneration traduz o grupo em scope, que é o que o authorizer do API Gateway consegue exigir.
+  AdminUserPoolGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: admin
+      UserPoolId: !Ref UserPool
+      Description: Acesso ao painel administrativo.
+
+Outputs:
+  UserPoolId:
+    Value: !Ref UserPool
+  UserPoolClientId:
+    Value: !Ref UserPoolClient

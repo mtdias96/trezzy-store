@@ -2,7 +2,7 @@
 
 E-commerce serverless na AWS. O backend roda em Node.js no AWS Lambda, sobre um mini-framework próprio (injeção de dependências, Controllers e Use Cases sobre Middy). O frontend será em Next.js.
 
-> **Status:** fundação do backend pronta (DI, pipeline HTTP, erros, banco e infra). Módulos de negócio e frontend em construção.
+> **Status:** fundação do backend pronta (DI, pipeline HTTP, erros, banco e infra), autenticação com Cognito (signup, signin, signout e rotas privadas) e RBAC por permissões. Módulos de negócio e frontend em construção.
 
 ## Stack
 
@@ -12,7 +12,7 @@ E-commerce serverless na AWS. O backend roda em Node.js no AWS Lambda, sobre um 
 | API | API Gateway HTTP API v2 · Middy 7 |
 | Infra como código | Serverless Framework v4 (esbuild) |
 | Banco | Neon Postgres · Drizzle ORM |
-| Auth | Amazon Cognito + JWT authorizer do API Gateway (planejado) |
+| Auth | Amazon Cognito (Essentials) + JWT authorizer do API Gateway |
 | Validação | Zod 4 |
 | Qualidade | TypeScript strict · ESLint · Vitest · Husky · commitlint · GitHub Actions |
 
@@ -51,10 +51,14 @@ As dependências entre camadas são **impostas pelo ESLint**: um controller que 
 - **Erros desacoplados de HTTP.** O use case lança `ApplicationError(ErrorCode.NOT_FOUND, …)` e a camada HTTP deriva o status por um mapa exaustivo: um código novo sem status não compila.
 - **Neon com Pool WebSocket**, para ter transações interativas (checkout e SAGA). Cada container mantém uma conexão no máximo, e o PgBouncer do Neon absorve a concorrência.
 - **Autenticação no API Gateway** (Cognito): token inválido é rejeitado antes de invocar a Lambda.
+- **Conta no nosso banco; o Cognito guarda identidade e tipo de conta.** O id nasce na entidade `Account`, vai para o Cognito no cadastro (`custom:internalId`, imutável) e o trigger `PreTokenGeneration` o injeta no access token. A tabela `accounts` guarda o `sub` em `externalId`: trocar de provedor de auth custa remapear uma coluna, um gateway e a lista de admins.
+- **Saga no cadastro.** Cognito e banco não compartilham transação: cada passo registra sua compensação e uma falha desfaz os anteriores na ordem inversa. O client do Cognito é confidencial (`SECRET_HASH`), então ninguém cadastra direto no Cognito sem passar pela API.
+- **RBAC em duas camadas.** O grupo `admin` do Cognito vira um scope no token, e o API Gateway barra quem não é admin antes da Lambda. Dentro da API, cada rota exige uma permissão (`products:write`), nunca um papel: hoje o admin tem todas, e cargos como financeiro ou gerente entram depois, no nosso banco, sem mudar rotas nem o front, que monta o menu pelo `GET /me/permissions`.
 - **Decisões de build tomadas por medição:**
   - `moduleResolution: Bundler` gera build e bundle idênticos aos do `NodeNext`, então os imports ficaram limpos;
   - `minify` foi mantido porque reduz ~11% do tempo de carga a frio;
-  - source maps ficaram de fora (+15%).
+  - source maps ficaram de fora (+15%);
+  - `import * as z from 'zod'` (imposto pelo lint) corta o bundle de 731 para 361 KB e a carga a frio em 15%; o `zod/mini` foi avaliado e descartado.
 - **Infra de produção:**
   - arm64 (Graviton), 512 MB, logs JSON com retenção de 30 dias;
   - versão do Serverless fixada;
@@ -78,6 +82,7 @@ pnpm --filter trezzy-api typecheck   # tsc --noEmit
 pnpm --filter trezzy-api package     # build da Lambda (sem deploy)
 pnpm --filter trezzy-api deploy      # deploy no stage dev (deploy:prod para produção)
 pnpm --filter trezzy-api db:generate # gerar migration (db:migrate aplica)
+pnpm --filter trezzy-api account:admin <email> add   # promove a conta a admin (stage dev; remove para rebaixar)
 ```
 
 ## Contribuindo

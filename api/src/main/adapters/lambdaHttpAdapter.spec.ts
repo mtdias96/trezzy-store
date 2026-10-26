@@ -1,12 +1,13 @@
 import type { APIGatewayProxyEventV2, Context } from 'aws-lambda';
 import { describe, expect, it, vi } from 'vitest';
-import { z } from 'zod';
+import * as z from 'zod';
 
 import { Schema } from '@kernel/decorators/Schema';
 import { Controller } from '@application/contracts/Controller';
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
 import { HttpError } from '@application/errors/HttpError';
+import { ADMIN_SCOPE } from '@main/utils/authScopes';
 
 import { lambdaHttpAdapter } from './lambdaHttpAdapter';
 
@@ -23,6 +24,9 @@ describe('lambdaHttpAdapter', () => {
     let capturedRequest: Controller.Request<'public', { name: string }> | undefined;
 
     class CreateProductController extends Controller<'public', { id: string }> {
+
+      protected override readonly routeType = 'public';
+
       protected async handle(
         request: Controller.Request<'public', { name: string }>,
       ): Promise<Controller.Response<{ id: string }>> {
@@ -59,6 +63,8 @@ describe('lambdaHttpAdapter', () => {
 
   it('handles requests without body cleanly and resolves from class directly', async () => {
     class SimpleController extends Controller<'public', { ok: boolean }> {
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response<{ ok: boolean }>> {
         return {
           statusCode: 200,
@@ -81,6 +87,8 @@ describe('lambdaHttpAdapter', () => {
 
     @Schema(ProductSchema)
     class ValidatedController extends Controller<'public', { title: string }> {
+      protected override readonly routeType = 'public';
+
       protected async handle(
         request: Controller.Request<'public', { title: string }>,
       ): Promise<Controller.Response<{ title: string }>> {
@@ -115,6 +123,8 @@ describe('lambdaHttpAdapter', () => {
 
   it('formats HttpError through errorHandler', async () => {
     class NotFoundController extends Controller<'public'> {
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response> {
         throw new HttpError(404, ErrorCode.NOT_FOUND, 'Resource not found');
       }
@@ -135,6 +145,8 @@ describe('lambdaHttpAdapter', () => {
 
   it('formats ApplicationError through errorHandler', async () => {
     class BusinessRuleController extends Controller<'public'> {
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response> {
         throw new ApplicationError(ErrorCode.BAD_REQUEST, 'Email already in use', 409);
       }
@@ -155,6 +167,8 @@ describe('lambdaHttpAdapter', () => {
 
   it('catches generic errors and returns 500 with standard message', async () => {
     class ErrorController extends Controller<'public'> {
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response> {
         throw new Error('Database connection failed');
       }
@@ -174,6 +188,8 @@ describe('lambdaHttpAdapter', () => {
 
   it('responds 400 BAD_REQUEST when the JSON body is malformed or missing', async () => {
     class EchoController extends Controller<'public', unknown> {
+      protected override readonly routeType = 'public';
+
       protected async handle(request: Controller.Request<'public'>): Promise<Controller.Response<unknown>> {
         return { statusCode: 200, body: request.body };
       }
@@ -198,6 +214,9 @@ describe('lambdaHttpAdapter', () => {
     const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     class GatewayController extends Controller<'public'> {
+
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response> {
         z.object({ status: z.string() }).parse({ status: 42 });
         return { statusCode: 200 };
@@ -216,6 +235,8 @@ describe('lambdaHttpAdapter', () => {
 
   it('derives the HTTP status from the ErrorCode when ApplicationError has no explicit status', async () => {
     class MissingProductController extends Controller<'public'> {
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response> {
         throw new ApplicationError(ErrorCode.NOT_FOUND, 'Product not found.');
       }
@@ -233,6 +254,9 @@ describe('lambdaHttpAdapter', () => {
     const paramsSchema = z.object({ id: z.uuid() });
 
     class GetByIdController extends Controller<'public', { id: string }> {
+
+      protected override readonly routeType = 'public';
+
       protected async handle({ params }: Controller.Request<'public'>): Promise<Controller.Response<{ id: string }>> {
         const { id } = this.validate(paramsSchema, params);
 
@@ -253,12 +277,17 @@ describe('lambdaHttpAdapter', () => {
 
   it('dispatches to correct controller when using RouteMap and returns 404 for unknown route', async () => {
     class ListController extends Controller<'public', { items: string[] }> {
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response<{ items: string[] }>> {
         return { statusCode: 200, body: { items: ['item1'] } };
       }
     }
 
     class CreateController extends Controller<'public', { id: string }> {
+
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response<{ id: string }>> {
         return { statusCode: 201, body: { id: 'created-1' } };
       }
@@ -295,12 +324,17 @@ describe('lambdaHttpAdapter', () => {
 
   it('dispatches to correct controller when using RouteDefinition array shape', async () => {
     class ListUsersController extends Controller<'public', { users: string[] }> {
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response<{ users: string[] }>> {
         return { statusCode: 200, body: { users: ['user1', 'user2'] } };
       }
     }
 
     class UpdateUserController extends Controller<'public', { updated: boolean }> {
+
+      protected override readonly routeType = 'public';
+
       protected async handle(): Promise<Controller.Response<{ updated: boolean }>> {
         return { statusCode: 200, body: { updated: true } };
       }
@@ -330,5 +364,131 @@ describe('lambdaHttpAdapter', () => {
     });
     expect(putRes.statusCode).toBe(200);
     expect(JSON.parse(putRes.body!)).toEqual({ updated: true });
+  });
+
+  describe('accountId', () => {
+    class WhoAmIController extends Controller<'private', { accountId: string | null }> {
+      protected override readonly routeType = 'private';
+
+      protected async handle({ accountId }: Controller.Request<'private'>): Promise<Controller.Response<{ accountId: string | null }>> {
+        return { statusCode: 200, body: { accountId } };
+      }
+    }
+
+    const withClaims = (claims: Record<string, string>) =>
+      ({ authorizer: { jwt: { claims, scopes: null } } }) as unknown as APIGatewayProxyEventV2['requestContext'];
+
+    it('maps the internalId claim from the JWT authorizer to accountId', async () => {
+      const res = await call(lambdaHttpAdapter(new WhoAmIController()), {
+        requestContext: withClaims({ sub: 'cognito-sub', internalId: 'user-1' }),
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body!)).toEqual({ accountId: 'user-1' });
+    });
+
+    it('responds 401 when the token has no internalId claim', async () => {
+      const res = await call(lambdaHttpAdapter(new WhoAmIController()), {
+        requestContext: withClaims({ sub: 'cognito-sub' }),
+      });
+
+      expect(res.statusCode).toBe(401);
+      expect(JSON.parse(res.body!)).toEqual({
+        error: { code: ErrorCode.UNAUTHORIZED, message: 'Token has no account identity.' },
+      });
+    });
+
+    it('responds 401 when a private controller is served by a route without authorizer', async () => {
+      const res = await call(lambdaHttpAdapter(new WhoAmIController()), {
+        requestContext: { http: { method: 'GET' } } as APIGatewayProxyEventV2['requestContext'],
+      });
+
+      expect(res.statusCode).toBe(401);
+      expect(JSON.parse(res.body!)).toEqual({
+        error: { code: ErrorCode.UNAUTHORIZED, message: 'Token has no account identity.' },
+      });
+    });
+
+    it('sends accountId null to public controllers on routes without authorizer', async () => {
+      class PublicWhoAmIController extends Controller<'public', { accountId: null }> {
+        protected override readonly routeType = 'public';
+
+        protected async handle({ accountId }: Controller.Request<'public'>): Promise<Controller.Response<{ accountId: null }>> {
+          return { statusCode: 200, body: { accountId } };
+        }
+      }
+
+      const res = await call(lambdaHttpAdapter(new PublicWhoAmIController()), {
+        requestContext: { http: { method: 'GET' } } as APIGatewayProxyEventV2['requestContext'],
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body!)).toEqual({ accountId: null });
+    });
+  });
+
+  describe('permissions', () => {
+    class PermissionsController extends Controller<'private', { permissions: readonly string[] }> {
+      protected override readonly routeType = 'private';
+
+      protected async handle({ permissions }: Controller.Request<'private'>): Promise<Controller.Response<{ permissions: readonly string[] }>> {
+        return { statusCode: 200, body: { permissions } };
+      }
+    }
+
+    const tokenWith = (scope: string) =>
+      ({
+        authorizer: { jwt: { claims: { sub: 'cognito-sub', internalId: 'user-1', scope }, scopes: null } },
+      }) as unknown as APIGatewayProxyEventV2['requestContext'];
+
+    const customerToken = tokenWith('aws.cognito.signin.user.admin');
+    const adminToken = tokenWith(`aws.cognito.signin.user.admin ${ADMIN_SCOPE}`);
+
+    const adminRoute = lambdaHttpAdapter([
+      { method: 'GET', path: '/admin/dashboard', handler: new PermissionsController(), permission: 'dashboard:access' },
+    ]);
+
+    it('lets an admin token through a route that requires a permission', async () => {
+      const res = await call(adminRoute, { routeKey: 'GET /admin/dashboard', requestContext: adminToken });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body!)).toEqual({ permissions: ['dashboard:access'] });
+    });
+
+    it('responds 403 to a customer token on a route that requires a permission', async () => {
+      const res = await call(adminRoute, { routeKey: 'GET /admin/dashboard', requestContext: customerToken });
+
+      expect(res.statusCode).toBe(403);
+      expect(JSON.parse(res.body!)).toEqual({
+        error: { code: ErrorCode.FORBIDDEN, message: "Missing permission 'dashboard:access'." },
+      });
+    });
+
+    it('does not mistake the default cognito scope for the admin scope', async () => {
+      const res = await call(adminRoute, {
+        routeKey: 'GET /admin/dashboard',
+        requestContext: tokenWith('aws.cognito.signin.user.admin trezzy/admin-like'),
+      });
+
+      expect(res.statusCode).toBe(403);
+    });
+
+    it('responds 401 before checking permissions when the route has no authorizer', async () => {
+      const res = await call(adminRoute, {
+        routeKey: 'GET /admin/dashboard',
+        requestContext: { http: { method: 'GET' } } as APIGatewayProxyEventV2['requestContext'],
+      });
+
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('passes an empty permission list to customers on routes without a permission', async () => {
+      const customerRoute = lambdaHttpAdapter([{ method: 'GET', path: '/me', handler: new PermissionsController() }]);
+
+      const res = await call(customerRoute, { routeKey: 'GET /me', requestContext: customerToken });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body!)).toEqual({ permissions: [] });
+    });
   });
 });

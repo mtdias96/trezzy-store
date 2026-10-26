@@ -1,6 +1,9 @@
 import type { z } from 'zod';
 
 import { getSchema } from '@kernel/decorators/Schema';
+import type { Permission } from '@application/authorization/Permission';
+import { ApplicationError } from '@application/errors/ApplicationError';
+import { ErrorCode } from '@application/errors/ErrorCode';
 import { ValidationError } from '@application/errors/ValidationError';
 
 export type RouteType = 'public' | 'private';
@@ -11,14 +14,21 @@ export interface IController<TBody = unknown> {
 
 export abstract class Controller<TType extends RouteType, TBody = undefined>
   implements IController<TBody> {
+  protected abstract readonly routeType: TType;
+
   protected abstract handle(request: Controller.Request<TType>): Promise<Controller.Response<TBody>>;
 
   public async execute(request: Controller.ExecuteRequest): Promise<Controller.Response<TBody>> {
+    if (this.routeType === 'private' && !request.accountId) {
+      throw new ApplicationError(ErrorCode.UNAUTHORIZED, 'Token has no account identity.');
+    }
+
     const schema = getSchema(this);
     const body = schema ? this.validate(schema, request.body) : request.body;
 
     return this.handle({
       ...request,
+      permissions: request.permissions ?? [],
       body,
     } as unknown as Controller.Request<TType>);
   }
@@ -46,6 +56,7 @@ export namespace Controller {
     params: Record<string, unknown>;
     queryParams: Record<string, unknown>;
     accountId?: string | null;
+    permissions?: readonly Permission[];
   };
 
   type BaseRequest<
@@ -73,6 +84,7 @@ export namespace Controller {
     TQueryParams = Record<string, unknown>,
   > = BaseRequest<TBody, TParams, TQueryParams> & {
     accountId: string;
+    permissions: readonly Permission[];
   };
 
   export type Request<

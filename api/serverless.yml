@@ -5,6 +5,13 @@ service: trezzy-api
 # Sem isso o CLI se auto-atualiza e o deploy deixa de ser reprodutível.
 frameworkVersion: '~4.44.0'
 
+params:
+  prod:
+    cognitoDeletionProtection: ACTIVE
+  default:
+    # Fora de prod o pool pode ser recriado (ex: atributo custom alterado exige um pool novo).
+    cognitoDeletionProtection: INACTIVE
+
 provider:
   name: aws
   runtime: nodejs24.x
@@ -18,6 +25,21 @@ provider:
     lambda:
       logFormat: JSON
   environment: ${file(./sls/config/env.yml)}
+  httpApi:
+    authorizers:
+      cognito:
+        identitySource: $request.header.Authorization
+        issuerUrl: !GetAtt UserPool.ProviderURL
+        audience:
+          - !Ref UserPoolClient
+  iam:
+    role:
+      statements:
+        # Compensação do signup (Saga). SignUp e InitiateAuth são autorizados pelo secret do client.
+        - Effect: Allow
+          Action:
+            - cognito-idp:AdminDeleteUser
+          Resource: !GetAtt UserPool.Arn
 
 package:
   individually: true
@@ -33,3 +55,52 @@ functions:
       - httpApi:
           path: /health
           method: get
+
+  auth:
+    handler: src/main/functions/auth.handler
+    events:
+      - httpApi:
+          path: /auth/signup
+          method: post
+      - httpApi:
+          path: /auth/signin
+          method: post
+      - httpApi:
+          path: /auth/signout
+          method: post
+
+  account:
+    handler: src/main/functions/account.handler
+    events:
+      - httpApi:
+          path: /me
+          method: get
+          authorizer:
+            name: cognito
+      - httpApi:
+          path: /me/permissions
+          method: get
+          authorizer:
+            name: cognito
+
+  dashboard:
+    handler: src/main/functions/dashboard.handler
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/dashboard
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
+  # Triggers do UserPool, ligados em sls/resources/cognito.yml (LambdaConfig).
+  cognitoPreSignUp:
+    handler: src/main/functions/cognito/preSignUp.handler
+
+  cognitoPreTokenGeneration:
+    handler: src/main/functions/cognito/preTokenGeneration.handler
+
+resources:
+  - ${file(./sls/resources/cognito.yml)}

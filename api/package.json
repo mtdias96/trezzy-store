@@ -1,6 +1,6 @@
 {
   "name": "trezzy-api",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,7 +17,8 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "account:admin": "node scripts/accountAdmin.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -36,6 +37,7 @@
     "vitest": "^5.0.1"
   },
   "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "^3.1154.0",
     "@middy/core": "^7.9.2",
     "@middy/http-json-body-parser": "^7.9.2",
     "@middy/http-response-serializer": "^7.9.2",
