@@ -19,6 +19,7 @@ pnpm --filter trezzy-web build
 ```
 
 - `pnpm --filter trezzy-web lint:fix` corrige formatação, ordem de imports e ordem das classes. O pre-commit roda o `lint:fix` e o `typecheck`, e a CI roda os quatro comandos em todo PR 🔒.
+- OBRIGATÓRIO antes de todo push que muda o `web/`: rodar `pnpm --filter trezzy-web build:vercel` (seção 12) e ler os avisos, não só o status.
 - Commits com escopo `web/<feature>`, ex: `feat(web/catalog): add product listing`.
 
 ## 1. Idioma, nomes e formatação
@@ -332,11 +333,21 @@ Server Action é endpoint público. Toda action:
 - Todo push gera um preview deploy, e o `main` é o ambiente de produção.
 - O build da Vercel roda o `next build`, que já checa os tipos, mas não roda o lint nem os testes: quem barra o merge é a CI.
 
+### Build da Vercel antes do push
+
+- O `build:vercel` roda o `vercel build`, o mesmo builder do deploy (`@vercel/next`), e gera o `web/.vercel/output`. Se quebra ali, quebra no deploy.
+- Avisos de depreciação ou de configuração no build viram ajuste antes do push. Foi assim que entrou o `partialPrefetching`.
+- O CLI vem pelo `pnpm dlx`, com versão fixa e sem entrar como dependência. O `--allow-build=esbuild` libera só o script do `esbuild`, que o pnpm bloqueia por padrão.
+- Ele lê as configurações do `web/.vercel/project.json` e as variáveis do `web/.vercel/.env.preview.local`, os dois fora do git:
+  - com o projeto criado na Vercel, `vercel link` e `vercel pull --yes` trazem os dois;
+  - antes disso, crie-os à mão: o `project.json` com `{ "projectId": "local", "orgId": "local", "settings": { "framework": "nextjs", "nodeVersion": "24.x" } }`, e o `.env.preview.local` com as variáveis do `.env.example`.
+
 ## Pendências conhecidas (remova a linha ao resolver)
 
 | Item | Até resolver |
 | :--- | :--- |
-| Projeto na Vercel | Criar o projeto (Root Directory `web`) e cadastrar o `API_URL`. É um passo manual, feito por quem tem acesso à conta. |
+| Projeto na Vercel | Criar o projeto (Root Directory `web`) e cadastrar o `API_URL`. É um passo manual, feito por quem tem acesso à conta. Depois, trocar o `project.json` local pelo `vercel link`. |
+| Pre-push | O build da Vercel antes do push é regra escrita, sem hook: a barreira obrigatória continua sendo a CI e o preview da Vercel. |
 | Dependências | nuqs, react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |

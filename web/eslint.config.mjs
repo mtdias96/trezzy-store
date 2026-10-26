@@ -308,6 +308,8 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // Saída do build:vercel (o ESLint em flat config não lê o .gitignore).
+    '.vercel/**',
   ]),
 ]);
 
