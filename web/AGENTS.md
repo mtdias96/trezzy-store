@@ -337,7 +337,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Com o `partialPrefetching`, o `<Link>` pré-carrega o App Shell da rota, a parte que não depende da URL, um por rota. O `prefetch={true}` num link só entra quando a rota precisa de mais que o shell, com o motivo em comentário.
 - Headers de segurança em todas as rotas: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` com `frame-ancestors 'none'` e `Permissions-Policy`. O HSTS vem da Vercel, e a CSP completa entra junto com o primeiro script de terceiro.
 - Node 24: o `.nvmrc` da raiz vale para a CI e o ambiente local, e o `engines` do `package.json` vale para a Vercel.
-- TypeScript 🔒: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns` e `noFallthroughCasesInSwitch`. O `typecheck` roda `next typegen` antes do `tsc`, porque tipos como `LayoutProps` são gerados pelo Next.
+- TypeScript 🔒: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns` e `noFallthroughCasesInSwitch`. O `typecheck` roda `next typegen` antes do `tsc`, porque tipos como `LayoutProps` são gerados pelo Next. O `lint` e o `lint:fix` também: as regras type-aware leem esses tipos, e sem eles o resultado muda. Num checkout limpo, como o da CI, o `as Route` do `redirect()` vira "desnecessário", e o `lint:fix` o removeria.
 - Lint type-aware 🔒, que lê os tipos pelo `projectService`:
   - promise solta ou mal usada (`no-floating-promises`, `no-misused-promises`);
   - `any` e valor inseguro (`no-explicit-any`, `no-unsafe-*`);
