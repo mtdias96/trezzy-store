@@ -307,7 +307,8 @@ Server Action é endpoint público. Toda action:
 
 ## 10. Configuração
 
-- `next.config.ts`: `cacheComponents: true`, `typedRoutes: true` (links e redirects tipados), `reactCompiler: true` (pelo plugin do Babel; o port em Rust ainda é experimental) e `poweredByHeader: false`.
+- `next.config.ts`: `cacheComponents: true`, `partialPrefetching: true`, `typedRoutes: true` (links e redirects tipados), `reactCompiler: true` (pelo plugin do Babel; o port em Rust ainda é experimental) e `poweredByHeader: false`.
+- Com o `partialPrefetching`, o `<Link>` pré-carrega o App Shell da rota, a parte que não depende da URL, um por rota. O `prefetch={true}` num link só entra quando a rota precisa de mais que o shell, com o motivo em comentário.
 - Headers de segurança em todas as rotas: `X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options` com `frame-ancestors 'none'` e `Permissions-Policy`. O HSTS vem da Vercel, e a CSP completa entra junto com o primeiro script de terceiro.
 - Node 24: o `.nvmrc` da raiz vale para a CI e o ambiente local, e o `engines` do `package.json` vale para a Vercel.
 - TypeScript 🔒: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noImplicitReturns` e `noFallthroughCasesInSwitch`. O `typecheck` roda `next typegen` antes do `tsc`, porque tipos como `LayoutProps` são gerados pelo Next.

@@ -2,6 +2,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // O <Link> pré-carrega o App Shell da rota, um por rota e não um por link. Sem a opção, o Next usa false e avisa.
+  partialPrefetching: true,
   typedRoutes: true,
   reactCompiler: true,
   poweredByHeader: false,
