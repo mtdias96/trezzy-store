@@ -178,6 +178,8 @@ export default defineConfig([
       ],
     },
   },
+  // Scripts de linha de comando (fora do bundle das Lambdas): a saída no terminal é o objetivo.
+  { files: ['scripts/**/*.mjs'], rules: { 'no-console': 'off' } },
   {
     files: ['src/application/**/*.ts', 'src/infra/**/*.ts', 'src/shared/**/*.ts'],
     ignores: ['**/*.spec.ts'],
