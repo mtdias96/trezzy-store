@@ -7,6 +7,7 @@ import { Controller } from '@application/contracts/Controller';
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
 import { HttpError } from '@application/errors/HttpError';
+import { ADMIN_SCOPE } from '@main/utils/authScopes';
 
 import { lambdaHttpAdapter } from './lambdaHttpAdapter';
 
@@ -423,6 +424,71 @@ describe('lambdaHttpAdapter', () => {
 
       expect(res.statusCode).toBe(200);
       expect(JSON.parse(res.body!)).toEqual({ accountId: null });
+    });
+  });
+
+  describe('permissions', () => {
+    class PermissionsController extends Controller<'private', { permissions: readonly string[] }> {
+      protected override readonly routeType = 'private';
+
+      protected async handle({ permissions }: Controller.Request<'private'>): Promise<Controller.Response<{ permissions: readonly string[] }>> {
+        return { statusCode: 200, body: { permissions } };
+      }
+    }
+
+    const tokenWith = (scope: string) =>
+      ({
+        authorizer: { jwt: { claims: { sub: 'cognito-sub', internalId: 'user-1', scope }, scopes: null } },
+      }) as unknown as APIGatewayProxyEventV2['requestContext'];
+
+    const customerToken = tokenWith('aws.cognito.signin.user.admin');
+    const adminToken = tokenWith(`aws.cognito.signin.user.admin ${ADMIN_SCOPE}`);
+
+    const adminRoute = lambdaHttpAdapter([
+      { method: 'GET', path: '/admin/dashboard', handler: new PermissionsController(), permission: 'dashboard:access' },
+    ]);
+
+    it('lets an admin token through a route that requires a permission', async () => {
+      const res = await call(adminRoute, { routeKey: 'GET /admin/dashboard', requestContext: adminToken });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body!)).toEqual({ permissions: ['dashboard:access'] });
+    });
+
+    it('responds 403 to a customer token on a route that requires a permission', async () => {
+      const res = await call(adminRoute, { routeKey: 'GET /admin/dashboard', requestContext: customerToken });
+
+      expect(res.statusCode).toBe(403);
+      expect(JSON.parse(res.body!)).toEqual({
+        error: { code: ErrorCode.FORBIDDEN, message: "Missing permission 'dashboard:access'." },
+      });
+    });
+
+    it('does not mistake the default cognito scope for the admin scope', async () => {
+      const res = await call(adminRoute, {
+        routeKey: 'GET /admin/dashboard',
+        requestContext: tokenWith('aws.cognito.signin.user.admin trezzy/admin-like'),
+      });
+
+      expect(res.statusCode).toBe(403);
+    });
+
+    it('responds 401 before checking permissions when the route has no authorizer', async () => {
+      const res = await call(adminRoute, {
+        routeKey: 'GET /admin/dashboard',
+        requestContext: { http: { method: 'GET' } } as APIGatewayProxyEventV2['requestContext'],
+      });
+
+      expect(res.statusCode).toBe(401);
+    });
+
+    it('passes an empty permission list to customers on routes without a permission', async () => {
+      const customerRoute = lambdaHttpAdapter([{ method: 'GET', path: '/me', handler: new PermissionsController() }]);
+
+      const res = await call(customerRoute, { routeKey: 'GET /me', requestContext: customerToken });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body!)).toEqual({ permissions: [] });
     });
   });
 });

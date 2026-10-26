@@ -69,6 +69,13 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - Entrypoint: `main/functions/<modulo>.ts`. A primeira linha é `import 'reflect-metadata';`, e ele exporta `handler = lambdaHttpAdapter([...rotas])` (ou a classe, quando há um único endpoint).
 - Toda rota do array existe no `serverless.yml` (`httpApi`, mesmo método e path), e vice-versa.
 
+### Autorização (RBAC)
+
+- Tipo de conta: quem está no grupo `admin` do Cognito recebe o scope `trezzy/admin` no access token (trigger `PreTokenGeneration`). Sem o grupo, é customer.
+- A autorização é sempre por **permissão**, nunca por papel. PROIBIDO conferir `admin`/`customer` em controller ou use case: o papel só existe no mapa `application/authorization/rolePermissions.ts`.
+- Permissão nova entra no catálogo `application/authorization/Permission.ts` (`<recurso>:<ação>`, ex: `products:write`). Hoje o admin recebe o catálogo inteiro.
+- Rota de admin OBRIGATORIAMENTE declara `permission` na lista de rotas do módulo **e** leva `authorizer: { name: cognito, scopes: [trezzy/admin] }` no `serverless.yml`. O API Gateway barra quem não é admin, e o adapter responde 403 sem a permissão mesmo se o `scopes` for esquecido no YAML.
+
 ## Use cases e erros
 
 - Uma classe por caso de uso, com um único método público `execute(input): Promise<Output>`. O `Output` é explícito: nunca a linha crua do banco.
