@@ -70,6 +70,13 @@ Resources:
         - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
       PreventUserExistenceErrors: ENABLED
+      # O POST /auth/signout depende disto (RevokeToken).
+      EnableTokenRevocation: true
+      # TODO: reduzir para 15–30 min antes de produção. O API Gateway não consulta revogação,
+      # então tirar alguém do grupo admin só vale quando o access token expira. 60 min só enquanto for dev.
+      AccessTokenValidity: 60
+      TokenValidityUnits:
+        AccessToken: minutes
       ReadAttributes:
         - email
         - email_verified
@@ -77,6 +84,15 @@ Resources:
       WriteAttributes:
         - email
         - custom:internalId
+
+  # Separa admin de customer. O cargo do admin (financeiro, gerente…) fica no nosso banco, não aqui.
+  # O PreTokenGeneration traduz o grupo em scope, que é o que o authorizer do API Gateway consegue exigir.
+  AdminUserPoolGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: admin
+      UserPoolId: !Ref UserPool
+      Description: Acesso ao painel administrativo.
 
 Outputs:
   UserPoolId:

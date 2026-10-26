@@ -5,7 +5,10 @@ import {
   InvalidParameterException,
   InvalidPasswordException,
   NotAuthorizedException,
+  RevokeTokenCommand,
   SignUpCommand,
+  UnsupportedOperationException,
+  UnsupportedTokenTypeException,
   UsernameExistsException,
   UserNotConfirmedException,
   UserNotFoundException,
@@ -98,6 +101,29 @@ export class AuthGateway {
     }
   }
 
+  // Revoga o refresh token e os access tokens emitidos com ele (nas APIs do Cognito; o API Gateway não consulta revogação).
+  // Token desconhecido não é erro no Cognito (RFC 7009): o logout é idempotente.
+  async signOut({ refreshToken }: AuthGateway.SignOutParams): Promise<void> {
+    const { id, secret } = this.appConfig.auth.cognito.client;
+
+    try {
+      await this.cognitoClient.client.send(
+        new RevokeTokenCommand({ Token: refreshToken, ClientId: id, ClientSecret: secret }),
+      );
+    } catch (error) {
+      // Ex: um access token enviado no lugar do refresh token. `UnauthorizedException` (secret errado) é bug nosso e propaga.
+      if (
+        error instanceof UnsupportedOperationException ||
+        error instanceof UnsupportedTokenTypeException ||
+        error instanceof InvalidParameterException
+      ) {
+        throw new ApplicationError(ErrorCode.BAD_REQUEST, 'Invalid refresh token.');
+      }
+
+      throw error;
+    }
+  }
+
   async deleteUser({ externalId }: AuthGateway.DeleteUserParams): Promise<void> {
     await this.cognitoClient.client.send(
       new AdminDeleteUserCommand({
@@ -136,6 +162,10 @@ export namespace AuthGateway {
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
+  };
+
+  export type SignOutParams = {
+    refreshToken: string;
   };
 
   export type DeleteUserParams = {

@@ -29,7 +29,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 | :--- | :--- | :--- | :--- |
 | `kernel/` | DI (`Registry`), `@Injectable`, `@Schema` | `@shared/types` | o resto do projeto, Middy, `aws-lambda`, Drizzle/Neon, `@aws-sdk` |
 | `shared/` | `env.ts`, `AppConfig`, `saga/`, tipos | `@kernel` | `@application`, `@infra`, `@main`, SDKs |
-| `application/contracts`, `errors`, `entities` | `Controller`, `ApplicationError`, `ErrorCode`, entidades de domínio | `@kernel`, `@shared` | `controllers/`, `useCases/`, `@infra`, `@main`, SDKs |
+| `application/contracts`, `errors`, `entities`, `authorization` | `Controller`, `ApplicationError`, `ErrorCode`, entidades de domínio, catálogo de permissões | `@kernel`, `@shared` | `controllers/`, `useCases/`, `@infra`, `@main`, SDKs |
 | `application/useCases/<modulo>` | Regras de negócio | `@kernel`, `@shared`, `@application` (exceto controllers), `@infra` (repositórios, gateways e `DrizzleClient` para transação) | `@main`, `drizzle-orm` direto, Middy, `aws-lambda`, `@aws-sdk` |
 | `application/controllers/<modulo>` | HTTP → use case (`schemas/` com Zod) | `@kernel`, `@shared`, `@application` | `@infra`, `@main`, SDKs |
 | `infra/` | `DrizzleClient`, schema, `repositories/`, `clients/` (SDKs), `gateways/` (integrações) | `@kernel`, `@shared`, `@application/errors`, `@application/entities` | demais `@application`, `@main`, Middy |
@@ -59,15 +59,26 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 - Um controller por rota (`<Ação><Recurso>Controller`). Ele estende `Controller<'public' | 'private', Response>`, declara `protected override readonly routeType` com o mesmo valor do genérico, implementa `protected override async handle()`, valida a entrada, chama **um** use case e devolve `{ statusCode, body }`.
 - Body: `@Schema(schema)`, com o schema em `schemas/<acao>Schema.ts`. O `handle` é tipado com `z.infer` desse schema.
+- O `Response` do namespace do controller é o contrato público da rota (versionado pelo SemVer) e é declarado ali, campo a campo. PROIBIDO `Response = <UseCase>.Output`: o body é montado a partir do retorno do use case (`const { id, email } = …`), para uma mudança interna no use case nunca vazar para a API.
 - OBRIGATÓRIO: desestruturar o body e repassar ao use case **só** os campos que ele usa (`const { email, password } = body`), nunca o body inteiro.
 - Params e query: `this.validate(schema, params)`. PROIBIDO `schema.parse()` direto (um `ZodError` solto vira 500).
 - Autenticação é do API Gateway (JWT authorizer do Cognito). A identidade vem só de `request.accountId`, nunca de body, headers ou query.
 - `accountId` é o nosso `accounts.id`, lido pelo adapter da claim `internalId` do access token (injetada pelo trigger `PreTokenGeneration`). Controller `'private'` sem `accountId` (token sem a claim ou rota sem authorizer) responde 401 antes do `handle`.
 - Rota `'private'` no `serverless.yml` OBRIGATORIAMENTE leva `authorizer: { name: cognito }`.
-- PROIBIDO chamar o SDK do Cognito fora do `infra/gateways/AuthGateway.ts`. Os dados do usuário ficam no nosso banco; o Cognito só autentica, ligado por `accounts.externalId` (o `sub`).
+- PROIBIDO chamar o SDK do Cognito em `src/` fora do `infra/gateways/AuthGateway.ts`. O Cognito guarda a identidade e o tipo de conta (grupo `admin` ou nenhum); os dados do usuário e os cargos ficam no nosso banco, ligados por `accounts.externalId` (o `sub`).
 - O id da conta nasce na entidade `Account` e vai para o Cognito no `SignUp` (`custom:internalId`, imutável). O client do Cognito é confidencial: toda chamada pública leva `SECRET_HASH`.
+- Logout: `POST /auth/signout` (pública, recebe o `refreshToken`) revoga o refresh token no Cognito e é idempotente. O access token já emitido continua passando no API Gateway até expirar, então o front descarta os dois tokens.
 - Entrypoint: `main/functions/<modulo>.ts`. A primeira linha é `import 'reflect-metadata';`, e ele exporta `handler = lambdaHttpAdapter([...rotas])` (ou a classe, quando há um único endpoint).
 - Toda rota do array existe no `serverless.yml` (`httpApi`, mesmo método e path), e vice-versa.
+
+### Autorização (RBAC)
+
+- Tipo de conta: quem está no grupo `admin` do Cognito recebe o scope `trezzy/admin` no access token (trigger `PreTokenGeneration`). Sem o grupo, é customer.
+- A autorização é sempre por **permissão**, nunca por papel. PROIBIDO conferir `admin`/`customer` em controller ou use case: o papel só existe no mapa `application/authorization/rolePermissions.ts`.
+- Permissão nova entra no catálogo `application/authorization/Permission.ts` (`<recurso>:<ação>`, ex: `products:write`). Hoje o admin recebe o catálogo inteiro.
+- Rota de admin OBRIGATORIAMENTE declara `permission` na lista de rotas do módulo **e** leva `authorizer: { name: cognito, scopes: [trezzy/admin] }` no `serverless.yml`. O API Gateway barra quem não é admin, e o adapter responde 403 sem a permissão mesmo se o `scopes` for esquecido no YAML.
+- O `GET /me/permissions` (qualquer usuário logado) devolve as permissões efetivas, e o front monta o menu do painel por elas. O `GET /me` é só perfil. Esconder um item não protege nada: quem protege é a rota.
+- Promover ou rebaixar admin: `pnpm --filter trezzy-api account:admin <email> <add|remove> [stage]`. Vale a partir do próximo login.
 
 ## Use cases e erros
 
@@ -144,7 +155,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 2. `infra/database/repositories/<Recurso>Repository.ts` (`@Injectable`, injeta `DrizzleClient`).
 3. `application/useCases/<modulo>/<Ação><Recurso>UseCase.ts`, com `namespace { Input; Output }`.
 4. `application/controllers/<modulo>/schemas/<acao><Recurso>Schema.ts`, exportando o schema e o `type ... = z.infer<...>`.
-5. `application/controllers/<modulo>/<Ação><Recurso>Controller.ts`, com `Response = <UseCase>.Output`.
+5. `application/controllers/<modulo>/<Ação><Recurso>Controller.ts`, com `Response` próprio no namespace.
 6. Rota no `main/functions/<modulo>.ts` e no `serverless.yml`.
 7. Specs do use case e do controller, depois a Definition of Done.
 
@@ -152,6 +163,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 | Item | Até resolver |
 | :--- | :--- |
+| Validade do access token | 60 min só enquanto for dev. Reduzir para 15–30 min antes de produção: tirar alguém do grupo `admin` só vale quando o token expira (o API Gateway não consulta revogação). |
 | Auto-confirmação no signup | O trigger `PreSignUp` confirma o usuário sem verificar o e-mail. Só para testes: trocar por confirmação real antes de produção. |
 | `Content-Type` | PROIBIDO definir `Content-Type` no retorno do controller: o serializer pula a serialização do body. |
 | Config do health | O `HealthUseCase` lê `process.env` (exceção temporária no lint). Não copie. |

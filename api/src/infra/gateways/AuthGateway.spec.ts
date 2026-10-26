@@ -3,7 +3,11 @@ import {
   AdminDeleteUserCommand,
   InitiateAuthCommand,
   NotAuthorizedException,
+  RevokeTokenCommand,
   SignUpCommand,
+  UnauthorizedException,
+  UnsupportedOperationException,
+  UnsupportedTokenTypeException,
   UsernameExistsException,
   UserNotFoundException,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -114,5 +118,37 @@ describe('AuthGateway', () => {
     const [command] = send.mock.calls[0]!;
     expect(command).toBeInstanceOf(AdminDeleteUserCommand);
     expect(command.input).toEqual({ UserPoolId: 'pool-1', Username: 'sub-1' });
+  });
+
+  it('signOut revokes the refresh token with the client secret', async () => {
+    const { sut, send } = makeSut();
+    send.mockResolvedValue({});
+
+    await sut.signOut({ refreshToken: 'refresh-1' });
+
+    const [command] = send.mock.calls[0]!;
+    expect(command).toBeInstanceOf(RevokeTokenCommand);
+    expect(command.input).toEqual({ Token: 'refresh-1', ClientId: 'client-1', ClientSecret: 'secret-1' });
+  });
+
+  it.each([UnsupportedOperationException, UnsupportedTokenTypeException])(
+    'signOut maps %o (e.g. an access token sent by mistake) to BAD_REQUEST',
+    async (ErrorClass) => {
+      const { sut, send } = makeSut();
+      send.mockRejectedValue(cognitoError(ErrorClass));
+
+      await expect(sut.signOut({ refreshToken: 'eyJ.access.token' })).rejects.toMatchObject({
+        code: ErrorCode.BAD_REQUEST,
+        message: 'Invalid refresh token.',
+      });
+    },
+  );
+
+  it('signOut propagates UnauthorizedException, since a wrong client secret is our bug, not the client\'s', async () => {
+    const { sut, send } = makeSut();
+    const error = cognitoError(UnauthorizedException);
+    send.mockRejectedValue(error);
+
+    await expect(sut.signOut({ refreshToken: 'refresh-1' })).rejects.toBe(error);
   });
 });

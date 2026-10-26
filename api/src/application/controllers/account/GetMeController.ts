@@ -13,12 +13,15 @@ export class GetMeController extends Controller<'private', GetMeController.Respo
   protected override async handle({
     accountId,
   }: Controller.Request<'private'>): Promise<Controller.Response<GetMeController.Response>> {
-    const account = await this.getMeUseCase.execute({ accountId });
+    const { id, email } = await this.getMeUseCase.execute({ accountId });
 
-    return { statusCode: 200, body: account };
+    return { statusCode: 200, body: { id, email } };
   }
 }
 
 export namespace GetMeController {
-  export type Response = GetMeUseCase.Output;
+  export type Response = {
+    id: string;
+    email: string;
+  };
 }

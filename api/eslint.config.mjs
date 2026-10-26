@@ -38,11 +38,16 @@ const LAYERS = [
     ],
   },
   {
-    files: ['src/application/contracts/**/*.ts', 'src/application/errors/**/*.ts', 'src/application/entities/**/*.ts'],
+    files: [
+      'src/application/contracts/**/*.ts',
+      'src/application/errors/**/*.ts',
+      'src/application/entities/**/*.ts',
+      'src/application/authorization/**/*.ts',
+    ],
     deny: [
       {
         group: ['@infra/*', '@main/*', '@application/controllers/*', '@application/useCases/*'],
-        message: 'contracts/, errors/ e entities/ não dependem de infra/, main/, controllers/ ou useCases/.',
+        message: 'contracts/, errors/, entities/ e authorization/ não dependem de infra/, main/, controllers/ ou useCases/.',
       },
       MIDDY, DATABASE, AWS_SDK,
     ],
@@ -173,6 +178,8 @@ export default defineConfig([
       ],
     },
   },
+  // Scripts de linha de comando (fora do bundle das Lambdas): a saída no terminal é o objetivo.
+  { files: ['scripts/**/*.mjs'], rules: { 'no-console': 'off' } },
   {
     files: ['src/application/**/*.ts', 'src/infra/**/*.ts', 'src/shared/**/*.ts'],
     ignores: ['**/*.spec.ts'],

@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 
 import { getSchema } from '@kernel/decorators/Schema';
+import type { Permission } from '@application/authorization/Permission';
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
 import { ValidationError } from '@application/errors/ValidationError';
@@ -27,6 +28,7 @@ export abstract class Controller<TType extends RouteType, TBody = undefined>
 
     return this.handle({
       ...request,
+      permissions: request.permissions ?? [],
       body,
     } as unknown as Controller.Request<TType>);
   }
@@ -54,6 +56,7 @@ export namespace Controller {
     params: Record<string, unknown>;
     queryParams: Record<string, unknown>;
     accountId?: string | null;
+    permissions?: readonly Permission[];
   };
 
   type BaseRequest<
@@ -81,6 +84,7 @@ export namespace Controller {
     TQueryParams = Record<string, unknown>,
   > = BaseRequest<TBody, TParams, TQueryParams> & {
     accountId: string;
+    permissions: readonly Permission[];
   };
 
   export type Request<
