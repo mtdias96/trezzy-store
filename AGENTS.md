@@ -64,7 +64,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - Autenticação é do API Gateway (JWT authorizer do Cognito). A identidade vem só de `request.accountId`, nunca de body, headers ou query.
 - `accountId` é o nosso `accounts.id`, lido pelo adapter da claim `internalId` do access token (injetada pelo trigger `PreTokenGeneration`). Controller `'private'` sem `accountId` (token sem a claim ou rota sem authorizer) responde 401 antes do `handle`.
 - Rota `'private'` no `serverless.yml` OBRIGATORIAMENTE leva `authorizer: { name: cognito }`.
-- PROIBIDO chamar o SDK do Cognito fora do `infra/gateways/AuthGateway.ts`. Os dados do usuário ficam no nosso banco; o Cognito só autentica, ligado por `accounts.externalId` (o `sub`).
+- PROIBIDO chamar o SDK do Cognito em `src/` fora do `infra/gateways/AuthGateway.ts`. O Cognito guarda a identidade e o tipo de conta (grupo `admin` ou nenhum); os dados do usuário e os cargos ficam no nosso banco, ligados por `accounts.externalId` (o `sub`).
 - O id da conta nasce na entidade `Account` e vai para o Cognito no `SignUp` (`custom:internalId`, imutável). O client do Cognito é confidencial: toda chamada pública leva `SECRET_HASH`.
 - Entrypoint: `main/functions/<modulo>.ts`. A primeira linha é `import 'reflect-metadata';`, e ele exporta `handler = lambdaHttpAdapter([...rotas])` (ou a classe, quando há um único endpoint).
 - Toda rota do array existe no `serverless.yml` (`httpApi`, mesmo método e path), e vice-versa.
@@ -152,6 +152,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 | Item | Até resolver |
 | :--- | :--- |
+| Validade do access token | 60 min só enquanto for dev. Reduzir para 15–30 min antes de produção: tirar alguém do grupo `admin` só vale quando o token expira (o API Gateway não consulta revogação). |
 | Auto-confirmação no signup | O trigger `PreSignUp` confirma o usuário sem verificar o e-mail. Só para testes: trocar por confirmação real antes de produção. |
 | `Content-Type` | PROIBIDO definir `Content-Type` no retorno do controller: o serializer pula a serialização do body. |
 | Config do health | O `HealthUseCase` lê `process.env` (exceção temporária no lint). Não copie. |
