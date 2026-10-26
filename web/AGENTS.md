@@ -72,7 +72,7 @@ app → features → components · hooks → lib → config
 - A raiz do `app/` tem só o layout raiz, o `not-found` e o `global-error`. Cada área é um route group:
   - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`, em sub-grupos como na loja:
     - `(auth)`: entrar (`/admin/entrar`), na tela dividida do `AuthShell`, sem a navegação do painel;
-    - previsto: o painel logado, com a sidebar no layout do sub-grupo.
+    - `(panel)`: o painel logado (`/admin`…), com o cabeçalho (depois a sidebar) no layout. O layout não lê a sessão (seção 6).
   - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
