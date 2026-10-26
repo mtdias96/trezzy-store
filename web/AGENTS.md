@@ -66,7 +66,7 @@ app → features → components · hooks → lib → config
 
 - Só arquivos de convenção do Next: rotas (`page`, `layout`, `loading`, `error`, `global-error`, `not-found`, `route`, `template`, `default`), metadados (`favicon.ico`, `icon`, `opengraph-image`, `sitemap`, `robots`, `manifest`) e o `globals.css` (referenciado pelo `components.json`).
 - A raiz do `app/` tem só o layout raiz, o `not-found`, o `global-error` e o `globals.css`. Cada área é um route group:
-  - `(admin)`: painel, com `layout` (que aplica `data-area="admin"`), `loading` e `error`. As rotas ficam em `(admin)/admin/…`.
+  - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`.
   - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
