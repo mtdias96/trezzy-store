@@ -103,7 +103,7 @@ features/<área>/<feature>/
 ├── containers/  *.tsx                                                    ← lógica: busca e decide
 ├── hooks/       use-*.ts                                                 ← lógica de client
 ├── components/  *.tsx                                                    ← UI: só props
-└── session/     session.ts · guard.ts                                    ← só em shared/auth
+└── session/     session.ts · cookies.ts · authorized-http.ts · guard.ts  ← só em shared/auth
 ```
 
 - `data/`: todo o I/O. `api.ts` é o transporte HTTP (sobre o `lib/http.ts`), `queries.ts` a leitura e `actions.ts` (`'use server'`) a escrita.
@@ -237,7 +237,21 @@ Server Action é endpoint público. Toda action:
 - `src/proxy.ts` é convenção do Next (substitui o `middleware.ts`): fica na raiz de `src/`, ao lado de `app/`. Movido dali, ele para de rodar sem aviso. Um só por projeto.
 - A lógica não mora nele: ele importa `features/shared/auth/session/guard.ts` e exporta o `matcher`.
 - Se o painel ganhar um subdomínio próprio (`admin.…`), quem roteia pelo host é o `proxy.ts`, sem virar outro app.
-- O proxy faz só o redirect otimista (sem sessão → login). A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
+- O proxy faz só o redirect otimista (sem sessão → login, com o destino em `?next=`). Ele roda em toda navegação, até no prefetch, então só lê o cookie e nunca chama a API. A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
+- Quem está logado e abre o login vê o formulário: mandá-lo ao painel com um token revogado criaria um loop de redirects.
+
+### Sessão (BFF)
+
+A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda rota). O Next só guarda a sessão e a repassa.
+
+- O login é uma Server Action que chama `POST /auth/signin` e grava os tokens em cookies `__Host-`, `httpOnly`, `Secure` e `SameSite=Lax`. O browser nunca vê os tokens, então um XSS não consegue roubá-los. Com "Manter conectado", o access token vive o quanto vale e o refresh token, 30 dias; sem ele, os dois somem ao fechar o browser.
+- O login do painel recusa conta sem o scope `trezzy/admin` e revoga os tokens que acabaram de sair. O `?next=` só aceita caminhos do painel (`toPanelPath`), para não virar redirecionamento para fora do site.
+- Ler a sessão: `getSession()` e `requireAdminSession()` em `features/shared/auth/session/session.ts`. Toda query e action do painel começa por `requireAdminSession()`.
+- Chamar a API em nome do usuário: `authorizedHttp()` manda o `Bearer` e, se a API responder 401, volta ao login. A feature usa no `data/api.ts`, nunca o `http()` com o token na mão.
+- PROIBIDO passar token para componente ou para o client: o `Session` não leva tokens, e só o `session/` os lê.
+- O Next lê o token sem validar a assinatura, só para decidir tela e redirect. Um cookie forjado chega no máximo à casca do painel: a primeira chamada à API responde 401 e volta ao login.
+- PROIBIDO ler a sessão no topo de um `layout.tsx` (seção 4). A página da área logada põe o dado num `<Suspense>`, e a casca continua estática.
+- Logout: a action `signOut` revoga o refresh token (melhor esforço: com a API fora do ar, o logout local segue), apaga os cookies e volta ao login.
 
 ## 7. Formulários
 
@@ -366,5 +380,7 @@ Server Action é endpoint público. Toda action:
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
 | `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |
 | Login do painel | A tela está pronta, mas o formulário ainda não tem a Server Action (o `method="post"` só evita a senha na URL). O "Esqueci a senha" abre um e-mail para o suporte até a API ter a recuperação de senha. |
+| Renovação da sessão | A API não tem `POST /auth/refresh`: a sessão dura o access token (60 min em dev). O refresh token já fica guardado, e a renovação entra no `proxy.ts` quando a rota existir. |
+| Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |
