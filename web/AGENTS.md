@@ -25,12 +25,32 @@ pnpm --filter trezzy-web build
 
 - Código, pastas, tipos e funções em inglês. Textos de UI, mensagens de erro e comentários em pt-BR.
 - Arquivos em kebab-case (`product-card.tsx`), componentes em PascalCase (`ProductCard`) e hooks em `use-*.ts`.
-- Features nomeadas pelo domínio (`catalog`, `cart`, `checkout`, `account`…). As do painel levam o prefixo `admin-` (`admin-products`).
+- Features nomeadas pelo domínio (`catalog`, `cart`, `orders`…), dentro da pasta da área: `store` (loja), `admin` (painel) ou `shared` (usada pelas duas, como o `auth`). O mesmo nome pode existir nas duas áreas: `store/orders` e `admin/orders` são features diferentes.
 - Formatação pelo ESLint (`@stylistic`) 🔒, com as mesmas escolhas da `api/`: aspas simples (duplas no JSX), ponto e vírgula, vírgula no fim de lista multilinha e 2 espaços. Imports ordenados pelo `simple-import-sort` 🔒. O VSCode corrige ao salvar.
 - Fora da pasta atual, importe pelo alias `@/` 🔒: `../` é proibido.
 - OBRIGATÓRIO `import * as z from 'zod'`, como na `api/`: o `import { z }` impede o tree-shaking.
 
-## 2. Arquitetura por feature
+## 2. Arquitetura por área e feature
+
+O web tem duas áreas, a loja e o painel, no mesmo app. Cada uma tem a sua pasta em `app/`, `features/` e `components/`, e uma área não enxerga a outra 🔒. O que é das duas fica em `features/shared` e nas camadas compartilhadas.
+
+```text
+src/
+├── app/
+│   ├── (store)/                 ← tudo o que o cliente vê
+│   │   ├── (auth)/ (account)/   ← sub-grupos por tipo de layout e de cache
+│   └── (admin)/                 ← painel (URLs em /admin)
+├── features/
+│   ├── store/<feature>/         ← catalog, cart, checkout, orders…
+│   ├── admin/<feature>/         ← dashboard, products, orders…
+│   └── shared/<feature>/        ← auth
+└── components/
+    ├── ui/ · common/ · layout/  ← das duas áreas
+    └── store/ · admin/          ← de uma área só
+```
+
+- Um app só, e não dois: localizar o código se resolve com pastas, e o Next já divide o bundle por rota, então o JS do painel não vai para quem compra. Dividir em dois apps só faz sentido com um motivo de deploy, segurança ou time, como deixar o painel atrás de SSO ou publicar em ritmos diferentes. Essa estrutura já deixa a separação pronta.
+- Quem protege o painel é a API (RBAC por permissão). A separação no front é de organização.
 
 ### Direção de dependência
 
@@ -44,30 +64,39 @@ app → features → components · hooks → lib → config
 ### `app/`
 
 - Só arquivos de convenção do Next: rotas (`page`, `layout`, `loading`, `error`, `global-error`, `not-found`, `route`, `template`, `default`), metadados (`favicon.ico`, `icon`, `opengraph-image`, `sitemap`, `robots`, `manifest`) e o `globals.css` (referenciado pelo `components.json`).
-- OBRIGATÓRIO um route group por área do site, cada um com seu `layout`, `loading` e `error`. A divisão é por tipo de layout e de cache, não por domínio. Os grupos de hoje:
+- A raiz do `app/` tem só o layout raiz, o `not-found`, o `global-error` e o `globals.css`. Cada área é um route group:
+  - `(admin)`: painel, com `layout` (que aplica `data-area="admin"`), `loading` e `error`. As rotas ficam em `(admin)/admin/…`.
+  - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
+- Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
   - `(account)`: área do cliente, dinâmica;
-  - `(admin)`: painel, com `data-area="admin"`.
+  - previstos: `(shop)`, a vitrine cacheada, e `(checkout)`, a sacola e o checkout sem a navegação da loja.
+- O `(store)` não tem layout próprio. Layout aninhado não se desliga, então um header no `(store)` apareceria também no `(auth)` e no `(checkout)`. O header da loja entra no layout de cada sub-grupo que o mostra.
 - URLs em pt-BR (`/produtos`, `/sacola`): o nome da pasta da rota vira texto que o cliente vê e que o Google indexa. É a única exceção à regra de pastas em inglês.
 - PROIBIDO componente solto e pasta `_components`. Página é composição, não implementação.
 
-### Isolamento entre features
+### Isolamento entre áreas e features
 
-- PROIBIDO 🔒 feature importar feature. O que duas features usam sobe de camada: o visual vai para `components/common`, recebendo tudo por props, e a lógica vai para `lib`.
-- Exceção única: `features/auth/session/` (ler e validar a sessão no servidor) pode ser importado por qualquer feature.
+- PROIBIDO 🔒 uma área importar a outra. A rota e o código da loja não importam nada de `features/admin` nem de `components/admin`, e vice-versa.
+- PROIBIDO 🔒 feature importar feature, mesmo dentro da área. O que duas features usam sobe de camada:
+  - o visual vai para `components/<área>` (só uma área usa) ou `components/common` (as duas usam), recebendo tudo por props;
+  - a lógica vai para `lib`;
+  - a feature usada pelas duas áreas vai para `features/shared`.
+- Exceção única: `features/shared/auth/session/` (ler e validar a sessão no servidor) pode ser importado por qualquer feature.
+- Feature da `shared` não usa `components/store` nem `components/admin`: ela serve às duas áreas.
 
 ### Anatomia de uma feature
 
 Arquivos agrupados em pastas por assunto, nunca soltos na raiz da feature 🔒. Pastas criadas sob demanda.
 
 ```text
-features/<feature>/
+features/<área>/<feature>/
 ├── data/        api.ts · queries.ts · actions.ts                         ← I/O
 ├── model/       types.ts · schema.ts · compute.ts · search-params.ts     ← regra pura
 ├── containers/  *.tsx                                                    ← lógica: busca e decide
 ├── hooks/       use-*.ts                                                 ← lógica de client
 ├── components/  *.tsx                                                    ← UI: só props
-└── session/     session.ts · guard.ts                                    ← só em auth
+└── session/     session.ts · guard.ts                                    ← só em shared/auth
 ```
 
 - `data/`: todo o I/O. `api.ts` é o transporte HTTP (sobre o `lib/http.ts`), `queries.ts` a leitura e `actions.ts` (`'use server'`) a escrita.
@@ -85,25 +114,26 @@ A lógica fica separada da UI. No App Router, o container costuma ser um Server 
 | Hook | `hooks/use-*.ts` | estado da feature, `useActionState`, chamada de Server Action | JSX |
 | Apresentação | `components/` | recebe props e renderiza; estado de UI local (aberto/fechado) pode | importar `data/`, `hooks/` da feature ou `config/` 🔒 |
 
-- Componente de apresentação não sabe de onde vem o dado. Por isso dá para testá-lo e reaproveitá-lo só com props, e ele sobe para `components/common` quando outra feature precisa dele.
+- Componente de apresentação não sabe de onde vem o dado. Por isso dá para testá-lo e reaproveitá-lo só com props, e ele sobe para `components/<área>` ou `components/common` quando outra feature precisa dele.
 - O `'use client'` continua na folha (seção 3): container client só existe onde há interação.
 
 ### Quem importa o quê
 
-Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma feature.
+Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `layout`, `hooks`, `lib` e `config`.
 
 | De | Pode importar |
 | :--- | :--- |
-| `app/` | de qualquer feature: `containers`, `components`, `data`, `model` e `auth/session`; `components/*`, `hooks`, `lib` e `config` |
-| `proxy.ts` | `auth/session`, `lib` e `config` |
-| `containers/` | da feature: `data`, `model`, `components`, `hooks` e `containers`; `auth/session`, `components/*`, `hooks`, `lib` e `config` |
-| `components/` da feature | da feature: `components` e `model`; `components/*`, `hooks` e `lib` |
+| Raiz do `app/` | compartilhados e `shared/auth/session` |
+| `app/(store)` e `app/(admin)` | `containers`, `components`, `data` e `model` das features da própria área e da `shared`; `components/<própria área>`; `shared/auth/session` e compartilhados |
+| `proxy.ts` | `shared/auth/session`, `lib` e `config` |
+| `containers/` | da feature: `data`, `model`, `components`, `hooks` e `containers`; `components/<própria área>`; `shared/auth/session` e compartilhados |
+| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `layout`, `hooks` e `lib` |
 | `hooks/` da feature | da feature: `hooks`, `model` e `data/actions.ts`; `hooks` e `lib` |
-| `data/` | da feature: `data` e `model`; `auth/session`, `lib` e `config` |
+| `data/` | da feature: `data` e `model`; `shared/auth/session`, `lib` e `config` |
 | `model/` | da feature: `model`; `lib` |
-| `auth/session/` | `data` e `model` do auth; `lib` e `config` |
+| `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
 | `components/ui` | `components/ui`, `hooks` e `lib` |
-| `components/common` e `components/layout` | `components/*`, `hooks` e `lib` |
+| `components/common`, `layout`, `store` e `admin` | `ui`, `common`, `layout`, `hooks` e `lib`, e nunca a outra área |
 | `hooks/` · `lib/` · `config/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config` |
 
 ### Camadas compartilhadas
@@ -111,6 +141,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma f
 - `components/ui/`: só o que o shadcn gera. O lint de tokens é mais brando aqui (seção 8).
 - `components/common/`: nossos componentes de apresentação sem domínio (`MessageScreen`, `RouteError`, `PageSkeleton`), com o lint de tokens inteiro.
 - `components/layout/`: primitivos de composição de página (`Screen`, `Section`).
+- `components/store/` e `components/admin/`: apresentação de uma área só, como o header e o footer da loja ou a sidebar e a tabela de dados do painel.
 - `hooks/`: hooks de client sem domínio (é o alias `hooks` do `components.json`).
 - `lib/`: utilitários sem domínio (`cn`, `http`, formatadores) e os nomes dos tokens (`tokens.ts`).
 - `config/`: variáveis de ambiente validadas com zod no boot. PROIBIDO ler `process.env` fora de `config/`.
@@ -193,7 +224,8 @@ Server Action é endpoint público. Toda action:
 ## 6. Proteção de rota (`proxy.ts`)
 
 - `src/proxy.ts` é convenção do Next (substitui o `middleware.ts`): fica na raiz de `src/`, ao lado de `app/`. Movido dali, ele para de rodar sem aviso. Um só por projeto.
-- A lógica não mora nele: ele importa `features/auth/session/guard.ts` e exporta o `matcher`.
+- A lógica não mora nele: ele importa `features/shared/auth/session/guard.ts` e exporta o `matcher`.
+- Se o painel ganhar um subdomínio próprio (`admin.…`), quem roteia pelo host é o `proxy.ts`, sem virar outro app.
 - O proxy faz só o redirect otimista (sem sessão → login). A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
 
 ## 7. Formulários
@@ -241,7 +273,7 @@ Server Action é endpoint público. Toda action:
 - PROIBIDO cor literal (hex, `rgb()`, `oklch()`…) em TS/TSX e valor fixo no `style`, que só recebe valor calculado em runtime.
 - PROIBIDO importar CSS além do `globals.css`.
 - Fora de `components/ui`, PROIBIDO a escala de texto padrão (`text-sm`…) e os aliases do shadcn (`bg-black`/`bg-white`, `shadow-md`/`shadow-lg`, `rounded-sm`/`rounded-4xl`). Eles existem só para os componentes gerados pelo shadcn e apontam para tokens: `ink`, `gray-0`, `pop`, `modal`, `seal` e `pill`.
-- `components/ui` é só o que o shadcn gera: componente nosso vai em `components/common`, onde todas essas restrições valem.
+- `components/ui` é só o que o shadcn gera: componente nosso vai em `components/common` ou `components/<área>`, onde todas essas restrições valem.
 - Ordem das classes padronizada (`enforce-consistent-class-order`), corrigida pelo `lint:fix`.
 - Exceção pontual só com `// eslint-disable-next-line <regra> -- <motivo>`.
 

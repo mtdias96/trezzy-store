@@ -50,18 +50,24 @@ const SHADCN_ONLY_CLASSES = [
   },
 ];
 
-// Camadas da seção 2 do web/AGENTS.md. `feature` captura o nome da pasta para isolar uma feature da outra.
+// Camadas da seção 2 do web/AGENTS.md. `area` (store, admin, shared) e `feature` são capturadas para isolar
+// uma área da outra e uma feature da outra. Os parênteses dos route groups são escapados no padrão.
+const FEATURE_LAYERS = ['data', 'model', 'containers', 'components', 'hooks'];
+
 const ELEMENTS = [
+  { type: 'app-store', pattern: 'src/app/\\(store\\)' },
+  { type: 'app-admin', pattern: 'src/app/\\(admin\\)' },
   { type: 'app', pattern: 'src/app' },
-  { type: 'feature-data', pattern: 'src/features/*/data', capture: ['feature'] },
-  { type: 'feature-model', pattern: 'src/features/*/model', capture: ['feature'] },
-  { type: 'feature-containers', pattern: 'src/features/*/containers', capture: ['feature'] },
-  { type: 'feature-components', pattern: 'src/features/*/components', capture: ['feature'] },
-  { type: 'feature-hooks', pattern: 'src/features/*/hooks', capture: ['feature'] },
-  { type: 'feature-session', pattern: 'src/features/auth/session' },
+  ...FEATURE_LAYERS.map((layer) => ({
+    type: `feature-${layer}`,
+    pattern: `src/features/{store,admin,shared}/*/${layer}`,
+    capture: ['area', 'feature'],
+  })),
+  { type: 'feature-session', pattern: 'src/features/shared/auth/session' },
   { type: 'ui', pattern: 'src/components/ui' },
   { type: 'common', pattern: 'src/components/common' },
   { type: 'layout', pattern: 'src/components/layout' },
+  { type: 'area-components', pattern: 'src/components/{store,admin}', capture: ['area'] },
   { type: 'hooks', pattern: 'src/hooks' },
   { type: 'lib', pattern: 'src/lib' },
   { type: 'config', pattern: 'src/config' },
@@ -70,16 +76,28 @@ const ELEMENTS = [
 // Elemento do boundaries é sempre uma pasta: arquivo solto de convenção do Next entra como descritor de arquivo.
 const FILES = [{ category: 'proxy', pattern: 'src/proxy.ts' }];
 
-const SAME_FEATURE = { feature: '{{ from.element.captured.feature }}' };
+const SAME_AREA = { area: '{{ from.element.captured.area }}' };
+const SAME_FEATURE = { ...SAME_AREA, feature: '{{ from.element.captured.feature }}' };
 const same = (type, extra = {}) => ({ type, captured: SAME_FEATURE, ...extra });
 const anyOf = (...types) => ({ types: { anyOf: types } });
+const SHARED = ['ui', 'common', 'layout', 'hooks', 'lib', 'config'];
+
+// Rota de uma área compõe features da própria área e da shared, e os componentes da própria área.
+const areaRoute = (area) => [
+  {
+    types: { anyOf: ['feature-data', 'feature-model', 'feature-containers', 'feature-components'] },
+    captured: { area: `{${area},shared}` },
+  },
+  { type: 'area-components', captured: { area } },
+  anyOf('feature-session', ...SHARED),
+];
 
 // O que cada camada pode importar. O resto é bloqueado (default: disallow).
 const IMPORTS = {
-  app: [
-    anyOf('app', 'feature-data', 'feature-model', 'feature-containers', 'feature-components', 'feature-session'),
-    anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'config'),
-  ],
+  // Raiz do app/ (layout, not-found, global-error): sem feature de área.
+  app: [anyOf('app', 'feature-session', ...SHARED)],
+  'app-store': areaRoute('store'),
+  'app-admin': areaRoute('admin'),
   // Container: busca (server) ou liga hook e action (client) e passa props para a apresentação.
   'feature-containers': [
     same('feature-data'),
@@ -87,10 +105,16 @@ const IMPORTS = {
     same('feature-containers'),
     same('feature-components'),
     same('feature-hooks'),
-    anyOf('feature-session', 'ui', 'common', 'layout', 'hooks', 'lib', 'config'),
+    { type: 'area-components', captured: SAME_AREA },
+    anyOf('feature-session', ...SHARED),
   ],
   // Apresentação: só props. Não busca dado, não lê ambiente e não conhece a lógica da feature.
-  'feature-components': [same('feature-components'), same('feature-model'), anyOf('ui', 'common', 'layout', 'hooks', 'lib')],
+  'feature-components': [
+    same('feature-components'),
+    same('feature-model'),
+    { type: 'area-components', captured: SAME_AREA },
+    anyOf('ui', 'common', 'layout', 'hooks', 'lib'),
+  ],
   // Lógica de client: estado da feature e chamada das Server Actions, nunca das queries.
   'feature-hooks': [
     same('feature-hooks'),
@@ -101,12 +125,14 @@ const IMPORTS = {
   'feature-data': [same('feature-data'), same('feature-model'), anyOf('feature-session', 'lib', 'config')],
   'feature-model': [same('feature-model'), anyOf('lib')],
   'feature-session': [
-    { types: { anyOf: ['feature-data', 'feature-model'] }, captured: { feature: 'auth' } },
+    { types: { anyOf: ['feature-data', 'feature-model'] }, captured: { area: 'shared', feature: 'auth' } },
     anyOf('lib', 'config'),
   ],
   ui: [anyOf('ui', 'hooks', 'lib')],
   common: [anyOf('ui', 'common', 'layout', 'hooks', 'lib')],
   layout: [anyOf('ui', 'common', 'layout', 'hooks', 'lib')],
+  // Componentes de uma área (header da loja, sidebar do painel): não enxergam a outra área.
+  'area-components': [anyOf('ui', 'common', 'layout', 'hooks', 'lib')],
   hooks: [anyOf('hooks', 'lib')],
   lib: [anyOf('lib', 'config')],
   config: [anyOf('config')],
