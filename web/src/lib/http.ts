@@ -25,6 +25,20 @@ export class HttpError extends Error {
   }
 }
 
+// A chamada falhou do lado de lá: a API respondeu 4xx/5xx, estourou o timeout ou a rede caiu.
+// Serve para tratar a falha como esperada; qualquer outro erro (schema que não bate, bug) continua propagando.
+export function isRequestFailure(error: unknown): boolean {
+  if (error instanceof HttpError) {
+    return true;
+  }
+
+  if (error instanceof DOMException) {
+    return error.name === 'TimeoutError' || error.name === 'AbortError';
+  }
+
+  return error instanceof TypeError && error.message === 'fetch failed';
+}
+
 // Resposta sem corpo vira undefined, e corpo que não é JSON (ex: 502 do gateway) fica como texto.
 function parseBody(text: string): unknown {
   if (text === '') {

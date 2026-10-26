@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
 
-import { http, HttpError } from '@/lib/http';
+import { http, HttpError, isRequestFailure } from '@/lib/http';
 
 vi.mock('@/config/env', () => ({ env: { API_URL: 'https://api.test' } }));
 
@@ -60,5 +60,23 @@ describe('http', () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ id: 1 })));
 
     await expect(http('/products/p1', { schema: z.object({ id: z.string() }) })).rejects.toBeInstanceOf(z.ZodError);
+  });
+});
+
+describe('isRequestFailure', () => {
+  it.each([
+    ['an API error', new HttpError(500, 'Internal Server Error')],
+    ['a timeout', new DOMException('The operation timed out.', 'TimeoutError')],
+    ['an aborted request', new DOMException('The operation was aborted.', 'AbortError')],
+    ['a network error', new TypeError('fetch failed')],
+  ])('is true for %s', (_case, error) => {
+    expect(isRequestFailure(error)).toBe(true);
+  });
+
+  it.each([
+    ['a schema mismatch', new z.ZodError([])],
+    ['a bug', new TypeError('Cannot read properties of undefined')],
+  ])('is false for %s', (_case, error) => {
+    expect(isRequestFailure(error)).toBe(false);
   });
 });

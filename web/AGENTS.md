@@ -150,7 +150,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - `components/layout/`: primitivos de composição de página (`Screen`, `Section`).
 - `components/store/` e `components/admin/`: apresentação de uma área só, como o header e o footer da loja ou a sidebar e a tabela de dados do painel.
 - `hooks/`: hooks de client sem domínio (é o alias `hooks` do `components.json`).
-- `lib/`: utilitários sem domínio (`cn`, `http`, formatadores).
+- `lib/`: utilitários sem domínio (`cn`, `http`, `ActionResult`, formatadores).
 - `config/`: variáveis de ambiente validadas com zod no boot. PROIBIDO ler `process.env` fora de `config/`.
   - `config/env.ts` começa com `import 'server-only'`.
   - Variável pública (`NEXT_PUBLIC_*`) fica em `config/public-env.ts`, lida por extenso (`process.env.NEXT_PUBLIC_X`). O Next só embute no bundle o acesso literal: desestruturar ou ler o `process.env` inteiro devolve `undefined` no browser.
@@ -214,10 +214,13 @@ Server Action é endpoint público. Toda action:
 3. Devolve resultado tipado. PROIBIDO `throw` para erro de negócio:
 
    ```ts
-   type ActionResult<T> =
+   // src/lib/action-result.ts
+   type ActionResult<T = void> =
      | { ok: true; data: T }
-     | { ok: false; error: string; fieldErrors?: Record<string, string[]> };
+     | { ok: false; error: string; fieldErrors?: Partial<Record<string, string[]>>; values?: Record<string, string> };
    ```
+
+   O React limpa o formulário depois da action: o `values` devolve o que foi digitado (nunca a senha), e o campo o usa como `defaultValue`.
 
 4. É consumida no client com `useActionState`.
 
