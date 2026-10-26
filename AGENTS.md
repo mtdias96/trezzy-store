@@ -76,6 +76,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 - A autorização é sempre por **permissão**, nunca por papel. PROIBIDO conferir `admin`/`customer` em controller ou use case: o papel só existe no mapa `application/authorization/rolePermissions.ts`.
 - Permissão nova entra no catálogo `application/authorization/Permission.ts` (`<recurso>:<ação>`, ex: `products:write`). Hoje o admin recebe o catálogo inteiro.
 - Rota de admin OBRIGATORIAMENTE declara `permission` na lista de rotas do módulo **e** leva `authorizer: { name: cognito, scopes: [trezzy/admin] }` no `serverless.yml`. O API Gateway barra quem não é admin, e o adapter responde 403 sem a permissão mesmo se o `scopes` for esquecido no YAML.
+- O `GET /me/permissions` (qualquer usuário logado) devolve as permissões efetivas, e o front monta o menu do painel por elas. O `GET /me` é só perfil. Esconder um item não protege nada: quem protege é a rota.
 
 ## Use cases e erros
 

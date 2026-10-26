@@ -74,6 +74,11 @@ functions:
           method: get
           authorizer:
             name: cognito
+      - httpApi:
+          path: /me/permissions
+          method: get
+          authorizer:
+            name: cognito
 
   # Triggers do UserPool, ligados em sls/resources/cognito.yml (LambdaConfig).
   cognitoPreSignUp:
