@@ -38,11 +38,16 @@ const LAYERS = [
     ],
   },
   {
-    files: ['src/application/contracts/**/*.ts', 'src/application/errors/**/*.ts', 'src/application/entities/**/*.ts'],
+    files: [
+      'src/application/contracts/**/*.ts',
+      'src/application/errors/**/*.ts',
+      'src/application/entities/**/*.ts',
+      'src/application/authorization/**/*.ts',
+    ],
     deny: [
       {
         group: ['@infra/*', '@main/*', '@application/controllers/*', '@application/useCases/*'],
-        message: 'contracts/, errors/ e entities/ não dependem de infra/, main/, controllers/ ou useCases/.',
+        message: 'contracts/, errors/, entities/ e authorization/ não dependem de infra/, main/, controllers/ ou useCases/.',
       },
       MIDDY, DATABASE, AWS_SDK,
     ],
