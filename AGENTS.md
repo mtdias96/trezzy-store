@@ -59,6 +59,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 - Um controller por rota (`<Ação><Recurso>Controller`). Ele estende `Controller<'public' | 'private', Response>`, declara `protected override readonly routeType` com o mesmo valor do genérico, implementa `protected override async handle()`, valida a entrada, chama **um** use case e devolve `{ statusCode, body }`.
 - Body: `@Schema(schema)`, com o schema em `schemas/<acao>Schema.ts`. O `handle` é tipado com `z.infer` desse schema.
+- O `Response` do namespace do controller é o contrato público da rota (versionado pelo SemVer) e é declarado ali, campo a campo. PROIBIDO `Response = <UseCase>.Output`: o body é montado a partir do retorno do use case (`const { id, email } = …`), para uma mudança interna no use case nunca vazar para a API.
 - OBRIGATÓRIO: desestruturar o body e repassar ao use case **só** os campos que ele usa (`const { email, password } = body`), nunca o body inteiro.
 - Params e query: `this.validate(schema, params)`. PROIBIDO `schema.parse()` direto (um `ZodError` solto vira 500).
 - Autenticação é do API Gateway (JWT authorizer do Cognito). A identidade vem só de `request.accountId`, nunca de body, headers ou query.
@@ -151,7 +152,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 2. `infra/database/repositories/<Recurso>Repository.ts` (`@Injectable`, injeta `DrizzleClient`).
 3. `application/useCases/<modulo>/<Ação><Recurso>UseCase.ts`, com `namespace { Input; Output }`.
 4. `application/controllers/<modulo>/schemas/<acao><Recurso>Schema.ts`, exportando o schema e o `type ... = z.infer<...>`.
-5. `application/controllers/<modulo>/<Ação><Recurso>Controller.ts`, com `Response = <UseCase>.Output`.
+5. `application/controllers/<modulo>/<Ação><Recurso>Controller.ts`, com `Response` próprio no namespace.
 6. Rota no `main/functions/<modulo>.ts` e no `serverless.yml`.
 7. Specs do use case e do controller, depois a Definition of Done.
 
