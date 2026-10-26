@@ -1,0 +1,338 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Tokens da Trezzy: única fonte dos valores de estilo do web.
+ * Cada grupo resetado com `--*: initial` só tem os utilitários listados aqui: `bg-red-500` ou
+ * `md:` em 768px deixam de existir, e o lint (no-unknown-classes) acusa o uso.
+ * Os nomes também estão em src/lib/tokens.ts, e o tokens.spec.ts falha se as listas divergirem.
+ * Valores em rem na base de 16px; o px do design está no comentário.
+ */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-sm: 40rem; /* 640px */
+  --breakpoint-md: 60rem; /* 960px */
+  --breakpoint-lg: 68.75rem; /* 1100px */
+  --breakpoint-xl: 90rem; /* 1440px */
+
+  --color-*: initial;
+  --color-brand-50: #F7F3FF;
+  --color-brand-100: #EDE4FF;
+  --color-brand-200: #D9CCFF;
+  --color-brand-300: #B794FF;
+  --color-brand-400: #9B6BFA;
+  --color-brand-500: #7B3FF2;
+  --color-brand-600: #6A2EE0;
+  --color-brand-700: #5424BE;
+  --color-brand-800: #3D1A8C;
+  --color-brand-900: #2A1850;
+  --color-brand-950: #1B0D33;
+  --color-brand: var(--color-brand-500);
+
+  --color-lime-100: #F4FFD1;
+  --color-lime-400: #D4FF3A;
+  --color-lime-500: #C2F01E;
+  --color-lime-700: #9DBB1F;
+  --color-lime: var(--color-lime-400);
+
+  --color-ink: #111014;
+  --color-ink-soft: #2A2730;
+
+  /* Admin: cinzas frios, puxados para o lilás. */
+  --color-gray-0: #FFFFFF;
+  --color-gray-25: #FAF9FC;
+  --color-gray-50: #F5F4F9;
+  --color-gray-100: #F4F3F8;
+  --color-gray-150: #F0EEF5;
+  --color-gray-200: #E8E6EF;
+  --color-gray-250: #E3E0EA;
+  --color-gray-300: #D6D2DF;
+  --color-gray-400: #C6C1D1;
+  --color-gray-500: #A29DB0;
+  --color-gray-600: #8E8A93;
+  --color-gray-700: #6B6772;
+  --color-gray-800: #4A4650;
+  --color-gray-900: #111014;
+
+  /* Loja: superfícies quentes. */
+  --color-paper: #F3F0EA;
+  --color-paper-sand: #DCD7CE;
+  --color-paper-stone: #EEEAE3;
+  --color-paper-line: #E3DED6;
+
+  --color-success-50: #E5F4EA;
+  --color-success-500: #1E9E55;
+  --color-success-700: #0F6B37;
+  --color-warning-50: #FFF4DB;
+  --color-warning-500: #E0A100;
+  --color-warning-700: #7A4F00;
+  --color-danger-50: #FDECEC;
+  --color-danger-500: #C9353A;
+  --color-danger-600: #B3261E;
+  --color-danger-700: #8E1F23;
+  --color-info-50: #E6EEFF;
+  --color-info-500: #2F6BFF;
+  --color-info-700: #1D4AB0;
+
+  /* Status do pedido: fundo, texto e bolinha. */
+  --color-status-pending-bg: #FFF4DB;
+  --color-status-pending-fg: #7A4F00;
+  --color-status-pending-dot: #E0A100;
+  --color-status-paid-bg: #E6EEFF;
+  --color-status-paid-fg: #1D4AB0;
+  --color-status-paid-dot: #2F6BFF;
+  --color-status-shipped-bg: #EFE7FF;
+  --color-status-shipped-fg: #5424BE;
+  --color-status-shipped-dot: #7B3FF2;
+  --color-status-delivered-bg: #E5F4EA;
+  --color-status-delivered-fg: #0F6B37;
+  --color-status-delivered-dot: #1E9E55;
+  --color-status-cancelled-bg: #FDECEC;
+  --color-status-cancelled-fg: #8E1F23;
+  --color-status-cancelled-dot: #C9353A;
+
+  --font-*: initial;
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+  --font-display: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+  --font-hand: var(--font-permanent-marker), cursive;
+
+  /* Papéis tipográficos. A escala padrão (text-sm…) continua só para os componentes do shadcn. */
+  --text-display-2xl: 3.375rem; /* 54px */
+  --text-display-2xl--line-height: 0.95;
+  --text-display-2xl--letter-spacing: -0.04em;
+  --text-display-xl: 2.125rem; /* 34px */
+  --text-display-xl--line-height: 1;
+  --text-display-xl--letter-spacing: -0.04em;
+  --text-display-lg: 1.875rem; /* 30px */
+  --text-display-lg--line-height: 1;
+  --text-display-lg--letter-spacing: -0.035em;
+  --text-display-md: 1.5rem; /* 24px */
+  --text-display-md--line-height: 1.05;
+  --text-display-md--letter-spacing: -0.03em;
+  --text-display-sm: 1.0625rem; /* 17px */
+  --text-display-sm--line-height: 1.1;
+  --text-display-sm--letter-spacing: -0.02em;
+  --text-display-xs: 0.90625rem; /* 14.5px */
+  --text-display-xs--line-height: 1.1;
+  --text-display-xs--letter-spacing: -0.01em;
+  --text-body-lg: 0.9375rem; /* 15px */
+  --text-body-lg--line-height: 1.55;
+  --text-body: 0.875rem; /* 14px */
+  --text-body--line-height: 1.5;
+  --text-body-sm: 0.8125rem; /* 13px */
+  --text-body-sm--line-height: 1.45;
+  --text-caption: 0.75rem; /* 12px */
+  --text-caption--line-height: 1.3;
+  --text-micro: 0.6875rem; /* 11px */
+  --text-micro--line-height: 1;
+  --text-micro--letter-spacing: 0.06em;
+
+  --radius-*: initial;
+  --radius-seal: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 16px;
+  --radius-card: 20px;
+  --radius-block: 24px;
+  --radius-pill: 9999px;
+
+  --shadow-*: initial;
+  --shadow-pop: 0 12px 32px rgba(17, 16, 20, 0.14);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.3);
+  --shadow-float: 0 16px 40px rgba(17, 16, 20, 0.3);
+  --shadow-hero: 0 14px 32px rgba(123, 63, 242, 0.28);
+  --shadow-soft: 0 24px 60px rgba(27, 13, 51, 0.08);
+  --shadow-knob: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-focus-brand: 0 0 0 4px var(--color-brand-100);
+
+  /* Altura de controles: botão, campo e CTA. */
+  --height-ctl-sm: 2.125rem; /* 34px */
+  --height-ctl: 2.5rem; /* 40px */
+  --height-ctl-lg: 2.75rem; /* 44px */
+  --height-field: 3rem; /* 48px */
+  --height-cta: 3.125rem; /* 50px */
+
+  --transition-duration-fast: 120ms;
+  --transition-duration-base: 150ms;
+  --transition-duration-slow: 200ms;
+
+  /* `appear` é o `in` do design: `animate-in` já é do tw-animate-css, usado pelo shadcn. */
+  --animate-pop: pop 140ms ease-out;
+  --animate-appear: appear 180ms ease-out;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-shake: shake 380ms ease-in-out;
+  --animate-skeleton: skeleton 1.2s ease-in-out infinite;
+
+  --rotate-sticker: -6deg;
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes shake {
+    20%,
+    60% {
+      transform: translateX(-4px);
+    }
+    40%,
+    80% {
+      transform: translateX(4px);
+    }
+  }
+
+  @keyframes skeleton {
+    50% {
+      opacity: 0.5;
+    }
+  }
+}
+
+/* Slots do shadcn ligados aos tokens, e aliases que só os componentes de components/ui podem usar. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --font-heading: var(--font-display);
+
+  --color-black: var(--color-ink);
+  --color-white: var(--color-gray-0);
+  --radius-sm: var(--radius-seal);
+  --radius-4xl: var(--radius-pill);
+  --shadow-md: var(--shadow-pop);
+  --shadow-lg: var(--shadow-modal);
+}
+
+/* Loja (padrão). */
+:root {
+  --radius: var(--radius-lg);
+  --background: var(--color-paper);
+  --foreground: var(--color-ink);
+  --card: var(--color-gray-0);
+  --card-foreground: var(--color-ink);
+  --popover: var(--color-gray-0);
+  --popover-foreground: var(--color-ink);
+  --primary: var(--color-brand);
+  --primary-foreground: var(--color-gray-0);
+  --secondary: var(--color-paper-stone);
+  --secondary-foreground: var(--color-ink);
+  --muted: var(--color-paper-stone);
+  --muted-foreground: var(--color-gray-700);
+  --accent: var(--color-paper-stone);
+  --accent-foreground: var(--color-ink);
+  --destructive: var(--color-danger-600);
+  --border: var(--color-paper-line);
+  --input: var(--color-paper-sand);
+  --ring: var(--color-brand);
+  --chart-1: var(--color-brand);
+  --chart-2: var(--color-lime-500);
+  --chart-3: var(--color-info-500);
+  --chart-4: var(--color-success-500);
+  --chart-5: var(--color-warning-500);
+  --sidebar: var(--color-gray-0);
+  --sidebar-foreground: var(--color-ink);
+  --sidebar-primary: var(--color-brand);
+  --sidebar-primary-foreground: var(--color-gray-0);
+  --sidebar-accent: var(--color-gray-150);
+  --sidebar-accent-foreground: var(--color-ink);
+  --sidebar-border: var(--color-gray-200);
+  --sidebar-ring: var(--color-brand);
+}
+
+/* Painel: o layout do (admin) marca o container com data-area="admin" e aplica bg-background. */
+[data-area="admin"] {
+  --background: var(--color-gray-50);
+  --secondary: var(--color-gray-150);
+  --muted: var(--color-gray-150);
+  --accent: var(--color-gray-150);
+  --border: var(--color-gray-200);
+  --input: var(--color-gray-300);
+}
+
+/* Estilo display do design: Archivo itálico, peso 900, largura 125% e caixa alta. */
+@utility type-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 900;
+  font-stretch: 125%;
+  text-transform: uppercase;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-gray-0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

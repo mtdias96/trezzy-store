@@ -1,11 +1,11 @@
 # AGENTS.md — Regras do repositório
 
-> Fonte única das regras para pessoas e agentes de IA. **OBRIGATÓRIO**/**PROIBIDO** não admitem exceção. 🔒 = imposto por ferramenta (`tsc`, ESLint, commitlint ou CI). Quem muda uma regra atualiza este arquivo no mesmo commit.
+> Fonte única das regras para pessoas e agentes de IA. **OBRIGATÓRIO**/**PROIBIDO** não admitem exceção. 🔒 = imposto por ferramenta (`tsc`, ESLint, commitlint ou CI). Quem muda uma regra atualiza este arquivo no mesmo commit. Este arquivo vale para o repositório inteiro e para a `api/`. As regras do frontend ficam em [web/AGENTS.md](web/AGENTS.md).
 
 E-commerce em monorepo pnpm:
 
 - `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle e Neon.
-- `web/`: Next.js (planejado).
+- `web/`: Next.js 16, React 19, Tailwind v4 e shadcn/ui, com deploy na Vercel. Regras em [web/AGENTS.md](web/AGENTS.md).
 
 O backend usa um mini-framework próprio: DI, `Controller`, Use Cases e um adapter Middy. Visão geral no [README](README.md).
 
@@ -18,6 +18,7 @@ pnpm --filter trezzy-api test
 pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL no api/.env
 ```
 
+- Mudou o `web/`: rode também a [Definition of Done do web](web/AGENTS.md#definition-of-done).
 - Tudo deve passar com zero erros.
 - PROIBIDO enfraquecer `tsconfig`, ESLint, hooks ou CI.
 - PROIBIDO `--no-verify`.
