@@ -66,7 +66,9 @@ app → features → components · hooks → lib → config
 
 - Só arquivos de convenção do Next: rotas (`page`, `layout`, `loading`, `error`, `global-error`, `not-found`, `route`, `template`, `default`), metadados (`favicon.ico`, `icon`, `opengraph-image`, `sitemap`, `robots`, `manifest`) e o `globals.css` (referenciado pelo `components.json`).
 - A raiz do `app/` tem só o layout raiz, o `not-found`, o `global-error` e o `globals.css`. Cada área é um route group:
-  - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`.
+  - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`, em sub-grupos como na loja:
+    - `(auth)`: entrar (`/admin/entrar`), na tela dividida do `AuthShell`, sem a navegação do painel;
+    - previsto: o painel logado, com a sidebar no layout do sub-grupo.
   - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
@@ -351,9 +353,10 @@ Server Action é endpoint público. Toda action:
 | Dependências | nuqs, react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
-| Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. |
+| Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. Os links para `/` usam `'/' as Route`, porque o `typedRoutes` só aceita rota com página: tirar o cast quando a home entrar. |
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
 | `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |
+| Login do painel | A tela está pronta, mas o formulário ainda não tem a Server Action (o `method="post"` só evita a senha na URL). O "Esqueci a senha" abre um e-mail para o suporte até a API ter a recuperação de senha. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |
