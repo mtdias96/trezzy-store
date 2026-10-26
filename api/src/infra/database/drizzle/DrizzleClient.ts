@@ -4,7 +4,10 @@ import { drizzle, type NeonDatabase } from 'drizzle-orm/neon-serverless';
 import { Injectable } from '@kernel/decorators/Injectable';
 import { AppConfig } from '@shared/config/AppConfig';
 
-import * as schema from './schema';
+import * as accounts from './schema/accounts';
+
+// Um módulo por domínio, juntados aqui (sem barrel): tabela nova em outro domínio entra nesta lista.
+const schema = { ...accounts };
 
 @Injectable()
 export class DrizzleClient {

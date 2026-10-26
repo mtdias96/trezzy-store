@@ -93,7 +93,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 ## Banco (Drizzle + Neon)
 
 - `DATABASE_URL` aponta para o endpoint **`-pooler`** do Neon. O pool tem `max: 1` por container, e o PgBouncer absorve a escala.
-- Tabelas em `infra/database/drizzle/schema.ts`, com colunas em camelCase (o snake_case no banco é automático).
+- Tabelas em `infra/database/drizzle/schema/<dominio>.ts` (`accounts`, `catalog`, `media`…), agrupadas por domínio e não uma por arquivo, com colunas em camelCase (o snake_case no banco é automático). Domínio novo entra na lista do `DrizzleClient` (sem barrel). O enum de `text()` só tipa o TypeScript: valor restrito leva também um `check()`.
 - Mudança de schema: `db:generate`, revisar o SQL, commitar e rodar `db:migrate`. PROIBIDO `db:push` fora do banco local e PROIBIDO editar migration já aplicada.
 - Repositório em `infra/database/repositories/<Recurso>Repository.ts`. "Não encontrado" retorna `null`, e escritas aceitam `tx?: DrizzleClient.Transaction`. Quando existe entidade, o repositório recebe e devolve a entidade, não a linha do banco.
 - OBRIGATÓRIO: dentro de `transaction()`, **toda** query usa o `tx`. Com `max: 1`, usar o `db` ali causa deadlock.
@@ -151,7 +151,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 ## Criar um endpoint (checklist)
 
-1. Tabela em `schema.ts`, depois `db:generate`.
+1. Tabela em `schema/<dominio>.ts`, depois `db:generate`.
 2. `infra/database/repositories/<Recurso>Repository.ts` (`@Injectable`, injeta `DrizzleClient`).
 3. `application/useCases/<modulo>/<Ação><Recurso>UseCase.ts`, com `namespace { Input; Output }`.
 4. `application/controllers/<modulo>/schemas/<acao><Recurso>Schema.ts`, exportando o schema e o `type ... = z.infer<...>`.
