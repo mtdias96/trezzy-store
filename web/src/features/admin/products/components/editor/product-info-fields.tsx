@@ -16,12 +16,23 @@ const FORMAT_TOOLS: readonly FormatTool[] = [
   { label: 'Link', icon: LinkIcon },
 ];
 
-export function ProductInfoFields() {
+type ProductInfoFieldsProps = {
+  defaultTitle?: string;
+  defaultDescription?: string;
+};
+
+export function ProductInfoFields({ defaultTitle, defaultDescription }: ProductInfoFieldsProps) {
   return (
     <FormCard title="Informações">
       <div className="flex flex-col gap-2">
         <Label htmlFor="product-title">Título</Label>
-        <Input id="product-title" name="title" variant="outline" placeholder="Ex.: Dunk Low Pro “Black/White”" />
+        <Input
+          id="product-title"
+          name="title"
+          variant="outline"
+          defaultValue={defaultTitle}
+          placeholder="Ex.: Dunk Low Pro “Black/White”"
+        />
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="product-description">Descrição</Label>
@@ -46,6 +57,7 @@ export function ProductInfoFields() {
           <InputGroupTextarea
             id="product-description"
             name="description"
+            defaultValue={defaultDescription}
             placeholder="Materiais, caimento, detalhes da collab..."
             className="min-h-35"
           />

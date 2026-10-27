@@ -5,19 +5,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { COLOR_SUGGESTIONS, type ColorSwatch, SIZE_GRIDS } from '@/features/admin/products/model/variants';
+import type { ProductVariant } from '@/features/admin/products/model/types';
+import { COLOR_SUGGESTIONS, SIZE_GRIDS, type SizeGridId } from '@/features/admin/products/model/variants';
 
-const swatchClass = {
-  black: 'bg-ink',
-  white: 'border border-gray-300 bg-gray-0',
-  'off-white': 'border border-gray-300 bg-paper',
-  'heather-gray': 'bg-gray-400',
-  green: 'bg-success-700',
-} satisfies Record<ColorSwatch, string>;
+import { ColorSwatch } from './color-swatch';
+import { VariantsTable } from './variants-table';
 
-export function ProductVariantsFields() {
+type ProductVariantsFieldsProps = {
+  defaultSizeGrid: SizeGridId;
+  variants: readonly ProductVariant[];
+};
+
+export function ProductVariantsFields({ defaultSizeGrid, variants }: ProductVariantsFieldsProps) {
+  const activeCount = variants.filter(({ active }) => active).length;
+
   return (
-    <FormCard title="Variantes" count={0} meta="Gere a grade abaixo">
+    <FormCard
+      title="Variantes"
+      count={variants.length}
+      meta={variants.length > 0 ? `${activeCount} ativas` : 'Gere a grade abaixo'}
+    >
       <div className="flex flex-col gap-2.5">
         <p id="size-grid-label" className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
           <span className="text-body-sm font-semibold">Tipo de grade</span>
@@ -26,7 +33,7 @@ export function ProductVariantsFields() {
         <RadioGroup
           aria-labelledby="size-grid-label"
           name="sizeGrid"
-          defaultValue="one"
+          defaultValue={defaultSizeGrid}
           className="grid-cols-1 gap-2.5 sm:grid-cols-3"
         >
           {SIZE_GRIDS.map(({ id, label, examples, range }) => (
@@ -62,7 +69,7 @@ export function ProductVariantsFields() {
                   hover:bg-gray-100 hover:text-ink
                 "
               >
-                <span aria-hidden className={`size-2.5 rounded-pill ${swatchClass[swatch]}`} />
+                <ColorSwatch swatch={swatch} />
                 <PlusIcon aria-hidden className="size-3" />
                 {label}
               </button>
@@ -77,13 +84,17 @@ export function ProductVariantsFields() {
           Gerar variantes
         </Button>
       </div>
-      <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-dashed border-gray-300 px-6 py-7 text-center">
-        <p className="text-body-lg font-semibold">Nenhuma variante ainda</p>
-        <p className="max-w-sm text-body text-muted-foreground">
-          Escolha a grade, os tamanhos e as cores acima e toque em Gerar variantes. Dá para ajustar SKU, preço e estoque
-          de cada uma depois.
-        </p>
-      </div>
+      {variants.length > 0
+        ? <VariantsTable variants={variants} />
+        : (
+            <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-dashed border-gray-300 px-6 py-7 text-center">
+              <p className="text-body-lg font-semibold">Nenhuma variante ainda</p>
+              <p className="max-w-sm text-body text-muted-foreground">
+                Escolha a grade, os tamanhos e as cores acima e toque em Gerar variantes. Dá para ajustar SKU, preço e estoque
+                de cada uma depois.
+              </p>
+            </div>
+          )}
     </FormCard>
   );
 }
