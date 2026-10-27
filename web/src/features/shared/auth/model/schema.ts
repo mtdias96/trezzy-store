@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-import { toPanelPath } from '@/features/shared/auth/model/paths';
+import { toPanelPath } from './paths';
 
 export const signInSchema = z.object({
   email: z.string().trim().min(1, 'Informe o e-mail.').toLowerCase().pipe(z.email('Informe um e-mail válido.')),

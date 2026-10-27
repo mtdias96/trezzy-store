@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 
-import { PanelToday } from '@/components/admin/panel-today';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+
+import { PanelToday } from './panel-today';
 
 type PanelHeaderProps = {
   heading: ReactNode;

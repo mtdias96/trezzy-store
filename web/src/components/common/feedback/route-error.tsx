@@ -1,7 +1,8 @@
 'use client';
 
-import { MessageScreen } from '@/components/common/message-screen';
 import { Button } from '@/components/ui/button';
+
+import { MessageScreen } from './message-screen';
 
 type RouteErrorProps = {
   retry: () => void;

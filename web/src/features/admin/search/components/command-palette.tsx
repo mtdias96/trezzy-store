@@ -4,7 +4,7 @@ import { useEffect, useEffectEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronRightIcon, type LucideIcon, PlusIcon, ReceiptTextIcon, SearchIcon } from 'lucide-react';
 
-import { OrderStatusBadge } from '@/components/admin/order-status-badge';
+import { OrderStatusBadge } from '@/components/admin/data-display/order-status-badge';
 import {
   Combobox,
   ComboboxChipsInput,

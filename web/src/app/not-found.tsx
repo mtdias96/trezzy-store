@@ -1,7 +1,7 @@
 import type { Route } from 'next';
 import Link from 'next/link';
 
-import { MessageScreen } from '@/components/common/message-screen';
+import { MessageScreen } from '@/components/common/feedback/message-screen';
 import { buttonVariants } from '@/components/ui/button';
 
 // A home da loja ainda não existe, e o typedRoutes só aceita rota com página: tirar o cast quando ela entrar.

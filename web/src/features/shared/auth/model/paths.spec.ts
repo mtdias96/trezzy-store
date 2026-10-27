@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { PANEL_HOME, toPanelPath } from '@/features/shared/auth/model/paths';
+import { PANEL_HOME, toPanelPath } from './paths';
 
 describe('toPanelPath', () => {
   it.each(['/admin', '/admin/pedidos', '/admin/pedidos?status=pago', '/admin#topo'])('keeps the panel path %s', (path) => {

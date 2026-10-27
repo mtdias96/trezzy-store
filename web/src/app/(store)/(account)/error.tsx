@@ -1,5 +1,5 @@
 'use client';
 
-import { RouteError } from '@/components/common/route-error';
+import { RouteError } from '@/components/common/feedback/route-error';
 
 export default RouteError;

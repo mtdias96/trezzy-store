@@ -4,13 +4,14 @@ import type { Route } from 'next';
 import { redirect } from 'next/navigation';
 import * as z from 'zod';
 
-import { requestSignIn, requestSignOut, type SessionTokens } from '@/features/shared/auth/data/api';
 import { readSession } from '@/features/shared/auth/model/access-token';
 import { PANEL_SIGN_IN } from '@/features/shared/auth/model/paths';
 import { signInSchema } from '@/features/shared/auth/model/schema';
 import { createSession, deleteSession, getRefreshToken } from '@/features/shared/auth/session/session';
 import type { ActionResult } from '@/lib/action-result';
 import { HttpError, isRequestFailure } from '@/lib/http';
+
+import { requestSignIn, requestSignOut, type SessionTokens } from './api';
 
 // Erros que a API devolve no login, na linguagem de quem usa o painel. O resto vira SIGN_IN_UNAVAILABLE.
 const SIGN_IN_ERRORS: Partial<Record<number, string>> = {

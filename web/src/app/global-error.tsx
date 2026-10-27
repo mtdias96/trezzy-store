@@ -2,7 +2,7 @@
 
 import '@/styles/globals.css';
 
-import { RouteError } from '@/components/common/route-error';
+import { RouteError } from '@/components/common/feedback/route-error';
 import { cn } from '@/lib/utils';
 import { fontVariables } from '@/styles/fonts';
 

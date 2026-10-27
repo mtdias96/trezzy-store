@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { PasswordInput } from '@/components/common/password-input';
+import { PasswordInput } from './password-input';
 
 describe('PasswordInput', () => {
   it('starts hidden and toggles the password visibility', () => {

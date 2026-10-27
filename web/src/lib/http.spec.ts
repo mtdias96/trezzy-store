@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
 
-import { http, HttpError, isRequestFailure } from '@/lib/http';
+import { http, HttpError, isRequestFailure } from './http';
 
 vi.mock('@/config/env', () => ({ env: { API_URL: 'https://api.test' } }));
 

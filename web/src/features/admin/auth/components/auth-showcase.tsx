@@ -1,4 +1,4 @@
-import { AdminLogo } from '@/components/admin/admin-logo';
+import { AdminLogo } from '@/components/admin/shell/admin-logo';
 
 import { PanelMarquee } from './panel-marquee';
 
