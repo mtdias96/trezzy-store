@@ -309,6 +309,9 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Os slots apontam para tokens no `:root` (superfícies da loja). No painel, o container com `data-area="admin"` troca as superfícies para os cinzas frios e aplica `bg-background`.
 - Elemento com papel de interface usa o slot (`bg-primary`, `text-muted-foreground`, `border-border`). O token direto fica para o que não tem slot (`bg-lime`, `bg-status-paid-bg`).
 - Manter `cn()`, `data-slot` e os aliases do `components.json`. A composição de primitivo é pela prop `render` do Base UI, que não tem `asChild`/`Slot`.
+- O `shadcn add` reescreve os componentes de que o novo depende (a sidebar traz o `button` e o `input`), e os nossos têm ajustes: depois de rodar, restaure-os com `git checkout` e confira o diff.
+- Sidebar do painel: os slots `--sidebar-*` e as larguras `--sidebar-width*` ficam no `:root`, e não no `[data-area="admin"]`, porque no celular ela abre num Sheet, que o portal renderiza fora do container do painel. Fora do `components/ui`, o estado recolhido se escreve com a variante `sidebar-collapsed:` do `globals.css`.
+- Portais no painel (Dialog, Popover, Sheet…) renderizam no `<body>`, fora do `[data-area="admin"]`, e voltariam às superfícies da loja. O conteúdo do portal leva `data-area="admin"` (ex: `<DialogContent data-area="admin">`).
 - Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
 - O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar.
 
