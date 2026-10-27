@@ -7,7 +7,7 @@
 O Next 16 tem breaking changes: APIs, convenções e estrutura de arquivos podem diferir do seu treinamento. OBRIGATÓRIO ler o guia do assunto em `node_modules/next/dist/docs/` (a documentação da versão instalada) antes de escrever código, e respeitar os avisos de depreciação.
 
 - Stack: Next 16 (App Router, Turbopack, Cache Components, React Compiler), React 19, TypeScript strict, Tailwind v4, shadcn/ui sobre Base UI, zod e Vitest. Deploy na Vercel (seção 12).
-- Previstos, ainda não instalados (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): nuqs, react-hook-form e Playwright. A regra que depende de um deles vale a partir da instalação.
+- Previstos, ainda não instalados (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): react-hook-form e Playwright. A regra que depende de um deles vale a partir da instalação.
 
 ## Definition of Done
 
@@ -390,7 +390,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | :--- | :--- |
 | Projeto na Vercel | Criar o projeto (Root Directory `web`) e cadastrar o `API_URL`. É um passo manual, feito por quem tem acesso à conta. Depois, trocar o `project.json` local pelo `vercel link`. |
 | Pre-push | O build da Vercel antes do push é regra escrita, sem hook: a barreira obrigatória continua sendo a CI e o preview da Vercel. |
-| Dependências | nuqs, react-hook-form e Playwright aguardam aprovação. |
+| Dependências | react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
 | Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. Os links para `/` usam `'/' as Route`, porque o `typedRoutes` só aceita rota com página: tirar o cast quando a home entrar. |
