@@ -152,7 +152,8 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 | `model/` | da feature: `model`; `lib` |
 | `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
 | `components/ui` | `components/ui`, `hooks`, `lib` e `styles` |
-| `components/common`, `store` e `admin` | `ui`, `common`, `hooks`, `lib` e `styles`, e nunca a outra área |
+| `components/common` | `ui`, `common`, `hooks`, `lib` e `styles` |
+| `components/store` e `admin` | `components/<própria área>`, `ui`, `common`, `hooks`, `lib` e `styles`, e nunca a outra área |
 | `hooks/` · `lib/` · `config/` · `styles/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config`; `styles` → só `styles` |
 
 ### Camadas compartilhadas

@@ -135,8 +135,12 @@ const IMPORTS = {
   ],
   ui: [anyOf('ui', 'hooks', 'lib', 'styles')],
   common: [anyOf('ui', 'common', 'hooks', 'lib', 'styles')],
-  // Componentes de uma área (header da loja, sidebar do painel): não enxergam a outra área.
-  'area-components': [anyOf('ui', 'common', 'hooks', 'lib', 'styles')],
+  // Componentes de uma área (header da loja, sidebar do painel): usam as outras categorias da própria área (o header
+  // usa o container de layout/) e não enxergam a outra área.
+  'area-components': [
+    { type: 'area-components', captured: SAME_AREA },
+    anyOf('ui', 'common', 'hooks', 'lib', 'styles'),
+  ],
   hooks: [anyOf('hooks', 'lib')],
   lib: [anyOf('lib', 'config')],
   config: [anyOf('config')],
