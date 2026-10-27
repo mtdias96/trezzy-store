@@ -4,6 +4,6 @@ export const ANNOUNCEMENTS: readonly string[] = [
   'Frete grátis acima de R$ 299',
   '10% off no Pix',
   'Em até 10x sem juros',
-  'Drop 07 — sex, 19h',
+  'Drop 01 — sex, 19h',
   'Primeira troca grátis',
 ];

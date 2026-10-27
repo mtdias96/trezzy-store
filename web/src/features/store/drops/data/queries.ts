@@ -6,7 +6,9 @@ import { dropLongLabel, dropShortLabel } from '@/features/store/drops/model/drop
 import type { Drop } from '@/features/store/drops/model/types';
 import { isRequestFailure } from '@/lib/http';
 
-import { type DropDto, fetchNextDrop } from './api';
+import type { DropDto } from './api';
+// PRÉVIA (não commitar): o drop de exemplo no lugar da rota.
+import { fetchNextDrop } from './preview-api';
 
 function toDrop({ number, title, description, startsAt, imageUrl, imageAlt, sticker }: DropDto): Drop {
   const date = new Date(startsAt);
