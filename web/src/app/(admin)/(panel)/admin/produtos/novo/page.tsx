@@ -13,6 +13,24 @@ export const metadata: Metadata = {
   title: 'Novo produto',
 };
 
+// PRÉVIA (não commitar): marcas e categorias de exemplo, até a API listá-las.
+const PREVIEW_BRANDS = [
+  { value: 'trezzy', label: 'Trezzy' },
+  { value: 'nike', label: 'Nike' },
+  { value: 'adidas', label: 'Adidas' },
+  { value: 'new-balance', label: 'New Balance' },
+  { value: 'vans', label: 'Vans' },
+];
+
+const PREVIEW_CATEGORIES = [
+  { value: 'tenis', label: 'Tênis' },
+  { value: 'camisetas', label: 'Camisetas' },
+  { value: 'moletons', label: 'Moletons' },
+  { value: 'calcas', label: 'Calças' },
+  { value: 'bones', label: 'Bonés' },
+  { value: 'oculos', label: 'Óculos' },
+];
+
 export default function Page() {
   return (
     <ProductEditorView
@@ -26,7 +44,7 @@ export default function Page() {
       aside={(
         <>
           <ProductStatusField />
-          <ProductOrganizationFields brands={[]} categories={[]} />
+          <ProductOrganizationFields brands={PREVIEW_BRANDS} categories={PREVIEW_CATEGORIES} />
           <ProductPriceField />
           <ProductSummary />
         </>
