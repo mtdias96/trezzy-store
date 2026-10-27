@@ -1,8 +1,8 @@
 import 'server-only';
 
-import type { DropDto, FeaturedProductDto } from './api';
+import type { FeaturedProductDto } from './api';
 
-// PRÉVIA (não commitar): as rotas da vitrine com os dados de exemplo do design, até a API existir. O queries.ts
+// PRÉVIA (não commitar): a rota da vitrine com os produtos de exemplo do design, até a API existir. O queries.ts
 // importa daqui em vez do api.ts.
 
 function product(slug: string, title: string, brandName: string, priceInCents: number): FeaturedProductDto {
@@ -28,12 +28,6 @@ const FEATURED: Record<string, FeaturedProductDto[]> = {
   ],
 };
 
-const DROP: DropDto = { number: 7, title: 'Runner 03 Lima Ácida', startsAt: '2026-10-30T19:00:00-03:00' };
-
 export async function fetchFeaturedProducts(department: string, limit: number): Promise<FeaturedProductDto[]> {
   return (FEATURED[department] ?? []).slice(0, limit);
-}
-
-export async function fetchNextDrop(): Promise<DropDto | null> {
-  return DROP;
 }

@@ -39,14 +39,6 @@ export type FeaturedProduct = {
   imageUrl: string | null;
 };
 
-export type DropTeaser = {
-  title: string;
-  // "Drop 07 · Sex 19h"
-  badge: string;
-  startsAt: string;
-  href: Route;
-};
-
 export type StoreMenuDepartment = NavDepartment & {
   featured: readonly FeaturedProduct[];
 };
@@ -55,5 +47,4 @@ export type StoreMenuEntry = NavShortcut | StoreMenuDepartment;
 
 export type StoreMenu = {
   entries: readonly StoreMenuEntry[];
-  drop: DropTeaser | null;
 };

@@ -1,21 +1,22 @@
+import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { ArrowRightIcon } from 'lucide-react';
 
 import { PageContainer } from '@/components/store/layout/page-container';
 import { NavigationMenuLink } from '@/components/ui/navigation-menu';
-import type { DropTeaser, StoreMenuDepartment } from '@/features/store/navigation/model/types';
+import type { StoreMenuDepartment } from '@/features/store/navigation/model/types';
 
-import { DropTeaserCard } from './drop-teaser-card';
 import { MenuProductCard } from './menu-product-card';
 
 type DepartmentPanelProps = {
   department: StoreMenuDepartment;
-  drop: DropTeaser | null;
+  // Card no fim do painel (o drop da semana), vindo de outra feature.
+  promo?: ReactNode;
 };
 
 // Os títulos das colunas não são <h*>: o painel se repete por departamento e em toda página, e encheria o
 // sumário da página de títulos que não são conteúdo. A lista é nomeada pelo aria-labelledby.
-export function DepartmentPanel({ department, drop }: DepartmentPanelProps) {
+export function DepartmentPanel({ department, promo }: DepartmentPanelProps) {
   return (
     <PageContainer className="flex gap-6 py-8 xl:gap-8">
       <div className="grid flex-1 grid-cols-2 gap-6">
@@ -60,7 +61,7 @@ export function DepartmentPanel({ department, drop }: DepartmentPanelProps) {
           <MenuProductCard product={product} />
         </div>
       ))}
-      {drop ? <DropTeaserCard drop={drop} /> : null}
+      {promo}
     </PageContainer>
   );
 }

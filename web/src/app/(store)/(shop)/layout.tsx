@@ -4,6 +4,7 @@ import { BagLink } from '@/components/store/shell/bag-link';
 import { HeaderSearch } from '@/components/store/shell/header-search';
 import { StoreHeader } from '@/components/store/shell/store-header';
 import { ANNOUNCEMENTS } from '@/features/store/announcements/model/announcements';
+import { DropTeaserContainer } from '@/features/store/drops/containers/drop-teaser-container';
 import { DesktopNavContainer } from '@/features/store/navigation/containers/desktop-nav-container';
 import { MobileNavContainer } from '@/features/store/navigation/containers/mobile-nav-container';
 
@@ -18,7 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <StoreHeader
         announcements={<AnnouncementBar items={ANNOUNCEMENTS} />}
         mobileNav={<MobileNavContainer />}
-        nav={<DesktopNavContainer />}
+        nav={<DesktopNavContainer promo={<DropTeaserContainer />} />}
         search={<HeaderSearch />}
         account={<AccountLink />}
         bag={<BagLink count={PREVIEW_BAG_COUNT} />}

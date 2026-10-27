@@ -102,7 +102,7 @@ export const durationTokens = ['fast', 'base', 'slow'] as const;
 
 export const animationTokens = ['pop', 'appear', 'marquee', 'marquee-reverse', 'shake', 'skeleton'] as const;
 
-export const rotateTokens = ['sticker'] as const;
+export const rotateTokens = ['sticker', 'ribbon', 'ribbon-cross'] as const;
 
 // Grupos semânticos: cada tom tem 50/500/700 e cada status tem bg/fg/dot em colorTokens.
 export const feedbackTones = ['success', 'warning', 'danger', 'info'] as const;

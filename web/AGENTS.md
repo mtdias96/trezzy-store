@@ -78,7 +78,7 @@ app → features → components · hooks → lib → config
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
   - `(account)`: área do cliente, dinâmica;
-  - `(shop)`: a vitrine cacheada (home, catálogo, produto), com o header da loja no layout. O menu vem de um `'use cache'` e entra no shell estático, sem `<Suspense>`;
+  - `(shop)`: a vitrine cacheada (home, catálogo, produto), com o header da loja no layout. O menu e o drop vêm de `'use cache'` e entram no shell estático, sem `<Suspense>`;
   - previsto: `(checkout)`, a sacola e o checkout sem a navegação da loja.
 - O `(store)` não tem layout próprio. Layout aninhado não se desliga, então um header no `(store)` apareceria também no `(auth)` e no `(checkout)`. O header da loja entra no layout de cada sub-grupo que o mostra.
 - URLs em pt-BR (`/produtos`, `/sacola`): o nome da pasta da rota vira texto que o cliente vê e que o Google indexa. É a única exceção à regra de pastas em inglês.
@@ -297,6 +297,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Movimento | `duration-fast`, `animate-pop`, `animate-appear`, `animate-skeleton`, `rotate-sticker` |
 
 - `type-display` aplica o estilo display do design (itálico, peso 900, largura 125% e caixa alta), e o tamanho vem do `text-display-*`.
+- O título do hero usa a utility `text-display-hero` (`globals.css`): o tamanho sai da largura do `@container` e da palavra mais longa, passada em `--hero-letters` no `style` do elemento. É utility, e não token: o token mora no `:root`, onde a variável do elemento não existe.
 - Espaçamento (`p-4`, `gap-3`) e largura de container (`max-w-md`, `@md:`) seguem a escala padrão do Tailwind, porque o design não define esses tokens.
 
 ### Regras impostas pelo lint 🔒
@@ -339,7 +340,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 
 - Animação e transição só em `transform` e `opacity`, que rodam no compositor. PROIBIDO animar `width`, `height`, `top`, `left`, `margin` ou `padding`: cada quadro recalcula o layout da página.
 - Texto que muda a cada segundo (relógio, contador) usa `tabular-nums` e só atualiza enquanto aparece na tela (`useCountdown`, de `hooks/`).
-- Medido no header da loja (Chrome, 1440px, 3 s parado): o marquee roda com 0 layout e 0 recálculo de estilo; com o mega menu aberto, o único layout é o do contador, 1 por segundo.
+- Medido na home (Chrome, 1440px, 3 s parado): os três marquees rodam sem layout nem recálculo de estilo; o único layout é o do contador do hero, 1 por segundo.
 
 ### Imagens
 
@@ -405,8 +406,9 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Dependências | react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
-| Home | Só o header: as seções entram uma a uma, a partir do hero. Até lá, o `<h1>` fica `sr-only`. A descrição da metadata do layout raiz é provisória. |
-| Rotas da vitrine na API | O menu já consome o contrato em `features/store/navigation/data/api.ts`: `GET /store/products?department=&featured=true&limit=` e `GET /store/drops/next` (404 quando não há drop). Falta a API. Com a API fora do ar, o menu sai sem os destaques e a entrada de cache dura minutos, não horas. Quando o painel editar produtos e drops, as actions invalidam as tags `catalog` e `drops`. Quando o drop começa, o contador do menu para em zero até a entrada do cache vencer (até 1 h). |
+| Home | Header, hero do drop e a fita diagonal: as outras seções entram uma a uma. A descrição da metadata do layout raiz é provisória. A foto do drop de prévia tem 992px: no desktop retina, o hero pede ~1500px. |
+| Rotas da vitrine na API | O front já consome os contratos: `GET /store/products?department=&featured=true&limit=` (`features/store/navigation/data/api.ts`) e `GET /store/drops/next` (`features/store/drops/data/api.ts`; 404 quando não há drop). Falta a API, e o domínio do CDN das fotos em `images.remotePatterns`. Com a API fora do ar, o menu sai sem os destaques, a home sem o drop, e a entrada de cache dura minutos, não horas. Quando o painel editar produtos e drops, as actions invalidam as tags `catalog` e `drops`. Quando o drop começa, os contadores param em zero até a entrada do cache vencer (até 1 h). |
+| Lembrete do drop | O "Ativar lembrete" só guarda a escolha no navegador (`useStoredFlag`): nada avisa o cliente. O aviso de verdade (e-mail ou push) entra com uma rota na API e, se exigir conta, com a área do cliente. |
 | SEO da loja | Falta a URL pública do site: sem ela não há `metadataBase`, `canonical`, Open Graph, `sitemap` nem `robots`. Entram com a variável da URL no `config/`. |
 | Páginas da loja | Os links do header usam `pendingRoute` até cada página existir: `/novidades`, `/streetwear`, `/sneakers`, `/eyewear`, `/marcas` (e as subpáginas), `/drops`, `/outlet`, `/produtos/{slug}`, `/busca`, `/sacola` e `/conta`. As categorias e marcas do menu são fixas em `features/store/navigation/model/nav.ts` até a API listar as ativas. |
 | Sacola e avisos | A sacola não mostra contagem: ela vem do carrinho, num `<Suspense>` (lê cookie). Os avisos da faixa do topo são fixos em `features/store/announcements` até existir onde editá-los. |

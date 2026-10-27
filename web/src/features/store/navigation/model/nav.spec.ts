@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { departmentIds, dropBadge, STORE_NAV, toStoreMenu } from './nav';
+import { departmentIds, STORE_NAV, toStoreMenu } from './nav';
 import type { FeaturedProduct } from './types';
 
 const product: FeaturedProduct = {
@@ -42,32 +42,25 @@ describe('departmentIds', () => {
 
 describe('toStoreMenu', () => {
   it('attaches the featured products to their department', () => {
-    const menu = toStoreMenu({ streetwear: [product] }, null);
+    const menu = toStoreMenu({ streetwear: [product] });
     const streetwear = menu.entries.find((entry) => entry.kind === 'department' && entry.id === 'streetwear');
 
     expect(streetwear).toMatchObject({ featured: [product] });
   });
 
   it('opens a department without featured products when there are none', () => {
-    const menu = toStoreMenu({}, null);
+    const menu = toStoreMenu({});
 
     expect(menu.entries.filter((entry) => entry.kind === 'department').every((entry) => entry.featured.length === 0)).toBe(true);
   });
 
   it('keeps the shortcuts as they are', () => {
-    const menu = toStoreMenu({}, null);
+    const menu = toStoreMenu({});
 
     expect(menu.entries.filter((entry) => entry.kind === 'link').map(({ label }) => label)).toEqual([
       'Novidades',
       'Drops',
       'Outlet',
     ]);
-  });
-});
-
-describe('dropBadge', () => {
-  it('pads the drop number and shows the store weekday and hour', () => {
-    // 19h em São Paulo (UTC-3) de sexta, 30/10/2026.
-    expect(dropBadge(7, new Date('2026-10-30T22:00:00Z'))).toBe('Drop 07 · Sex 19h');
   });
 });

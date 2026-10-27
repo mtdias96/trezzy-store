@@ -1,4 +1,3 @@
-import { formatWeekdayHour } from '@/lib/date';
 import { pendingRoute } from '@/lib/route';
 
 import type { DepartmentId, FeaturedProduct, NavEntry, NavLink, NavSection, StoreMenu } from './types';
@@ -106,16 +105,9 @@ export function departmentIds(nav: readonly NavEntry[] = STORE_NAV): DepartmentI
 // Departamento sem destaques (API fora do ar, nenhum produto marcado) abre só com os links.
 export function toStoreMenu(
   featured: Partial<Record<DepartmentId, readonly FeaturedProduct[]>>,
-  drop: StoreMenu['drop'],
   nav: readonly NavEntry[] = STORE_NAV,
 ): StoreMenu {
   return {
     entries: nav.map((entry) => (entry.kind === 'department' ? { ...entry, featured: featured[entry.id] ?? [] } : entry)),
-    drop,
   };
-}
-
-// "Drop 07 · Sex 19h", com o dia e a hora da loja.
-export function dropBadge(number: number, startsAt: Date): string {
-  return `Drop ${String(number).padStart(2, '0')} · ${formatWeekdayHour(startsAt)}`;
 }
