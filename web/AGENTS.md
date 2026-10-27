@@ -314,6 +314,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - O `shadcn add` reescreve os componentes de que o novo depende (a sidebar traz o `button` e o `input`), e os nossos têm ajustes: depois de rodar, restaure-os com `git checkout` e confira o diff.
 - Sidebar do painel: os slots `--sidebar-*` e as larguras `--sidebar-width*` ficam no `:root`, e não no `[data-area="admin"]`, porque no celular ela abre num Sheet, que o portal renderiza fora do container do painel. Fora do `components/ui`, o estado recolhido se escreve com a variante `sidebar-collapsed:` do `globals.css`.
 - Portais no painel (Dialog, Popover, Sheet…) renderizam no `<body>`, fora do `[data-area="admin"]`, e voltariam às superfícies da loja. O conteúdo do portal leva `data-area="admin"` (ex: `<DialogContent data-area="admin">`).
+- Paleta de comandos: `Dialog` + `Combobox` do shadcn (Base UI) com `inline`, e não o `command` do shadcn, que traz o `cmdk` (sobre o Radix). O campo sem moldura é o `ComboboxChipsInput`: o `ComboboxInput` sempre envolve o campo num `InputGroup`.
 - Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
 - O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar.
 
@@ -390,5 +391,6 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
 | Nome da conta | A API não guarda nome: a saudação do Dashboard mostra só o período ("Boa tarde"), e o avatar usa as iniciais do e-mail. Entra com o nome na tabela `accounts`, no cadastro e no `GET /me`. |
+| Busca do painel | A paleta do ⌘K filtra só o que recebe (ações rápidas e pedidos recentes): a busca por pedido, produto e SKU chega com a API de busca. |
 | Sidebar recolhida | O estado aberto/recolhido não sobrevive ao recarregar a página: o cookie do shadcn só seria lido no layout, o que a seção 4 proíbe. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |

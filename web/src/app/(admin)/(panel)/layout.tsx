@@ -11,6 +11,7 @@ import { DashboardGreeting } from '@/features/admin/dashboard/components/dashboa
 import { PanelHeading } from '@/features/admin/navigation/components/panel-heading';
 import { PanelNavSkeleton } from '@/features/admin/navigation/components/panel-nav-skeleton';
 import { PanelNavContainer } from '@/features/admin/navigation/containers/panel-nav-container';
+import { CommandPaletteContainer } from '@/features/admin/search/containers/command-palette-container';
 import { signOut } from '@/features/shared/auth/data/actions';
 
 // Painel logado. O layout é só a casca e não lê a sessão: um await aqui seguraria todas as páginas atrás da
@@ -28,6 +29,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <SidebarInset>
           <PanelHeader
             heading={<PanelHeading greeting={<DashboardGreeting />} />}
+            search={<CommandPaletteContainer />}
             notifications={<PanelNotifications />}
             account={(
               <Suspense fallback={<UserMenuSkeleton />}>
