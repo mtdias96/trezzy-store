@@ -27,3 +27,27 @@ export function formatShortDate(date: Date): string {
 
   return `${part('day')} ${part('month').replace('.', '')} ${part('year')}`;
 }
+
+const dayMonth = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short', timeZone: STORE_TIME_ZONE });
+
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+
+// Quando algo mudou: "agora", "há 5 min" e "há 11 h" no último dia; depois, "24 out".
+export function formatRelativeDate(date: Date, now: Date): string {
+  const elapsed = now.getTime() - date.getTime();
+
+  if (elapsed < MINUTE) {
+    return 'agora';
+  }
+
+  if (elapsed < HOUR) {
+    return `há ${Math.floor(elapsed / MINUTE)} min`;
+  }
+
+  if (elapsed < 24 * HOUR) {
+    return `há ${Math.floor(elapsed / HOUR)} h`;
+  }
+
+  return dayMonth.format(date).replace(' de ', ' ').replace('.', '');
+}

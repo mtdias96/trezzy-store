@@ -1,6 +1,7 @@
 import type { Route } from 'next';
 
 import { formatPrice } from '@/lib/money';
+import { matchesSearch } from '@/lib/text';
 
 export type OrderStatus = 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled';
 
@@ -66,13 +67,6 @@ export function buildCommandGroups(
   ].filter(({ items }) => items.length > 0);
 }
 
-function normalize(text: string): string {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
-}
-
 export function matchesCommand(item: CommandItem, query: string): boolean {
-  const terms = normalize(query).split(/\s+/).filter(Boolean);
-  const text = normalize(`${item.label} ${item.description}`);
-
-  return terms.every((term) => text.includes(term));
+  return matchesSearch(`${item.label} ${item.description}`, query);
 }
