@@ -1,7 +1,8 @@
 'use client';
 
 import { ProductMedia } from '@/features/admin/products/components/media/product-media';
-import { uploadProductImage } from '@/features/admin/products/data/upload';
+// PRÉVIA (não commitar): envio simulado no lugar do uploadProductImage.
+import { previewUploadProductImage as uploadProductImage } from '@/features/admin/products/data/upload';
 import { useMediaUploads } from '@/features/admin/products/hooks/use-media-uploads';
 import type { MediaItem } from '@/features/admin/products/model/media';
 import type { ProductMediaFile } from '@/features/admin/products/model/types';

@@ -22,3 +22,23 @@ export const uploadProductImage: MediaUploader = async (file, { onProgress, sign
 
   return { mediaId: started.data.mediaId };
 };
+
+// PRÉVIA (não commitar): simula o envio com progresso, sem a API, no lugar do uploadProductImage acima.
+export const previewUploadProductImage: MediaUploader = (_file, { onProgress, signal }) =>
+  new Promise((resolve, reject) => {
+    let progress = 0;
+    const timer = setInterval(() => {
+      progress = Math.min(100, progress + 3 + Math.round(Math.random() * 6));
+      onProgress(progress);
+
+      if (progress === 100) {
+        clearInterval(timer);
+        resolve({ mediaId: crypto.randomUUID() });
+      }
+    }, 120);
+
+    signal.addEventListener('abort', () => {
+      clearInterval(timer);
+      reject(new DOMException('Envio cancelado.', 'AbortError'));
+    }, { once: true });
+  });
