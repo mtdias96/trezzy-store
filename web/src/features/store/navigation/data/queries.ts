@@ -7,7 +7,9 @@ import type { DropTeaser, FeaturedProduct, StoreMenu } from '@/features/store/na
 import { isRequestFailure } from '@/lib/http';
 import { pendingRoute } from '@/lib/route';
 
-import { type DropDto, type FeaturedProductDto, fetchFeaturedProducts, fetchNextDrop } from './api';
+import type { DropDto, FeaturedProductDto } from './api';
+// PRÉVIA (não commitar): os dados de exemplo no lugar das rotas da vitrine.
+import { fetchFeaturedProducts, fetchNextDrop } from './preview-api';
 
 const FEATURED_PER_DEPARTMENT = 2;
 

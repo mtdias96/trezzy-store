@@ -7,6 +7,9 @@ import { ANNOUNCEMENTS } from '@/features/store/announcements/model/announcement
 import { DesktopNavContainer } from '@/features/store/navigation/containers/desktop-nav-container';
 import { MobileNavContainer } from '@/features/store/navigation/containers/mobile-nav-container';
 
+// PRÉVIA (não commitar): sacola fixa. A contagem de verdade vem do carrinho, num Suspense (lê cookie).
+const PREVIEW_BAG_COUNT = 1;
+
 // Vitrine cacheada: o menu vem de um 'use cache' e entra no shell estático, sem Suspense.
 // O <main> recebe o foco do "Pular para o conteúdo" (tabIndex -1 para o Safari mover o foco).
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -18,7 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         nav={<DesktopNavContainer />}
         search={<HeaderSearch />}
         account={<AccountLink />}
-        bag={<BagLink />}
+        bag={<BagLink count={PREVIEW_BAG_COUNT} />}
       />
       <main id="conteudo" tabIndex={-1} className="flex flex-1 flex-col outline-none">
         {children}
