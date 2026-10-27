@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { findActiveHref, findSection, visibleNavItems } from './nav';
+import { findActiveHref, findPage, findSection, visibleNavItems } from './nav';
 
 describe('visibleNavItems', () => {
   it('shows the items the account has permission for, without the permission', () => {
@@ -23,6 +23,16 @@ describe('findSection', () => {
 
   it('finds nothing outside the panel', () => {
     expect(findSection('/produtos')).toBeUndefined();
+  });
+});
+
+describe('findPage', () => {
+  it('names a page inside a section', () => {
+    expect(findPage('/admin/produtos/novo')).toEqual({ label: 'Novo produto', href: '/admin/produtos/novo' });
+  });
+
+  it('finds nothing for the section itself', () => {
+    expect(findPage('/admin/produtos')).toBeUndefined();
   });
 });
 
