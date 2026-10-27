@@ -16,7 +16,7 @@ import {
   rotateTokens,
   shadowTokens,
   textTokens,
-} from '@/styles/tokens';
+} from './tokens';
 
 const NAMESPACES: Record<string, readonly string[]> = {
   breakpoint: breakpointTokens,

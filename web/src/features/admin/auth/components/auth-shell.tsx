@@ -3,7 +3,7 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { ArrowUpRightIcon, LockIcon } from 'lucide-react';
 
-import { AdminLogo } from '@/components/admin/admin-logo';
+import { AdminLogo } from '@/components/admin/shell/admin-logo';
 
 import { AuthShowcase } from './auth-showcase';
 

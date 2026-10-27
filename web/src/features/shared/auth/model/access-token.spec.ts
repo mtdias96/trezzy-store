@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 
-import { ADMIN_SCOPE, readSession } from '@/features/shared/auth/model/access-token';
+import { ADMIN_SCOPE, readSession } from './access-token';
 
 const NOW = Date.UTC(2026, 9, 26, 12);
 const IN_ONE_HOUR = NOW / 1000 + 3600;

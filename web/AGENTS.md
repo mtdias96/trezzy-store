@@ -28,7 +28,7 @@ pnpm --filter trezzy-web build
 - Arquivos em kebab-case (`product-card.tsx`), componentes em PascalCase (`ProductCard`) e hooks em `use-*.ts`.
 - Features nomeadas pelo domínio (`catalog`, `cart`, `orders`…), dentro da pasta da área: `store` (loja), `admin` (painel) ou `shared` (usada pelas duas, como o `auth`). O mesmo nome pode existir nas duas áreas: `store/orders` e `admin/orders` são features diferentes.
 - Formatação pelo ESLint (`@stylistic`) 🔒, com as mesmas escolhas da `api/`: aspas simples (duplas no JSX), ponto e vírgula, vírgula no fim de lista multilinha e 2 espaços. Imports ordenados pelo `simple-import-sort` 🔒. O VSCode corrige ao salvar.
-- Fora da pasta atual, importe pelo alias `@/` 🔒: `../` é proibido.
+- Na mesma pasta, import relativo (`./x`); fora dela, pelo alias `@/` 🔒: `../` é proibido. O `components/ui` mantém o alias que o shadcn gera.
 - OBRIGATÓRIO `import * as z from 'zod'`, como na `api/`: o `import { z }` impede o tree-shaking.
 
 ## 2. Arquitetura por área e feature
@@ -46,8 +46,9 @@ src/
 │   ├── admin/<feature>/         ← dashboard, products, orders…
 │   └── shared/<feature>/        ← auth
 ├── components/
-│   ├── ui/ · common/ · layout/  ← das duas áreas
-│   └── store/ · admin/          ← de uma área só
+│   ├── ui/                      ← shadcn, sem subpastas
+│   ├── common/<categoria>/      ← das duas áreas
+│   └── <área>/<categoria>/      ← de uma área só (store, admin)
 ├── hooks/ · lib/ · config/      ← lógica sem domínio, das duas áreas
 └── styles/                      ← estilo global: globals.css, tokens.ts e fonts.ts
 ```
@@ -102,13 +103,24 @@ features/<área>/<feature>/
 ├── model/       types.ts · schema.ts · compute.ts · search-params.ts     ← regra pura
 ├── containers/  *.tsx                                                    ← lógica: busca e decide
 ├── hooks/       use-*.ts                                                 ← lógica de client
-├── components/  *.tsx                                                    ← UI: só props
+├── components/  *.tsx ou <contexto>/*.tsx                               ← UI: só props
 └── session/     session.ts · cookies.ts · authorized-http.ts · guard.ts  ← só em shared/auth
 ```
 
 - `data/`: todo o I/O. `api.ts` é o transporte HTTP (sobre o `lib/http.ts`), `queries.ts` a leitura e `actions.ts` (`'use server'`) a escrita.
 - `model/`: tipos e regra pura, sem I/O, com os testes co-localizados.
 - `containers/`, `hooks/` e `components/`: o padrão Container & Presentational, descrito abaixo.
+
+### Pastas dentro de `components/`
+
+- `components/common` e `components/<área>`: OBRIGATÓRIO todo arquivo numa pasta de categoria, desde o primeiro 🔒. As categorias seguem os nomes do MUI e do Chakra: `layout/` (composição de página), `navigation/`, `forms/` (campos e cards de formulário), `data-display/`, `feedback/` (erro, vazio e carregamento) e `overlay/`. A `<área>` tem também `shell/`, a casca da área (header, sidebar e logo). Pastas criadas sob demanda; categoria nova entra nesta lista e no `eslint.config.mjs` no mesmo commit.
+- `components/` da feature: arquivos soltos enquanto a feature tem um contexto só (`auth`, `navigation`). No segundo contexto, a pasta inteira é dividida: PROIBIDO arquivo solto ao lado de subpasta.
+- Contexto é uma tela, no singular (`list/`, `editor/`), ou um subdomínio com o nome do arquivo do `model/` (`media/` ↔ `model/media.ts`).
+- PROIBIDO subpasta dentro de subpasta: o contexto que cresce vira um contexto irmão.
+- Peça sem domínio usada por dois contextos sobe para `components/<área>`, em vez de um contexto importar o outro (o `FormCard` do cadastro de produto está em `components/admin/forms/`).
+- Spec e skeleton ficam junto do componente.
+- Código de prévia fica em `components/<área>/preview/`, fora das categorias, e entra nas Pendências.
+- `components/ui` segue o layout do shadcn, sem subpastas.
 
 ### Container & Presentational
 
@@ -126,7 +138,7 @@ A lógica fica separada da UI. No App Router, o container costuma ser um Server 
 
 ### Quem importa o quê
 
-Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `layout`, `hooks`, `lib`, `config` e `styles`.
+Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `hooks`, `lib`, `config` e `styles`.
 
 | De | Pode importar |
 | :--- | :--- |
@@ -134,21 +146,20 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 | `app/(store)` e `app/(admin)` | `containers`, `components`, `data` e `model` das features da própria área e da `shared`; `components/<própria área>`; `shared/auth/session` e compartilhados |
 | `proxy.ts` | `shared/auth/session`, `lib` e `config` |
 | `containers/` | da feature: `data`, `model`, `components`, `hooks` e `containers`; `components/<própria área>`; `shared/auth/session` e compartilhados |
-| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `layout`, `hooks`, `lib` e `styles` |
+| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `hooks`, `lib` e `styles` |
 | `hooks/` da feature | da feature: `hooks`, `model` e `data/actions.ts`; `hooks` e `lib` |
 | `data/` | da feature: `data` e `model`; `shared/auth/session`, `lib` e `config` |
 | `model/` | da feature: `model`; `lib` |
 | `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
 | `components/ui` | `components/ui`, `hooks`, `lib` e `styles` |
-| `components/common`, `layout`, `store` e `admin` | `ui`, `common`, `layout`, `hooks`, `lib` e `styles`, e nunca a outra área |
+| `components/common`, `store` e `admin` | `ui`, `common`, `hooks`, `lib` e `styles`, e nunca a outra área |
 | `hooks/` · `lib/` · `config/` · `styles/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config`; `styles` → só `styles` |
 
 ### Camadas compartilhadas
 
 - `components/ui/`: só o que o shadcn gera. O lint de tokens é mais brando aqui (seção 8).
-- `components/common/`: nossos componentes de apresentação sem domínio (`MessageScreen`, `RouteError`, `PageSkeleton`), com o lint de tokens inteiro.
-- `components/layout/`: primitivos de composição de página (`Screen`, `Section`).
-- `components/store/` e `components/admin/`: apresentação de uma área só, como o header e o footer da loja ou a sidebar e a tabela de dados do painel.
+- `components/common/`: nossos componentes de apresentação sem domínio, por categoria (`feedback/` com `RouteError` e `PageSkeleton`, `forms/` com `PasswordInput`, `layout/` com os primitivos de página `Screen` e `Section`), com o lint de tokens inteiro.
+- `components/store/` e `components/admin/`: apresentação de uma área só, por categoria: `shell/` (header, footer, sidebar e logo), `data-display/` (cards e tabelas), `forms/` (campos e cards de formulário)…
 - `hooks/`: hooks de client sem domínio (é o alias `hooks` do `components.json`).
 - `lib/`: utilitários sem domínio (`cn`, `http`, `ActionResult`, formatadores).
 - `config/`: variáveis de ambiente validadas com zod no boot. PROIBIDO ler `process.env` fora de `config/`.
@@ -384,6 +395,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
 | Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. Os links para `/` usam `'/' as Route`, porque o `typedRoutes` só aceita rota com página: tirar o cast quando a home entrar. |
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
+| Seções vazias do painel | Pedidos, estoque, cupons e marcas e categorias são páginas vazias da prévia do sidebar (`components/admin/preview/section-preview.tsx`), com a permissão do Dashboard: saem quando cada seção entrar. |
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
 | `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |
 | Renovação da sessão | A API não tem `POST /auth/refresh`: a sessão dura o access token (60 min em dev). O refresh token já fica guardado, e a renovação entra no `proxy.ts` quando a rota existir. |

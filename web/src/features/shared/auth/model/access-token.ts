@@ -1,6 +1,6 @@
 import * as z from 'zod';
 
-import type { Session } from '@/features/shared/auth/model/types';
+import type { Session } from './types';
 
 // Escrito pelo trigger PreTokenGeneration da api/ para quem está no grupo admin do Cognito.
 export const ADMIN_SCOPE = 'trezzy/admin';

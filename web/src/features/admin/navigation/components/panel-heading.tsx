@@ -12,7 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { findSection, PANEL_HOME_HREF } from '@/features/admin/navigation/model/nav';
+import { findPage, findSection, PANEL_HOME_HREF } from '@/features/admin/navigation/model/nav';
 
 type PanelHeadingProps = {
   greeting: ReactNode;
@@ -27,6 +27,7 @@ export function PanelHeading({ greeting }: PanelHeadingProps) {
   }
 
   const section = findSection(pathname);
+  const page = findPage(pathname);
 
   return (
     <Breadcrumb>
@@ -38,8 +39,20 @@ export function PanelHeading({ greeting }: PanelHeadingProps) {
           ? (
               <>
                 <BreadcrumbSeparator>/</BreadcrumbSeparator>
+                <BreadcrumbItem className={page ? 'shrink-0' : 'min-w-0'}>
+                  {page
+                    ? <BreadcrumbLink render={<Link href={section.href} />}>{section.label}</BreadcrumbLink>
+                    : <BreadcrumbPage className="truncate font-semibold">{section.label}</BreadcrumbPage>}
+                </BreadcrumbItem>
+              </>
+            )
+          : null}
+        {page
+          ? (
+              <>
+                <BreadcrumbSeparator>/</BreadcrumbSeparator>
                 <BreadcrumbItem className="min-w-0">
-                  <BreadcrumbPage className="truncate font-semibold">{section.label}</BreadcrumbPage>
+                  <BreadcrumbPage className="truncate font-semibold">{page.label}</BreadcrumbPage>
                 </BreadcrumbItem>
               </>
             )

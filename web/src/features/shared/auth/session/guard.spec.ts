@@ -3,8 +3,9 @@ import { NextRequest } from 'next/server';
 import { describe, expect, it } from 'vitest';
 
 import { ADMIN_SCOPE } from '@/features/shared/auth/model/access-token';
-import { ACCESS_TOKEN_COOKIE } from '@/features/shared/auth/session/cookies';
-import { guardPanel } from '@/features/shared/auth/session/guard';
+
+import { ACCESS_TOKEN_COOKIE } from './cookies';
+import { guardPanel } from './guard';
 
 function token(claims: Record<string, unknown>) {
   const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url');

@@ -1,4 +1,4 @@
-import { StatCard } from '@/components/admin/stat-card';
+import { StatCard } from '@/components/admin/data-display/stat-card';
 import { getDashboardSummary } from '@/features/admin/dashboard/data/queries';
 
 export async function AccountsSummary() {

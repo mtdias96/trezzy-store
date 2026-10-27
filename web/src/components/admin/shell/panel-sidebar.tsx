@@ -1,8 +1,6 @@
 import type { ReactNode } from 'react';
 import { ExternalLinkIcon } from 'lucide-react';
 
-import { AdminLogo, AdminLogoMark } from '@/components/admin/admin-logo';
-import { PanelSidebarToggle } from '@/components/admin/panel-sidebar-toggle';
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +11,9 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+
+import { AdminLogo, AdminLogoMark } from './admin-logo';
+import { PanelSidebarToggle } from './panel-sidebar-toggle';
 
 type PanelSidebarProps = {
   children: ReactNode;

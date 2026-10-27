@@ -14,6 +14,11 @@ export type PanelNavItem = {
 
 type PanelNavEntry = PanelNavItem & { permission: Permission };
 
+export type PanelPage = {
+  label: string;
+  href: Route;
+};
+
 export const PANEL_HOME_HREF: Route = '/admin';
 
 // PRÉVIA (não commitar): seções sem permissão própria na API, com páginas vazias. Usam a do Dashboard só para aparecer.
@@ -34,6 +39,10 @@ const PANEL_NAV: readonly PanelNavEntry[] = [
   },
 ];
 
+const PANEL_PAGES: readonly PanelPage[] = [
+  { label: 'Novo produto', href: '/admin/produtos/novo' },
+];
+
 function toNavItem({ id, label, href }: PanelNavEntry): PanelNavItem {
   return { id, label, href };
 }
@@ -49,6 +58,10 @@ export function findSection(pathname: string): PanelNavItem | undefined {
   const section = PANEL_NAV.find((item) => item.href === href);
 
   return section && toNavItem(section);
+}
+
+export function findPage(pathname: string): PanelPage | undefined {
+  return PANEL_PAGES.find(({ href }) => href === pathname);
 }
 
 // O href mais longo que é a página ou um ancestral dela: /admin/pedidos/42 acende Pedidos, e não o /admin.

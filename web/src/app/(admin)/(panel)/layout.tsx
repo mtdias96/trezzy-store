@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 
-import { PanelHeader } from '@/components/admin/panel-header';
-import { PanelNotifications } from '@/components/admin/panel-notifications';
-import { PanelSidebar } from '@/components/admin/panel-sidebar';
+import { PanelHeader } from '@/components/admin/shell/panel-header';
+import { PanelNotifications } from '@/components/admin/shell/panel-notifications';
+import { PanelSidebar } from '@/components/admin/shell/panel-sidebar';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { UserMenuSkeleton } from '@/features/admin/account/components/user-menu-skeleton';

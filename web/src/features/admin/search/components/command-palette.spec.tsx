@@ -2,8 +2,9 @@ import type { Route } from 'next';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CommandPalette } from '@/features/admin/search/components/command-palette';
 import { buildCommandGroups, type CommandItem } from '@/features/admin/search/model/commands';
+
+import { CommandPalette } from './command-palette';
 
 const push = vi.fn();
 
