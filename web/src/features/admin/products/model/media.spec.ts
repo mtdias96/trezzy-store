@@ -31,7 +31,7 @@ describe('formatImageCount', () => {
 });
 
 function item(id: string): MediaItem {
-  return { id, name: `${id}.png`, previewUrl: `blob:${id}`, status: 'uploading', progress: 0 };
+  return { id, mediaId: null, name: `${id}.png`, previewUrl: `blob:${id}`, status: 'uploading', progress: 0 };
 }
 
 describe('updateMedia', () => {

@@ -8,7 +8,7 @@ import { useMediaUploads } from './use-media-uploads';
 
 type PendingUpload = {
   progress: (percent: number) => void;
-  resolve: () => void;
+  resolve: (mediaId?: string) => void;
   reject: () => void;
   signal: AbortSignal;
 };
@@ -17,7 +17,7 @@ function controlledUploader() {
   const pending: PendingUpload[] = [];
   const upload: MediaUploader = (_file, { onProgress, signal }) =>
     new Promise((resolve, reject) => {
-      pending.push({ progress: onProgress, resolve, reject: () => reject(new Error('falhou')), signal });
+      pending.push({ progress: onProgress, resolve: (mediaId = 'media-1') => resolve({ mediaId }), reject: () => reject(new Error('falhou')), signal });
     });
 
   return { upload, pending };
@@ -34,6 +34,16 @@ describe('useMediaUploads', () => {
 
     URL.createObjectURL = vi.fn(() => `blob:preview-${next++}`);
     URL.revokeObjectURL = vi.fn();
+  });
+
+  it('starts with the photos the product already has', () => {
+    const { upload } = controlledUploader();
+    const saved = { id: 'm1', mediaId: 'm1', name: 'capa.webp', previewUrl: 'https://cdn.trezzy.com/capa.webp', status: 'done', progress: 100 } as const;
+    const { result } = renderHook(() => useMediaUploads(upload, [saved]));
+
+    act(() => result.current.addFiles([image('a.png')]));
+
+    expect(result.current.items.map(({ id }) => id)).toEqual(['m1', expect.any(String)]);
   });
 
   it('adds valid photos as uploading and lists the rejected ones', () => {
@@ -57,7 +67,7 @@ describe('useMediaUploads', () => {
 
     await act(async () => pending[0]?.resolve());
 
-    expect(result.current.items[0]).toMatchObject({ status: 'done', progress: 100 });
+    expect(result.current.items[0]).toMatchObject({ status: 'done', progress: 100, mediaId: 'media-1' });
   });
 
   it('marks a failed upload', async () => {

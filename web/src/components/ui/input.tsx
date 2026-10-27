@@ -12,6 +12,8 @@ const inputVariants = cva(
         filled: 'h-field rounded-2xl border-transparent bg-gray-50 px-4 focus-visible:bg-gray-0 md:text-body-lg',
         outline: 'h-ctl-lg rounded-xl border-gray-250 bg-card px-4 md:text-body-lg',
         dashed: 'h-ctl rounded-pill border-dashed border-gray-300 bg-card px-4 md:text-body',
+        compact: 'h-ctl-sm rounded-lg border-gray-250 bg-card px-2.5 md:text-body',
+        pill: 'h-ctl rounded-pill border-gray-250 bg-card px-4 md:text-body',
       },
     },
     defaultVariants: {

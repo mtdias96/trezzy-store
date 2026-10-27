@@ -7,7 +7,7 @@
 O Next 16 tem breaking changes: APIs, convenções e estrutura de arquivos podem diferir do seu treinamento. OBRIGATÓRIO ler o guia do assunto em `node_modules/next/dist/docs/` (a documentação da versão instalada) antes de escrever código, e respeitar os avisos de depreciação.
 
 - Stack: Next 16 (App Router, Turbopack, Cache Components, React Compiler), React 19, TypeScript strict, Tailwind v4, shadcn/ui sobre Base UI, zod e Vitest. Deploy na Vercel (seção 12).
-- Previstos, ainda não instalados (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): nuqs, react-hook-form e Playwright. A regra que depende de um deles vale a partir da instalação.
+- Previstos, ainda não instalados (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): react-hook-form e Playwright. A regra que depende de um deles vale a partir da instalação.
 
 ## Definition of Done
 
@@ -244,6 +244,8 @@ Server Action é endpoint público. Toda action:
 - Filtros, ordenação, busca e paginação de listagem ficam na URL, via `nuqs`.
 - Os parsers ficam em `model/search-params.ts` da feature e são reutilizados no servidor (`createSearchParamsCache`) e no client.
 - PROIBIDO `useSearchParams` manual para estado de filtro.
+- O `NuqsAdapter` fica no layout do `(panel)`. Quando é o servidor que filtra a lista, o filtro atualiza com `shallow: false` e numa transição (`startTransition`), para a lista atual ficar na tela até a nova chegar; a busca espera a digitação parar (`limitUrlUpdates: debounce(300)`).
+- Ordenação por coluna é link (`createSerializer` dos mesmos parsers): funciona sem JavaScript no client.
 
 ## 6. Proteção de rota (`proxy.ts`)
 
@@ -390,11 +392,12 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | :--- | :--- |
 | Projeto na Vercel | Criar o projeto (Root Directory `web`) e cadastrar o `API_URL`. É um passo manual, feito por quem tem acesso à conta. Depois, trocar o `project.json` local pelo `vercel link`. |
 | Pre-push | O build da Vercel antes do push é regra escrita, sem hook: a barreira obrigatória continua sendo a CI e o preview da Vercel. |
-| Dependências | nuqs, react-hook-form e Playwright aguardam aprovação. |
+| Dependências | react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
 | Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. Os links para `/` usam `'/' as Route`, porque o `typedRoutes` só aceita rota com página: tirar o cast quando a home entrar. |
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
+| Rotas do catálogo na API | O front já consome o contrato em `features/admin/products/data/api.ts` (schemas zod): `GET /admin/products`, `GET /admin/products/{id}`, `GET /admin/brands`, `GET /admin/categories`, `POST /admin/media` (URL pré-assinada) e `POST /admin/media/{id}/confirm`. Falta a API: as rotas com essas respostas e permissões (`products:read`, `products:write`), o CORS do bucket aceitando o `PUT` do domínio do painel e o domínio do CDN das fotos em `images.remotePatterns` do `next.config.ts` (sem ele, o `next/image` recusa a foto). O Next filtra e ordena a lista inteira; quando a API paginar, os parâmetros da URL vão para ela. |
 | Seções vazias do painel | Pedidos, estoque, cupons e marcas e categorias são páginas vazias da prévia do sidebar (`components/admin/preview/section-preview.tsx`), com a permissão do Dashboard: saem quando cada seção entrar. |
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
 | `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |

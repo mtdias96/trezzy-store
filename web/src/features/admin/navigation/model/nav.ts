@@ -16,7 +16,7 @@ type PanelNavEntry = PanelNavItem & { permission: Permission };
 
 export type PanelPage = {
   label: string;
-  href: Route;
+  path: RegExp;
 };
 
 export const PANEL_HOME_HREF: Route = '/admin';
@@ -39,8 +39,10 @@ const PANEL_NAV: readonly PanelNavEntry[] = [
   },
 ];
 
+// A primeira que casar vence: /admin/produtos/novo antes de /admin/produtos/<id>.
 const PANEL_PAGES: readonly PanelPage[] = [
-  { label: 'Novo produto', href: '/admin/produtos/novo' },
+  { label: 'Novo produto', path: /^\/admin\/produtos\/novo$/ },
+  { label: 'Editar produto', path: /^\/admin\/produtos\/[^/]+$/ },
 ];
 
 function toNavItem({ id, label, href }: PanelNavEntry): PanelNavItem {
@@ -61,7 +63,7 @@ export function findSection(pathname: string): PanelNavItem | undefined {
 }
 
 export function findPage(pathname: string): PanelPage | undefined {
-  return PANEL_PAGES.find(({ href }) => href === pathname);
+  return PANEL_PAGES.find(({ path }) => path.test(pathname));
 }
 
 // O href mais longo que é a página ou um ancestral dela: /admin/pedidos/42 acende Pedidos, e não o /admin.

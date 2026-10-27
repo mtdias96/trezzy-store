@@ -6,6 +6,8 @@ import type { SelectOption } from '@/features/admin/products/model/types';
 type ProductOrganizationFieldsProps = {
   brands: readonly SelectOption[];
   categories: readonly SelectOption[];
+  defaultBrandId?: string;
+  defaultCategoryId?: string;
 };
 
 type OptionSelectProps = {
@@ -15,15 +17,16 @@ type OptionSelectProps = {
   placeholder: string;
   emptyPlaceholder: string;
   options: readonly SelectOption[];
+  defaultValue?: string;
 };
 
-function OptionSelect({ id, name, label, placeholder, emptyPlaceholder, options }: OptionSelectProps) {
+function OptionSelect({ id, name, label, placeholder, emptyPlaceholder, options, defaultValue }: OptionSelectProps) {
   const isEmpty = options.length === 0;
 
   return (
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
-      <Select name={name} items={options} disabled={isEmpty}>
+      <Select name={name} items={options} defaultValue={defaultValue} disabled={isEmpty}>
         <SelectTrigger id={id}>
           <SelectValue placeholder={isEmpty ? emptyPlaceholder : placeholder} />
         </SelectTrigger>
@@ -38,7 +41,12 @@ function OptionSelect({ id, name, label, placeholder, emptyPlaceholder, options 
   );
 }
 
-export function ProductOrganizationFields({ brands, categories }: ProductOrganizationFieldsProps) {
+export function ProductOrganizationFields({
+  brands,
+  categories,
+  defaultBrandId,
+  defaultCategoryId,
+}: ProductOrganizationFieldsProps) {
   return (
     <FormCard title="Organização">
       <OptionSelect
@@ -48,6 +56,7 @@ export function ProductOrganizationFields({ brands, categories }: ProductOrganiz
         placeholder="Selecione a marca"
         emptyPlaceholder="Nenhuma marca cadastrada"
         options={brands}
+        defaultValue={defaultBrandId}
       />
       <OptionSelect
         id="product-category"
@@ -56,6 +65,7 @@ export function ProductOrganizationFields({ brands, categories }: ProductOrganiz
         placeholder="Selecione a categoria"
         emptyPlaceholder="Nenhuma categoria cadastrada"
         options={categories}
+        defaultValue={defaultCategoryId}
       />
     </FormCard>
   );

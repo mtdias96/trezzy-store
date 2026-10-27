@@ -6,6 +6,8 @@ export type MediaStatus = 'uploading' | 'done' | 'error';
 
 export type MediaItem = {
   id: string;
+  // Id da mídia na API, que o produto guarda na galeria. Nulo até o envio terminar.
+  mediaId: string | null;
   name: string;
   previewUrl: string;
   status: MediaStatus;
@@ -20,7 +22,7 @@ export type MediaRejection = {
 export type MediaUploader = (
   file: File,
   options: { onProgress: (percent: number) => void; signal: AbortSignal },
-) => Promise<void>;
+) => Promise<{ mediaId: string }>;
 
 export function updateMedia(items: readonly MediaItem[], id: string, patch: Partial<MediaItem>): readonly MediaItem[] {
   return items.map((item) => (item.id === id ? { ...item, ...patch } : item));

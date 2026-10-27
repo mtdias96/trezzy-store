@@ -1,7 +1,12 @@
 import { FormCard } from '@/components/admin/forms/form-card';
 import { Switch } from '@/components/ui/switch';
 
-export function ProductStatusField() {
+type ProductStatusFieldProps = {
+  defaultActive: boolean;
+  hint?: string;
+};
+
+export function ProductStatusField({ defaultActive, hint }: ProductStatusFieldProps) {
   return (
     <FormCard title="Status">
       <label
@@ -10,13 +15,13 @@ export function ProductStatusField() {
           has-focus-visible:border-ring
         "
       >
-        <Switch name="active" defaultChecked aria-describedby="product-status-hint" />
+        <Switch name="active" defaultChecked={defaultActive} aria-describedby="product-status-hint" />
         <span className="flex flex-col gap-0.5">
           <span className="text-body-lg font-semibold">Ativo</span>
           <span id="product-status-hint" className="text-body-sm text-muted-foreground">Visível na loja e na busca</span>
         </span>
       </label>
-      <p className="text-body-sm text-muted-foreground">Será publicado na loja assim que você salvar.</p>
+      {hint ? <p className="text-body-sm text-muted-foreground">{hint}</p> : null}
     </FormCard>
   );
 }

@@ -13,10 +13,19 @@ type MoneyInputProps = Omit<
   value?: number;
   defaultValue?: number;
   onValueChange?: (cents: number) => void;
+  compact?: boolean;
 };
 
 // Centavos, com 0 como campo vazio. Sem preço, o input oculto envia vazio, e não 0, para o "obrigatório" valer.
-export function MoneyInput({ value, defaultValue = 0, onValueChange, name, className, ...props }: MoneyInputProps) {
+export function MoneyInput({
+  value,
+  defaultValue = 0,
+  onValueChange,
+  compact = false,
+  name,
+  className,
+  ...props
+}: MoneyInputProps) {
   const [uncontrolledCents, setUncontrolledCents] = useState(defaultValue);
   const cents = value ?? uncontrolledCents;
 
@@ -35,22 +44,23 @@ export function MoneyInput({ value, defaultValue = 0, onValueChange, name, class
     <div className="relative">
       <span
         aria-hidden
-        className="
-          pointer-events-none absolute inset-y-0 left-4 flex items-center font-mono text-body-sm text-muted-foreground
-        "
+        className={cn(
+          'pointer-events-none absolute inset-y-0 flex items-center font-mono text-body-sm text-muted-foreground',
+          compact ? 'left-2.5' : 'left-4',
+        )}
       >
         R$
       </span>
       <Input
         {...props}
-        variant="outline"
+        variant={compact ? 'compact' : 'outline'}
         type="text"
         inputMode="numeric"
         autoComplete="off"
         placeholder="0,00"
         value={cents > 0 ? formatAmount(cents) : ''}
         onChange={(event) => handleChange(event.target.value)}
-        className={cn('pl-11 font-mono', className)}
+        className={cn(compact ? 'pl-8 font-mono' : 'pl-11 font-mono', className)}
       />
       {name ? <input type="hidden" name={name} value={cents > 0 ? cents : ''} /> : null}
     </div>

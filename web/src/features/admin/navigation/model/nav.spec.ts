@@ -28,7 +28,11 @@ describe('findSection', () => {
 
 describe('findPage', () => {
   it('names a page inside a section', () => {
-    expect(findPage('/admin/produtos/novo')).toEqual({ label: 'Novo produto', href: '/admin/produtos/novo' });
+    expect(findPage('/admin/produtos/novo')?.label).toBe('Novo produto');
+  });
+
+  it('names a page with an id in the path', () => {
+    expect(findPage('/admin/produtos/0f8e2c1a')?.label).toBe('Editar produto');
   });
 
   it('finds nothing for the section itself', () => {

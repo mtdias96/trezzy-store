@@ -16,8 +16,8 @@ type Upload = {
 
 // Sem cleanup em effect: com o cacheComponents, o Next esconde a página com <Activity> ao navegar, roda os cleanups e
 // guarda o estado. Cancelar os envios ou revogar as prévias ali quebraria a lista quando a página voltasse.
-export function useMediaUploads(upload: MediaUploader) {
-  const [items, setItems] = useState<readonly MediaItem[]>([]);
+export function useMediaUploads(upload: MediaUploader, initialItems: readonly MediaItem[] = []) {
+  const [items, setItems] = useState(initialItems);
   const [rejections, setRejections] = useState<readonly MediaRejection[]>([]);
   const uploads = useRef(new Map<string, Upload>());
 
@@ -27,7 +27,7 @@ export function useMediaUploads(upload: MediaUploader) {
 
   function start(id: string, file: File, signal: AbortSignal) {
     upload(file, { signal, onProgress: (progress) => update(id, { progress }) }).then(
-      () => update(id, { status: 'done', progress: 100 }),
+      ({ mediaId }) => update(id, { status: 'done', progress: 100, mediaId }),
       () => {
         if (!signal.aborted) {
           update(id, { status: 'error' });
@@ -53,7 +53,7 @@ export function useMediaUploads(upload: MediaUploader) {
       const controller = new AbortController();
 
       uploads.current.set(id, { controller, previewUrl });
-      added.push({ id, name: file.name, previewUrl, status: 'uploading', progress: 0 });
+      added.push({ id, mediaId: null, name: file.name, previewUrl, status: 'uploading', progress: 0 });
       start(id, file, controller.signal);
     }
 

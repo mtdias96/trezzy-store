@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { NuqsAdapter } from 'nuqs/adapters/next/app';
 
 import { PanelHeader } from '@/components/admin/shell/panel-header';
 import { PanelNotifications } from '@/components/admin/shell/panel-notifications';
@@ -40,7 +41,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </Suspense>
             )}
           />
-          {children}
+          <NuqsAdapter>{children}</NuqsAdapter>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

@@ -1,16 +1,17 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 
-import { ProductsEmptyState } from '@/features/admin/products/components/list/products-empty-state';
-import { ProductsView } from '@/features/admin/products/components/list/products-view';
+import { ProductsListSkeleton } from '@/features/admin/products/components/list/products-list-skeleton';
+import { ProductListContainer } from '@/features/admin/products/containers/product-list-container';
 
 export const metadata: Metadata = {
   title: 'Produtos',
 };
 
-export default function Page() {
+export default function Page({ searchParams }: PageProps<'/admin/produtos'>) {
   return (
-    <ProductsView>
-      <ProductsEmptyState />
-    </ProductsView>
+    <Suspense fallback={<ProductsListSkeleton />}>
+      <ProductListContainer searchParams={searchParams} />
+    </Suspense>
   );
 }

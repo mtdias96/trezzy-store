@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatShortDate, greetingFor } from './date';
+import { formatRelativeDate, formatShortDate, greetingFor } from './date';
 
 // Datas em UTC: São Paulo fica em UTC-3 (sem horário de verão desde 2019), então 15h UTC são 12h na loja.
 const storeTime = (day: number, hour: number) => new Date(Date.UTC(2026, 9, day, hour + 3));
@@ -31,5 +31,18 @@ describe('formatShortDate', () => {
 
   it('keeps months whose short name has no dot', () => {
     expect(formatShortDate(new Date(Date.UTC(2026, 4, 1, 15)))).toBe('1 mai 2026');
+  });
+});
+
+describe('formatRelativeDate', () => {
+  const now = storeTime(26, 20);
+
+  it.each([
+    [new Date(now.getTime() - 30_000), 'agora'],
+    [new Date(now.getTime() - 5 * 60_000), 'há 5 min'],
+    [new Date(now.getTime() - 11 * 3_600_000), 'há 11 h'],
+    [storeTime(24, 10), '24 out'],
+  ])('describes %s as %s', (date, text) => {
+    expect(formatRelativeDate(date, now)).toBe(text);
   });
 });
