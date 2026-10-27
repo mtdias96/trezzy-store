@@ -72,7 +72,7 @@ app → features → components · hooks → lib → config
 - A raiz do `app/` tem só o layout raiz, o `not-found` e o `global-error`. Cada área é um route group:
   - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`, em sub-grupos como na loja:
     - `(auth)`: entrar (`/admin/entrar`), na tela dividida do `AuthShell`, sem a navegação do painel;
-    - `(panel)`: o painel logado (`/admin`…), com o cabeçalho (depois a sidebar) no layout. O layout não lê a sessão (seção 6).
+    - `(panel)`: o painel logado (`/admin`…), com a sidebar e o cabeçalho no layout. O layout não lê a sessão (seção 6): o menu da sidebar, que depende das permissões, entra num `<Suspense>`.
   - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
@@ -241,6 +241,7 @@ Server Action é endpoint público. Toda action:
 - Se o painel ganhar um subdomínio próprio (`admin.…`), quem roteia pelo host é o `proxy.ts`, sem virar outro app.
 - O proxy faz só o redirect otimista (sem sessão → login, com o destino em `?next=`). Ele roda em toda navegação, até no prefetch, então só lê o cookie e nunca chama a API. A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
 - Quem está logado e abre o login vê o formulário: mandá-lo ao painel com um token revogado criaria um loop de redirects.
+- O menu do painel segue as permissões efetivas da conta (`GET /me/permissions`), pelo catálogo em `features/admin/navigation/model/nav.ts`. Item novo entra ali com a permissão que a rota exige, junto com a página dele. Esconder o item não protege nada: quem protege é a rota.
 
 ### Sessão (BFF)
 
@@ -388,4 +389,5 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Recuperação de senha | A API não tem o fluxo: o "Esqueci a senha" abre um e-mail para o suporte. |
 | Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
+| Sidebar recolhida | O estado aberto/recolhido não sobrevive ao recarregar a página: o cookie do shadcn só seria lido no layout, o que a seção 4 proíbe. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |
