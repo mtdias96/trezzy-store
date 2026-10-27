@@ -28,7 +28,24 @@ export type RecentOrder = {
 };
 
 // Cada ação entra junto com a página dela e, com cargos, com a permissão que a rota exige.
-export const QUICK_ACTIONS: readonly CommandItem[] = [];
+// PRÉVIA (não commitar): levam às páginas vazias das seções, e não aos formulários e filtros de verdade.
+export const QUICK_ACTIONS: readonly CommandItem[] = [
+  {
+    id: 'new-product',
+    kind: 'create',
+    label: 'Novo produto',
+    description: 'Cadastrar produto, variantes e estoque',
+    href: '/admin/produtos',
+  },
+  { id: 'new-coupon', kind: 'create', label: 'Novo cupom', description: 'Criar código de desconto', href: '/admin/cupons' },
+  {
+    id: 'pending-orders',
+    kind: 'go',
+    label: 'Ver pedidos pendentes',
+    description: 'Aguardando PIX ou boleto',
+    href: '/admin/pedidos',
+  },
+];
 
 export function buildCommandGroups(
   quickActions: readonly CommandItem[],

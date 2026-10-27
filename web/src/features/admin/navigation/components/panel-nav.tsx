@@ -2,7 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutGridIcon, type LucideIcon } from 'lucide-react';
+import {
+  BoxIcon,
+  LayoutGridIcon,
+  type LucideIcon,
+  ReceiptIcon,
+  ShirtIcon,
+  TagsIcon,
+  TicketPercentIcon,
+} from 'lucide-react';
 
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { findActiveHref, type PanelNavId, type PanelNavItem } from '@/features/admin/navigation/model/nav';
@@ -16,6 +24,11 @@ type PanelNavProps = {
 // Componente não atravessa a fronteira server → client por props: o ícone é escolhido aqui, pelo id.
 const NAV_ICONS = {
   dashboard: LayoutGridIcon,
+  orders: ReceiptIcon,
+  products: ShirtIcon,
+  inventory: BoxIcon,
+  coupons: TicketPercentIcon,
+  'brands-categories': TagsIcon,
 } satisfies Record<PanelNavId, LucideIcon>;
 
 export function PanelNav({ items }: PanelNavProps) {

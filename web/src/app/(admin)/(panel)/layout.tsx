@@ -14,6 +14,9 @@ import { PanelNavContainer } from '@/features/admin/navigation/containers/panel-
 import { CommandPaletteContainer } from '@/features/admin/search/containers/command-palette-container';
 import { signOut } from '@/features/shared/auth/data/actions';
 
+// PRÉVIA (não commitar): contador fixo. O de verdade vem da API de notificações.
+const PREVIEW_UNREAD_NOTIFICATIONS = 3;
+
 // Painel logado. O layout é só a casca e não lê a sessão: um await aqui seguraria todas as páginas atrás da
 // requisição. Quem confere a sessão é o proxy (redirect otimista) e cada query do painel (requireAdminSession).
 // O que depende da conta (menu e usuário) entra num Suspense, e o resto fica na casca estática.
@@ -30,7 +33,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <PanelHeader
             heading={<PanelHeading greeting={<DashboardGreeting />} />}
             search={<CommandPaletteContainer />}
-            notifications={<PanelNotifications />}
+            notifications={<PanelNotifications unread={PREVIEW_UNREAD_NOTIFICATIONS} />}
             account={(
               <Suspense fallback={<UserMenuSkeleton />}>
                 <UserMenuContainer signOutAction={signOut} />

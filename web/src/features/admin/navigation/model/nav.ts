@@ -3,7 +3,7 @@ import type { Route } from 'next';
 // Espelha as permissões do catálogo da API (application/authorization/Permission.ts) que abrem um item do menu.
 type Permission = 'dashboard:access';
 
-export type PanelNavId = 'dashboard';
+export type PanelNavId = 'dashboard' | 'orders' | 'products' | 'inventory' | 'coupons' | 'brands-categories';
 
 export type PanelNavItem = {
   id: PanelNavId;
@@ -16,9 +16,22 @@ type PanelNavEntry = PanelNavItem & { permission: Permission };
 
 export const PANEL_HOME_HREF: Route = '/admin';
 
+// PRÉVIA (não commitar): seções sem permissão própria na API, com páginas vazias. Usam a do Dashboard só para aparecer.
+const PREVIEW_PERMISSION: Permission = 'dashboard:access';
+
 // Um item novo entra junto com a página dele e com a permissão que a rota exige na API.
 const PANEL_NAV: readonly PanelNavEntry[] = [
   { id: 'dashboard', label: 'Dashboard', href: PANEL_HOME_HREF, permission: 'dashboard:access' },
+  { id: 'orders', label: 'Pedidos', href: '/admin/pedidos', permission: PREVIEW_PERMISSION },
+  { id: 'products', label: 'Produtos', href: '/admin/produtos', permission: PREVIEW_PERMISSION },
+  { id: 'inventory', label: 'Estoque', href: '/admin/estoque', permission: PREVIEW_PERMISSION },
+  { id: 'coupons', label: 'Cupons', href: '/admin/cupons', permission: PREVIEW_PERMISSION },
+  {
+    id: 'brands-categories',
+    label: 'Marcas & Categorias',
+    href: '/admin/marcas-e-categorias',
+    permission: PREVIEW_PERMISSION,
+  },
 ];
 
 function toNavItem({ id, label, href }: PanelNavEntry): PanelNavItem {
