@@ -1,12 +1,16 @@
 import type { Metadata } from 'next';
 
-import { SectionPreview } from '@/components/admin/preview/section-preview';
+import { ProductsEmptyState } from '@/features/admin/products/components/list/products-empty-state';
+import { ProductsView } from '@/features/admin/products/components/list/products-view';
 
-// PRÉVIA (não commitar): página vazia só para ver o breadcrumb e o item ativo no menu.
 export const metadata: Metadata = {
   title: 'Produtos',
 };
 
 export default function Page() {
-  return <SectionPreview title="Produtos" />;
+  return (
+    <ProductsView>
+      <ProductsEmptyState />
+    </ProductsView>
+  );
 }
