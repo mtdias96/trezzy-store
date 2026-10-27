@@ -244,6 +244,8 @@ Server Action é endpoint público. Toda action:
 - Filtros, ordenação, busca e paginação de listagem ficam na URL, via `nuqs`.
 - Os parsers ficam em `model/search-params.ts` da feature e são reutilizados no servidor (`createSearchParamsCache`) e no client.
 - PROIBIDO `useSearchParams` manual para estado de filtro.
+- O `NuqsAdapter` fica no layout do `(panel)`. Quando é o servidor que filtra a lista, o filtro atualiza com `shallow: false` e numa transição (`startTransition`), para a lista atual ficar na tela até a nova chegar; a busca espera a digitação parar (`limitUrlUpdates: debounce(300)`).
+- Ordenação por coluna é link (`createSerializer` dos mesmos parsers): funciona sem JavaScript no client.
 
 ## 6. Proteção de rota (`proxy.ts`)
 
