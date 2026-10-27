@@ -1,0 +1,28 @@
+import { AccountLink } from '@/components/store/shell/account-link';
+import { AnnouncementBar } from '@/components/store/shell/announcement-bar';
+import { BagLink } from '@/components/store/shell/bag-link';
+import { HeaderSearch } from '@/components/store/shell/header-search';
+import { StoreHeader } from '@/components/store/shell/store-header';
+import { ANNOUNCEMENTS } from '@/features/store/announcements/model/announcements';
+import { DesktopNavContainer } from '@/features/store/navigation/containers/desktop-nav-container';
+import { MobileNavContainer } from '@/features/store/navigation/containers/mobile-nav-container';
+
+// Vitrine cacheada: o menu vem de um 'use cache' e entra no shell estático, sem Suspense.
+// O <main> recebe o foco do "Pular para o conteúdo" (tabIndex -1 para o Safari mover o foco).
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <StoreHeader
+        announcements={<AnnouncementBar items={ANNOUNCEMENTS} />}
+        mobileNav={<MobileNavContainer />}
+        nav={<DesktopNavContainer />}
+        search={<HeaderSearch />}
+        account={<AccountLink />}
+        bag={<BagLink />}
+      />
+      <main id="conteudo" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+        {children}
+      </main>
+    </>
+  );
+}

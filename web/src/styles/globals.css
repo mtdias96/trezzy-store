@@ -337,6 +337,10 @@
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
   }
+  /* O list-none tira a setinha nativa do <summary> no Chrome e no Firefox; o Safari desenha a dele por aqui. */
+  summary::-webkit-details-marker {
+    display: none;
+  }
   ::selection {
     background-color: var(--color-brand);
     color: var(--color-gray-0);
