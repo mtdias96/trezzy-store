@@ -100,7 +100,7 @@ export const heightTokens = ['ctl-sm', 'ctl', 'ctl-lg', 'field', 'cta'] as const
 
 export const durationTokens = ['fast', 'base', 'slow'] as const;
 
-export const animationTokens = ['pop', 'appear', 'marquee', 'shake', 'skeleton'] as const;
+export const animationTokens = ['pop', 'appear', 'marquee', 'marquee-reverse', 'shake', 'skeleton'] as const;
 
 export const rotateTokens = ['sticker'] as const;
 

@@ -332,13 +332,13 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Portais no painel (Dialog, Popover, Sheet…) renderizam no `<body>`, fora do `[data-area="admin"]`, e voltariam às superfícies da loja. O conteúdo do portal leva `data-area="admin"` (ex: `<DialogContent data-area="admin">`).
 - Paleta de comandos: `Dialog` + `Combobox` do shadcn (Base UI) com `inline`, e não o `command` do shadcn, que traz o `cmdk` (sobre o Radix). O campo sem moldura é o `ComboboxChipsInput`: o `ComboboxInput` sempre envolve o campo num `InputGroup`.
 - Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
-- O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar: na faixa de avisos da loja, uma caixa que aparece no foco do teclado e para a animação pelo `:has(:checked)`, sem JS.
+- O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar: a caixa "Pausar animações" da faixa de avisos aparece no foco do teclado e, marcada, para todos os marquees da página, sem JS. Marquee novo usa o `Marquee` de `components/store/data-display`, que já tem a variante `motion-paused:`.
 - `navigation-menu` (mega menu da loja): ajustado no arquivo para abrir em largura cheia, ancorado no `<header>`. Os painéis usam `keepMounted`, para os links das categorias irem no HTML do servidor.
 
 ### Movimento e fluidez
 
 - Animação e transição só em `transform` e `opacity`, que rodam no compositor. PROIBIDO animar `width`, `height`, `top`, `left`, `margin` ou `padding`: cada quadro recalcula o layout da página.
-- Texto que muda a cada segundo (relógio, contador) usa `tabular-nums` e só atualiza enquanto aparece na tela (`useInView` + `useNowInSeconds`, de `hooks/`).
+- Texto que muda a cada segundo (relógio, contador) usa `tabular-nums` e só atualiza enquanto aparece na tela (`useCountdown`, de `hooks/`).
 - Medido no header da loja (Chrome, 1440px, 3 s parado): o marquee roda com 0 layout e 0 recálculo de estilo; com o mega menu aberto, o único layout é o do contador, 1 por segundo.
 
 ### Imagens
