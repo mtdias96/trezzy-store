@@ -21,6 +21,15 @@ const sizeClass = {
   },
 } satisfies Record<AdminLogoSize, Record<'root' | 'wordmark' | 'seal', string>>;
 
+export function AdminLogoMark() {
+  return (
+    <span className="type-display text-display-md">
+      <span aria-hidden>T</span>
+      <span className="sr-only">Trezzy Admin</span>
+    </span>
+  );
+}
+
 export function AdminLogo({ size = 'md', className }: AdminLogoProps) {
   const classes = sizeClass[size];
 

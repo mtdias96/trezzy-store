@@ -4,6 +4,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Sidebar do shadcn recolhida no modo ícone. Fora do components/ui, o group-data-[collapsible=icon]: é valor
+   arbitrário, proibido pelo lint. */
+@custom-variant sidebar-collapsed (&:where([data-collapsible="icon"] *));
+
 /*
  * Tokens da Trezzy: única fonte dos valores de estilo do web.
  * Cada grupo resetado com `--*: initial` só tem os utilitários listados aqui: `bg-red-500` ou
@@ -285,14 +289,19 @@
   --chart-3: var(--color-info-500);
   --chart-4: var(--color-success-500);
   --chart-5: var(--color-warning-500);
-  --sidebar: var(--color-gray-0);
-  --sidebar-foreground: var(--color-ink);
-  --sidebar-primary: var(--color-brand);
-  --sidebar-primary-foreground: var(--color-gray-0);
-  --sidebar-accent: var(--color-gray-150);
-  --sidebar-accent-foreground: var(--color-ink);
-  --sidebar-border: var(--color-gray-200);
-  --sidebar-ring: var(--color-brand);
+  /* Sidebar do painel. Fica no :root, e não no [data-area="admin"]: no celular ela abre num Sheet, que o portal
+     renderiza no <body>, fora do container do painel. */
+  --sidebar: var(--color-brand-950);
+  --sidebar-foreground: var(--color-brand-200);
+  --sidebar-primary: var(--color-lime);
+  --sidebar-primary-foreground: var(--color-ink);
+  --sidebar-accent: var(--color-brand-900);
+  --sidebar-accent-foreground: var(--color-gray-0);
+  --sidebar-border: var(--color-brand-900);
+  --sidebar-ring: var(--color-lime);
+  --sidebar-width: 14.5rem; /* 232px */
+  --sidebar-width-icon: 4.25rem; /* 68px: botão de 44px + 12px de cada lado */
+  --sidebar-width-mobile: 18rem; /* 288px */
 }
 
 /* Painel: o layout do (admin) marca o container com data-area="admin" e aplica bg-background. */

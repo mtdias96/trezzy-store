@@ -72,7 +72,7 @@ app → features → components · hooks → lib → config
 - A raiz do `app/` tem só o layout raiz, o `not-found` e o `global-error`. Cada área é um route group:
   - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`, em sub-grupos como na loja:
     - `(auth)`: entrar (`/admin/entrar`), na tela dividida do `AuthShell`, sem a navegação do painel;
-    - `(panel)`: o painel logado (`/admin`…), com o cabeçalho (depois a sidebar) no layout. O layout não lê a sessão (seção 6).
+    - `(panel)`: o painel logado (`/admin`…), com a sidebar e o cabeçalho no layout. O layout não lê a sessão (seção 6): o menu da sidebar, que depende das permissões, entra num `<Suspense>`.
   - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
@@ -195,6 +195,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - Página cacheada com um pedaço dinâmico isola esse pedaço num `<Suspense>` com skeleton, e o resto entra no shell estático.
 - PROIBIDO ler cookie ou sessão no topo de um `layout.tsx`: o `await` segura o segmento inteiro, inclusive o `children`, atrás da requisição.
 - Hora atual e valores aleatórios (`Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`) em componente de servidor: `await io()` (de `next/cache`) antes. Ler `cookies()` antes não basta: com o `partialPrefetching`, a casca da rota renderiza com os cookies da sessão, e o Next recusa a hora nesse prerender. O `connection()` fica para quando a renderização precisa esperar a requisição real, porque ele bloqueia também o prefetch.
+- Hora atual em client component (saudação, data de hoje): `useClientValue` de `hooks/`. O servidor e a hidratação renderizam o fallback (um skeleton), e o browser troca pelo valor logo depois. Datas do painel no fuso da loja, pelo `lib/date.ts`.
 
 ### Cache
 
@@ -240,6 +241,7 @@ Server Action é endpoint público. Toda action:
 - Se o painel ganhar um subdomínio próprio (`admin.…`), quem roteia pelo host é o `proxy.ts`, sem virar outro app.
 - O proxy faz só o redirect otimista (sem sessão → login, com o destino em `?next=`). Ele roda em toda navegação, até no prefetch, então só lê o cookie e nunca chama a API. A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
 - Quem está logado e abre o login vê o formulário: mandá-lo ao painel com um token revogado criaria um loop de redirects.
+- O menu do painel segue as permissões efetivas da conta (`GET /me/permissions`), pelo catálogo em `features/admin/navigation/model/nav.ts`. Item novo entra ali com a permissão que a rota exige, junto com a página dele. Esconder o item não protege nada: quem protege é a rota.
 
 ### Sessão (BFF)
 
@@ -309,6 +311,10 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Os slots apontam para tokens no `:root` (superfícies da loja). No painel, o container com `data-area="admin"` troca as superfícies para os cinzas frios e aplica `bg-background`.
 - Elemento com papel de interface usa o slot (`bg-primary`, `text-muted-foreground`, `border-border`). O token direto fica para o que não tem slot (`bg-lime`, `bg-status-paid-bg`).
 - Manter `cn()`, `data-slot` e os aliases do `components.json`. A composição de primitivo é pela prop `render` do Base UI, que não tem `asChild`/`Slot`.
+- O `shadcn add` reescreve os componentes de que o novo depende (a sidebar traz o `button` e o `input`), e os nossos têm ajustes: depois de rodar, restaure-os com `git checkout` e confira o diff.
+- Sidebar do painel: os slots `--sidebar-*` e as larguras `--sidebar-width*` ficam no `:root`, e não no `[data-area="admin"]`, porque no celular ela abre num Sheet, que o portal renderiza fora do container do painel. Fora do `components/ui`, o estado recolhido se escreve com a variante `sidebar-collapsed:` do `globals.css`.
+- Portais no painel (Dialog, Popover, Sheet…) renderizam no `<body>`, fora do `[data-area="admin"]`, e voltariam às superfícies da loja. O conteúdo do portal leva `data-area="admin"` (ex: `<DialogContent data-area="admin">`).
+- Paleta de comandos: `Dialog` + `Combobox` do shadcn (Base UI) com `inline`, e não o `command` do shadcn, que traz o `cmdk` (sobre o Radix). O campo sem moldura é o `ComboboxChipsInput`: o `ComboboxInput` sempre envolve o campo num `InputGroup`.
 - Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
 - O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar.
 
@@ -384,4 +390,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Recuperação de senha | A API não tem o fluxo: o "Esqueci a senha" abre um e-mail para o suporte. |
 | Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
+| Nome da conta | A API não guarda nome: a saudação do Dashboard mostra só o período ("Boa tarde"), e o avatar usa as iniciais do e-mail. Entra com o nome na tabela `accounts`, no cadastro e no `GET /me`. |
+| Busca do painel | A paleta do ⌘K filtra só o que recebe (ações rápidas e pedidos recentes): a busca por pedido, produto e SKU chega com a API de busca. |
+| Sidebar recolhida | O estado aberto/recolhido não sobrevive ao recarregar a página: o cookie do shadcn só seria lido no layout, o que a seção 4 proíbe. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |
