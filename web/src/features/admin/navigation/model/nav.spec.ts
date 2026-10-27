@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { findActiveHref, visibleNavItems } from './nav';
+import { findActiveHref, findSection, visibleNavItems } from './nav';
 
 describe('visibleNavItems', () => {
   it('shows the items the account has permission for, without the permission', () => {
@@ -13,6 +13,16 @@ describe('visibleNavItems', () => {
 
   it('ignores permissions the panel does not know yet', () => {
     expect(visibleNavItems(['reports:read'])).toEqual([]);
+  });
+});
+
+describe('findSection', () => {
+  it('names the panel home', () => {
+    expect(findSection('/admin')).toEqual({ id: 'dashboard', label: 'Dashboard', href: '/admin' });
+  });
+
+  it('finds nothing outside the panel', () => {
+    expect(findSection('/produtos')).toBeUndefined();
   });
 });
 

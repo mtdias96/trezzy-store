@@ -1,26 +1,24 @@
-import { LogOutIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
-import { AdminLogo } from '@/components/admin/admin-logo';
+import { PanelToday } from '@/components/admin/panel-today';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 
 type PanelHeaderProps = {
-  signOutAction: () => Promise<void>;
+  heading: ReactNode;
+  notifications: ReactNode;
+  account: ReactNode;
 };
 
-export function PanelHeader({ signOutAction }: PanelHeaderProps) {
+export function PanelHeader({ heading, notifications, account }: PanelHeaderProps) {
   return (
-    <header className="flex h-18 shrink-0 items-center gap-2 border-b border-border bg-card px-5 sm:px-8">
-      <SidebarTrigger className="-ml-3 size-11 md:hidden" />
-      <AdminLogo className="md:hidden" />
-      <form action={signOutAction} className="ml-auto">
-        <button
-          type="submit"
-          className="flex h-ctl-lg items-center gap-2 rounded-pill border border-gray-250 px-4 text-body-sm font-semibold text-ink transition-colors duration-base hover:bg-gray-100 md:h-ctl"
-        >
-          <LogOutIcon aria-hidden className="size-4" />
-          Sair
-        </button>
-      </form>
+    <header className="flex h-18 shrink-0 items-center gap-3 border-b border-border bg-card px-5 sm:px-8">
+      <SidebarTrigger className="-ml-3 size-11 shrink-0 md:hidden" />
+      <div className="min-w-0 flex-1">{heading}</div>
+      <div className="flex shrink-0 items-center gap-2 md:gap-4">
+        <PanelToday />
+        {notifications}
+        {account}
+      </div>
     </header>
   );
 }

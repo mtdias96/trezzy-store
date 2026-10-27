@@ -389,5 +389,6 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Recuperação de senha | A API não tem o fluxo: o "Esqueci a senha" abre um e-mail para o suporte. |
 | Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
+| Nome da conta | A API não guarda nome: a saudação do Dashboard mostra só o período ("Boa tarde"), e o avatar usa as iniciais do e-mail. Entra com o nome na tabela `accounts`, no cadastro e no `GET /me`. |
 | Sidebar recolhida | O estado aberto/recolhido não sobrevive ao recarregar a página: o cookie do shadcn só seria lido no layout, o que a seção 4 proíbe. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |

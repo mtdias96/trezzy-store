@@ -14,7 +14,7 @@ export type PanelNavItem = {
 
 type PanelNavEntry = PanelNavItem & { permission: Permission };
 
-const PANEL_HOME_HREF: Route = '/admin';
+export const PANEL_HOME_HREF: Route = '/admin';
 
 // Um item novo entra junto com a página dele e com a permissão que a rota exige na API.
 const PANEL_NAV: readonly PanelNavEntry[] = [
@@ -28,6 +28,14 @@ function toNavItem({ id, label, href }: PanelNavEntry): PanelNavItem {
 // Esconder um item não protege nada: quem protege é a rota.
 export function visibleNavItems(permissions: readonly string[]): PanelNavItem[] {
   return PANEL_NAV.filter(({ permission }) => permissions.includes(permission)).map(toNavItem);
+}
+
+// Sem filtrar por permissão: só dá nome à página atual, e quem decide se ela abre é a rota.
+export function findSection(pathname: string): PanelNavItem | undefined {
+  const href = findActiveHref(PANEL_NAV.map((item) => item.href), pathname);
+  const section = PANEL_NAV.find((item) => item.href === href);
+
+  return section && toNavItem(section);
 }
 
 // O href mais longo que é a página ou um ancestral dela: /admin/pedidos/42 acende Pedidos, e não o /admin.
