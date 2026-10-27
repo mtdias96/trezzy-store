@@ -1,3 +1,5 @@
+import { twoDigits } from './text';
+
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
@@ -22,9 +24,7 @@ export function toCountdown(remainingMs: number): Countdown {
   };
 }
 
-const pad = (value: number) => String(value).padStart(2, '0');
-
 // "03d 05:46:50"
 export function formatCountdown({ days, hours, minutes, seconds }: Countdown): string {
-  return `${pad(days)}d ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return `${twoDigits(days)}d ${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}`;
 }

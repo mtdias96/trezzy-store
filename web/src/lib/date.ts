@@ -67,3 +67,13 @@ export function formatWeekdayHour(date: Date): string {
 
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)} ${hour}h`;
 }
+
+const longWeekday = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', timeZone: STORE_TIME_ZONE });
+
+// "Sexta, 19h": sem o "-feira" do pt-BR, na hora da loja.
+export function formatLongWeekdayHour(date: Date): string {
+  const weekday = longWeekday.format(date).replace('-feira', '');
+  const hour = Number(storeHour.format(date));
+
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${hour}h`;
+}
