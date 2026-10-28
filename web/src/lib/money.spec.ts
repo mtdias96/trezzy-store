@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { discountPercent, formatAmount, formatPrice, parsePriceInput } from './money';
+import { discountPercent, formatAmount, formatPrice, formatWholeAmount, parsePriceInput } from './money';
 
 describe('formatPrice', () => {
   // O Intl separa o "R$" do valor com um espaço inseparável (U+00A0).
@@ -20,6 +20,12 @@ describe('formatAmount', () => {
     [999999999, '9.999.999,99'],
   ])('formats %i cents as %s, without the currency', (cents, amount) => {
     expect(formatAmount(cents)).toBe(amount);
+  });
+});
+
+describe('formatWholeAmount', () => {
+  it('drops the cents and keeps the thousands dot', () => {
+    expect([formatWholeAmount(30000), formatWholeAmount(120000), formatWholeAmount(29990)]).toEqual(['300', '1.200', '299']);
   });
 });
 
