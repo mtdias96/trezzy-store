@@ -11,8 +11,7 @@ import { MobileNavContainer } from '@/features/store/navigation/containers/mobil
 // PRÉVIA (não commitar): sacola fixa. A contagem de verdade vem do carrinho, num Suspense (lê cookie).
 const PREVIEW_BAG_COUNT = 1;
 
-// Vitrine cacheada: o menu vem de um 'use cache' e entra no shell estático, sem Suspense.
-// O <main> recebe o foco do "Pular para o conteúdo" (tabIndex -1 para o Safari mover o foco).
+// tabIndex -1: sem ele, o Safari não move o foco do "Pular para o conteúdo".
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>

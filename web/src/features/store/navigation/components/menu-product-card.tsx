@@ -10,7 +10,7 @@ type MenuProductCardProps = {
   product: FeaturedProduct;
 };
 
-// O card inteiro é o link. A foto tem alt vazio: o nome do produto já está no texto do link.
+// alt vazio: o nome do produto já está no texto do link.
 export function MenuProductCard({ product }: MenuProductCardProps) {
   return (
     <NavigationMenuLink

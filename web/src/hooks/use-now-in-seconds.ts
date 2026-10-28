@@ -28,8 +28,7 @@ function readOnServer(): null {
   return null;
 }
 
-// Hora atual em segundos, que atualiza a cada segundo só enquanto `active` (ex: o relógio está na tela).
-// null no servidor e na hidratação, que não podem ler a hora (web/AGENTS.md, seção 4).
+// Só atualiza enquanto `active`. null no servidor e na hidratação, que não podem ler a hora.
 export function useNowInSeconds(active: boolean): number | null {
   return useSyncExternalStore<number | null>(active ? subscribeToSeconds : subscribeToNothing, readSeconds, readOnServer);
 }

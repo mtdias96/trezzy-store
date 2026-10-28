@@ -1,6 +1,6 @@
 import { type RefObject, useEffect, useState } from 'react';
 
-// Se o elemento aparece na tela. Elemento escondido (display: none, fora da rolagem) conta como fora.
+// Elemento escondido (display: none) conta como fora da tela.
 export function useInView(ref: RefObject<Element | null>): boolean {
   const [inView, setInView] = useState(false);
 

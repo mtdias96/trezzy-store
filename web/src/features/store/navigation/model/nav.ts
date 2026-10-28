@@ -4,7 +4,6 @@ import type { DepartmentId, FeaturedProduct, NavEntry, NavLink, NavSection, Stor
 
 type Path = `/${string}`;
 
-// [rótulo, slug]: o slug vira a URL, em pt-BR e indexada pelo Google.
 type LinkSeed = readonly [label: string, slug: string];
 
 function links(base: Path, seeds: readonly LinkSeed[]): NavLink[] {
@@ -22,7 +21,6 @@ function highlights(base: Path): NavSection {
   };
 }
 
-// Ordem do header. Categorias e marcas fixas até a API da vitrine listar as ativas.
 export const STORE_NAV: readonly NavEntry[] = [
   { kind: 'link', label: 'Novidades', href: pendingRoute('/novidades') },
   {
@@ -102,7 +100,6 @@ export function departmentIds(nav: readonly NavEntry[] = STORE_NAV): DepartmentI
   return nav.flatMap((entry) => (entry.kind === 'department' ? [entry.id] : []));
 }
 
-// Departamento sem destaques (API fora do ar, nenhum produto marcado) abre só com os links.
 export function toStoreMenu(
   featured: Partial<Record<DepartmentId, readonly FeaturedProduct[]>>,
   nav: readonly NavEntry[] = STORE_NAV,

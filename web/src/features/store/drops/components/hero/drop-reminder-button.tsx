@@ -15,9 +15,7 @@ const stateClass = {
   active: 'flex h-cta items-center justify-between gap-2 rounded-xl bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:bg-paper-stone',
 } satisfies Record<'idle' | 'active', string>;
 
-// O aviso de verdade (e-mail ou push) depende de uma rota na API: até lá, a escolha fica só neste navegador.
-// O status sr-only só fala depois de um clique: o valor salvo entra após a hidratação, e anunciá-lo a cada visita
-// seria ruído para o leitor de tela.
+// O status só fala depois de um clique: o valor salvo entra após a hidratação, e anunciá-lo a cada visita seria ruído.
 export function DropReminderButton({ storageKey }: DropReminderButtonProps) {
   const [active, setActive] = useStoredFlag(storageKey);
   const [announcement, setAnnouncement] = useState('');

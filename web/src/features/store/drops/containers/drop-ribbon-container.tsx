@@ -5,7 +5,6 @@ type DropRibbonContainerProps = {
   tagline: string;
 };
 
-// Sem drop, só a fita escura com o slogan.
 export async function DropRibbonContainer({ tagline }: DropRibbonContainerProps) {
   const drop = await getNextDrop();
 

@@ -15,7 +15,6 @@ import { DepartmentPanel } from './department-panel';
 
 type DesktopNavProps = {
   menu: StoreMenu;
-  // Repetido no fim de cada painel.
   promo?: ReactNode;
 };
 

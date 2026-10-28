@@ -10,7 +10,7 @@ type DropTeaserCardProps = {
   drop: Drop;
 };
 
-// Card do drop no painel do mega menu: só vive dentro do NavigationMenu (o link fecha o painel ao navegar).
+// Só dentro do NavigationMenu: o NavigationMenuLink fecha o painel ao navegar.
 export function DropTeaserCard({ drop }: DropTeaserCardProps) {
   return (
     <div className="flex w-64 shrink-0 flex-col rounded-card bg-brand-950 p-5 text-gray-0 xl:w-70">

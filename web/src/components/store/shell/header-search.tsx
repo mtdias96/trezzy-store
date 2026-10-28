@@ -7,9 +7,7 @@ import { pendingRoute } from '@/lib/route';
 
 const SEARCH_PATH = pendingRoute('/busca');
 
-// A partir do xl, o campo: o <Form> do Next navega sem recarregar e funciona sem JS (GET /busca?q=).
-// Abaixo, um ícone que abre a página da busca: entre 1100 e 1440px o campo não cabe ao lado dos itens do menu, e no
-// celular ele ocuparia uma linha a mais no header. Quando falta espaço, é o campo que encolhe (até min-w-48).
+// Campo só a partir do xl: entre 1100 e 1440px ele não cabe ao lado dos itens do menu.
 export function HeaderSearch() {
   return (
     <>

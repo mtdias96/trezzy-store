@@ -1,4 +1,3 @@
-// Só o visual: o nome acessível vem do link que envolve a marca.
 export function StoreLogo() {
   return (
     <span aria-hidden className="inline-flex items-center gap-1.5 sm:gap-2 xl:gap-2.5">

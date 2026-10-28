@@ -15,8 +15,6 @@ function bagLabel(count: number): string {
   return count === 1 ? 'Sacola: 1 item' : `Sacola: ${count} itens`;
 }
 
-// Abaixo do xl, ícone com o contador por cima, como o da conta: a pílula "Sacola" não cabe ao lado da marca em 360px
-// nem dos itens do menu em 1100px.
 export function BagLink({ count = 0 }: BagLinkProps) {
   return (
     <Link

@@ -14,8 +14,7 @@ type StoreHeaderProps = {
   bag: ReactNode;
 };
 
-// Sticky com o top negativo da faixa de avisos (h-10): a faixa sai com a rolagem e a navegação fica presa no topo.
-// O mega menu se ancora neste <header> para abrir em largura cheia logo abaixo dele.
+// Sticky com top negativo do tamanho da faixa de avisos (h-10): a faixa sai com a rolagem, e a navegação fica.
 export function StoreHeader({ announcements, mobileNav, nav, search, account, bag }: StoreHeaderProps) {
   return (
     <header className="sticky -top-10 z-40 bg-ink text-gray-0">

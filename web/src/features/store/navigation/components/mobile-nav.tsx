@@ -9,7 +9,6 @@ type MobileNavProps = {
   menu: StoreMenu;
 };
 
-// Departamentos em <details>: abrem e fecham sem JS. Os destaques e o drop ficam no desktop.
 // A conta entra aqui porque o ícone dela sai do header no celular, para a marca caber em 360px.
 export function MobileNav({ menu }: MobileNavProps) {
   return (

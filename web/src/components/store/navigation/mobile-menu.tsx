@@ -10,7 +10,6 @@ type MobileMenuProps = {
   children: ReactNode;
 };
 
-// Só a gaveta é client: os links chegam renderizados no servidor, por children.
 export function MobileMenu({ label, children }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
 

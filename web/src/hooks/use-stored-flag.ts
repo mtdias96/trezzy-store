@@ -42,7 +42,7 @@ function write(key: string, value: boolean): void {
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
-// Liga/desliga guardado neste navegador. false no servidor e na hidratação: o valor salvo aparece logo depois.
+// false no servidor e na hidratação: o valor salvo aparece logo depois.
 export function useStoredFlag(key: string): [boolean, (value: boolean) => void] {
   const value = useSyncExternalStore(subscribe, () => read(key), () => false);
 

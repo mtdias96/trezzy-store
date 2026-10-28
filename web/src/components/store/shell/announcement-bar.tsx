@@ -4,9 +4,8 @@ type AnnouncementBarProps = {
   items: readonly string[];
 };
 
-// O leitor de tela lê os avisos uma vez, pela <ul> sr-only; o trilho animado fica escondido dele.
-// O hover não pausa (é do design). A pausa exigida para movimento infinito (WCAG 2.2.2) é a caixa que aparece ao
-// receber o foco pelo teclado: marcada, ela para todos os marquees da página, sem JS (variante motion-paused).
+// O hover não pausa (design). A pausa que a WCAG 2.2.2 exige é a caixa que aparece no foco do teclado e para todos
+// os marquees da página (variante motion-paused).
 export function AnnouncementBar({ items }: AnnouncementBarProps) {
   return (
     <div className="relative flex h-10 items-center overflow-hidden border-b border-ink-soft">
@@ -17,7 +16,7 @@ export function AnnouncementBar({ items }: AnnouncementBarProps) {
         <input type="checkbox" data-pause-motion className="accent-brand" />
         Pausar animações
       </label>
-      {/* Cada aviso tem uns 225px: 12 por cópia passam de um monitor de 2560px. 5 s por aviso dão uns 45px/s. */}
+      {/* Cada aviso tem uns 225px: 12 por cópia passam de um monitor de 2560px. */}
       <Marquee
         items={items}
         minItemsPerCopy={12}

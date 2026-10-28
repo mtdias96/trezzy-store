@@ -12,7 +12,6 @@ export type NavSection = {
   links: readonly NavLink[];
 };
 
-// Item sem painel (Novidades, Drops, Outlet). `highlight` marca o item com a bolinha lima.
 export type NavShortcut = NavLink & {
   kind: 'link';
   highlight?: boolean;
