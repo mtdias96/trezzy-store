@@ -51,3 +51,29 @@ export function formatRelativeDate(date: Date, now: Date): string {
 
   return dayMonth.format(date).replace(' de ', ' ').replace('.', '');
 }
+
+const weekdayHour = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'short',
+  hour: 'numeric',
+  hourCycle: 'h23',
+  timeZone: STORE_TIME_ZONE,
+});
+
+// Horário de um lançamento: "Sex 19h", na hora da loja.
+export function formatWeekdayHour(date: Date): string {
+  const parts = weekdayHour.formatToParts(date);
+  const weekday = parts.find((part) => part.type === 'weekday')?.value.replace('.', '') ?? '';
+  const hour = parts.find((part) => part.type === 'hour')?.value ?? '';
+
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)} ${hour}h`;
+}
+
+const longWeekday = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', timeZone: STORE_TIME_ZONE });
+
+// "Sexta, 19h": sem o "-feira" do pt-BR, na hora da loja.
+export function formatLongWeekdayHour(date: Date): string {
+  const weekday = longWeekday.format(date).replace('-feira', '');
+  const hour = Number(storeHour.format(date));
+
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${hour}h`;
+}

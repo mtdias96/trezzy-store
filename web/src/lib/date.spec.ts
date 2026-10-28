@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatRelativeDate, formatShortDate, greetingFor } from './date';
+import { formatLongWeekdayHour, formatRelativeDate, formatShortDate, formatWeekdayHour, greetingFor } from './date';
 
 // Datas em UTC: São Paulo fica em UTC-3 (sem horário de verão desde 2019), então 15h UTC são 12h na loja.
 const storeTime = (day: number, hour: number) => new Date(Date.UTC(2026, 9, day, hour + 3));
@@ -44,5 +44,27 @@ describe('formatRelativeDate', () => {
     [storeTime(24, 10), '24 out'],
   ])('describes %s as %s', (date, text) => {
     expect(formatRelativeDate(date, now)).toBe(text);
+  });
+});
+
+describe('formatWeekdayHour', () => {
+  it('formats as capitalized short weekday and hour', () => {
+    // 30/10/2026 é uma sexta.
+    expect(formatWeekdayHour(storeTime(30, 19))).toBe('Sex 19h');
+  });
+
+  it('uses the store time, not UTC', () => {
+    // 23h na loja já é sábado em UTC.
+    expect(formatWeekdayHour(storeTime(30, 23))).toBe('Sex 23h');
+  });
+});
+
+describe('formatLongWeekdayHour', () => {
+  it.each([
+    [30, 19, 'Sexta, 19h'],
+    [31, 9, 'Sábado, 9h'],
+    [25, 0, 'Domingo, 0h'],
+  ])('formats day %i at %ih (store time) as %s', (day, hour, text) => {
+    expect(formatLongWeekdayHour(storeTime(day, hour))).toBe(text);
   });
 });

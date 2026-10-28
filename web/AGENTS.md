@@ -78,9 +78,11 @@ app → features → components · hooks → lib → config
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
   - `(account)`: área do cliente, dinâmica;
-  - previstos: `(shop)`, a vitrine cacheada, e `(checkout)`, a sacola e o checkout sem a navegação da loja.
+  - `(shop)`: a vitrine cacheada (home, catálogo, produto), com o header da loja no layout. O menu e o drop vêm de `'use cache'` e entram no shell estático, sem `<Suspense>`;
+  - previsto: `(checkout)`, a sacola e o checkout sem a navegação da loja.
 - O `(store)` não tem layout próprio. Layout aninhado não se desliga, então um header no `(store)` apareceria também no `(auth)` e no `(checkout)`. O header da loja entra no layout de cada sub-grupo que o mostra.
 - URLs em pt-BR (`/produtos`, `/sacola`): o nome da pasta da rota vira texto que o cliente vê e que o Google indexa. É a única exceção à regra de pastas em inglês.
+- Link para página da loja que ainda não existe: `pendingRoute('/caminho')` (`lib/route.ts`), porque o `typedRoutes` só aceita rota com `page.tsx`. Quando a página entrar, a chamada vira o literal.
 - PROIBIDO componente solto e pasta `_components`. Página é composição, não implementação.
 
 ### Isolamento entre áreas e features
@@ -152,7 +154,8 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 | `model/` | da feature: `model`; `lib` |
 | `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
 | `components/ui` | `components/ui`, `hooks`, `lib` e `styles` |
-| `components/common`, `store` e `admin` | `ui`, `common`, `hooks`, `lib` e `styles`, e nunca a outra área |
+| `components/common` | `ui`, `common`, `hooks`, `lib` e `styles` |
+| `components/store` e `admin` | `components/<própria área>`, `ui`, `common`, `hooks`, `lib` e `styles`, e nunca a outra área |
 | `hooks/` · `lib/` · `config/` · `styles/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config`; `styles` → só `styles` |
 
 ### Camadas compartilhadas
@@ -294,6 +297,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Movimento | `duration-fast`, `animate-pop`, `animate-appear`, `animate-skeleton`, `rotate-sticker` |
 
 - `type-display` aplica o estilo display do design (itálico, peso 900, largura 125% e caixa alta), e o tamanho vem do `text-display-*`.
+- O título do hero usa a utility `text-display-hero` (`globals.css`): o tamanho sai da largura do `@container` e da palavra mais longa, passada em `--hero-letters` no `style` do elemento. É utility, e não token: o token mora no `:root`, onde a variável do elemento não existe.
 - Espaçamento (`p-4`, `gap-3`) e largura de container (`max-w-md`, `@md:`) seguem a escala padrão do Tailwind, porque o design não define esses tokens.
 
 ### Regras impostas pelo lint 🔒
@@ -329,7 +333,14 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Portais no painel (Dialog, Popover, Sheet…) renderizam no `<body>`, fora do `[data-area="admin"]`, e voltariam às superfícies da loja. O conteúdo do portal leva `data-area="admin"` (ex: `<DialogContent data-area="admin">`).
 - Paleta de comandos: `Dialog` + `Combobox` do shadcn (Base UI) com `inline`, e não o `command` do shadcn, que traz o `cmdk` (sobre o Radix). O campo sem moldura é o `ComboboxChipsInput`: o `ComboboxInput` sempre envolve o campo num `InputGroup`.
 - Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
-- O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar.
+- O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar: a caixa "Pausar animações" da faixa de avisos aparece no foco do teclado e, marcada, para todos os marquees da página, sem JS. Marquee novo usa o `Marquee` de `components/store/data-display`, que já tem a variante `motion-paused:`.
+- `navigation-menu` (mega menu da loja): ajustado no arquivo para abrir em largura cheia, ancorado no `<header>`. Os painéis usam `keepMounted`, para os links das categorias irem no HTML do servidor.
+
+### Movimento e fluidez
+
+- Animação e transição só em `transform` e `opacity`, que rodam no compositor. PROIBIDO animar `width`, `height`, `top`, `left`, `margin` ou `padding`: cada quadro recalcula o layout da página.
+- Texto que muda a cada segundo (relógio, contador) usa `tabular-nums` e só atualiza enquanto aparece na tela (`useCountdown`, de `hooks/`).
+- Medido na home (Chrome, 1440px, 3 s parado): os três marquees rodam sem layout nem recálculo de estilo; o único layout é o do contador do hero, 1 por segundo.
 
 ### Imagens
 
@@ -395,7 +406,12 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Dependências | react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
-| Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. Os links para `/` usam `'/' as Route`, porque o `typedRoutes` só aceita rota com página: tirar o cast quando a home entrar. |
+| Home | Header, hero do drop, a fita diagonal e os departamentos: as outras seções entram uma a uma. Os departamentos de prévia não têm foto (o card mostra um ícone). A descrição da metadata do layout raiz é provisória. A foto do drop de prévia tem 992px: no desktop retina, o hero pede ~1500px. |
+| Rotas da vitrine na API | O front já consome os contratos: `GET /store/products?department=&featured=true&limit=` (`features/store/navigation/data/api.ts`) `GET /store/drops/next` (`features/store/drops/data/api.ts`; 404 quando não há drop) e `GET /store/departments` (`features/store/departments/data/api.ts`). Falta a API, e o domínio do CDN das fotos em `images.remotePatterns`. Com a API fora do ar, o menu sai sem os destaques, a home sem o drop e sem os departamentos, e a entrada de cache dura minutos, não horas. Quando o painel editar produtos e drops, as actions invalidam as tags `catalog` e `drops`. Quando o drop começa, os contadores param em zero até a entrada do cache vencer (até 1 h). |
+| Lembrete do drop | O "Ativar lembrete" só guarda a escolha no navegador (`useStoredFlag`): nada avisa o cliente. O aviso de verdade (e-mail ou push) entra com uma rota na API e, se exigir conta, com a área do cliente. |
+| SEO da loja | Falta a URL pública do site: sem ela não há `metadataBase`, `canonical`, Open Graph, `sitemap` nem `robots`. Entram com a variável da URL no `config/`. |
+| Páginas da loja | Os links do header usam `pendingRoute` até cada página existir: `/novidades`, `/streetwear`, `/sneakers`, `/eyewear`, `/marcas` (e as subpáginas), `/drops`, `/outlet`, `/produtos/{slug}`, `/busca`, `/sacola` e `/conta`. As categorias e marcas do menu são fixas em `features/store/navigation/model/nav.ts` até a API listar as ativas. |
+| Sacola e avisos | A sacola não mostra contagem: ela vem do carrinho, num `<Suspense>` (lê cookie). Os avisos da faixa do topo são fixos em `features/store/announcements` até existir onde editá-los. |
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
 | Rotas do catálogo na API | O front já consome o contrato em `features/admin/products/data/api.ts` (schemas zod): `GET /admin/products`, `GET /admin/products/{id}`, `GET /admin/brands`, `GET /admin/categories`, `POST /admin/media` (URL pré-assinada) e `POST /admin/media/{id}/confirm`. Falta a API: as rotas com essas respostas e permissões (`products:read`, `products:write`), o CORS do bucket aceitando o `PUT` do domínio do painel e o domínio do CDN das fotos em `images.remotePatterns` do `next.config.ts` (sem ele, o `next/image` recusa a foto). O Next filtra e ordena a lista inteira; quando a API paginar, os parâmetros da URL vão para ela. |
 | Seções vazias do painel | Pedidos, estoque, cupons e marcas e categorias são páginas vazias da prévia do sidebar (`components/admin/preview/section-preview.tsx`), com a permissão do Dashboard: saem quando cada seção entrar. |
