@@ -26,8 +26,6 @@ function toDrop({ number, title, description, startsAt, imageUrl, imageAlt, stic
   };
 }
 
-// Conteúdo público, igual para todo visitante: entra no shell estático. O hero, o menu e a fita leem a mesma
-// entrada. Com a API fora do ar, a home sai sem o drop, e a entrada vale minutos, para ele voltar logo.
 export async function getNextDrop(): Promise<Drop | null> {
   'use cache';
   cacheTag('drops');

@@ -7,7 +7,6 @@ type MarqueeProps = {
   // Itens que cada cópia precisa ter para passar da largura da tela: se ela acabar antes da borda, sobra um vão
   // vazio até a volta recomeçar. Depende do tamanho de cada item.
   minItemsPerCopy: number;
-  // Velocidade constante, qualquer que seja o número de itens.
   secondsPerItem: number;
   reverse?: boolean;
   renderItem: (item: string) => ReactNode;
@@ -15,9 +14,7 @@ type MarqueeProps = {
   className?: string;
 };
 
-// Trilho com duas cópias iguais: anda 50% e a segunda ocupa o lugar da primeira sem emenda. Só o transform anima,
-// no compositor. Escondido do leitor de tela: quem usa dá o texto uma vez, fora do trilho, quando ele importa.
-// Para com a caixa "Pausar animações" (variante motion-paused do globals.css).
+// Duas cópias iguais: o trilho anda 50% e a segunda ocupa o lugar da primeira sem emenda.
 export function Marquee({ items, minItemsPerCopy, secondsPerItem, reverse = false, renderItem, className }: MarqueeProps) {
   if (items.length === 0) {
     return null;

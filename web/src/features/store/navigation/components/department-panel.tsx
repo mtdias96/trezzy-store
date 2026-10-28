@@ -10,7 +10,6 @@ import { MenuProductCard } from './menu-product-card';
 
 type DepartmentPanelProps = {
   department: StoreMenuDepartment;
-  // Card no fim do painel (o drop da semana), vindo de outra feature.
   promo?: ReactNode;
 };
 

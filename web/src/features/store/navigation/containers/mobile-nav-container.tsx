@@ -1,7 +1,11 @@
 import { MobileNav } from '@/features/store/navigation/components/mobile-nav';
 import { getStoreMenu } from '@/features/store/navigation/data/queries';
+import type { MenuDepartment } from '@/features/store/navigation/model/types';
 
-// Mesma entrada de cache do DesktopNavContainer: a segunda chamada não vai à API.
-export async function MobileNavContainer() {
-  return <MobileNav menu={await getStoreMenu()} />;
+type MobileNavContainerProps = {
+  departments: readonly MenuDepartment[];
+};
+
+export async function MobileNavContainer({ departments }: MobileNavContainerProps) {
+  return <MobileNav menu={await getStoreMenu(departments)} />;
 }

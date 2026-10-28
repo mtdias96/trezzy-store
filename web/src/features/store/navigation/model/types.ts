@@ -1,7 +1,5 @@
 import type { Route } from 'next';
 
-export type DepartmentId = 'streetwear' | 'sneakers' | 'eyewear' | 'brands';
-
 export type NavLink = {
   label: string;
   href: Route;
@@ -12,7 +10,6 @@ export type NavSection = {
   links: readonly NavLink[];
 };
 
-// Item sem painel (Novidades, Drops, Outlet). `highlight` marca o item com a bolinha lima.
 export type NavShortcut = NavLink & {
   kind: 'link';
   highlight?: boolean;
@@ -20,7 +17,7 @@ export type NavShortcut = NavLink & {
 
 export type NavDepartment = {
   kind: 'department';
-  id: DepartmentId;
+  id: string;
   label: string;
   href: Route;
   // Link para a página do departamento, que o gatilho do painel não abre (ele só abre o painel).
@@ -29,6 +26,15 @@ export type NavDepartment = {
 };
 
 export type NavEntry = NavShortcut | NavDepartment;
+
+// Departamento do catálogo como o layout o entrega: os nomes e os links são do catálogo, e o menu só os mostra.
+export type MenuDepartment = {
+  id: string;
+  label: string;
+  href: Route;
+  categories: readonly NavLink[];
+  shortcuts: readonly NavLink[];
+};
 
 export type FeaturedProduct = {
   id: string;

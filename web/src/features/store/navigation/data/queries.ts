@@ -2,8 +2,8 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { departmentIds, toStoreMenu } from '@/features/store/navigation/model/nav';
-import type { FeaturedProduct, StoreMenu } from '@/features/store/navigation/model/types';
+import { departmentIds, storeNav, toStoreMenu } from '@/features/store/navigation/model/nav';
+import type { FeaturedProduct, MenuDepartment, StoreMenu } from '@/features/store/navigation/model/types';
 import { isRequestFailure } from '@/lib/http';
 import { pendingRoute } from '@/lib/route';
 
@@ -32,11 +32,12 @@ function toFeaturedProduct({ id, slug, title, brandName, priceInCents, coverUrl 
 
 // Conteúdo público, igual para todo visitante: entra no shell estático. Com falha, a entrada vale pouco, para o
 // menu completo voltar logo; o 'minutes' ainda entra no prerender (expira em 1 h, acima do mínimo de 5 min).
-export async function getStoreMenu(): Promise<StoreMenu> {
+export async function getStoreMenu(departments: readonly MenuDepartment[]): Promise<StoreMenu> {
   'use cache';
   cacheTag('catalog');
 
-  const ids = departmentIds();
+  const nav = storeNav(departments);
+  const ids = departmentIds(nav);
   const featured = await Promise.all(ids.map((id) => orUndefined(fetchFeaturedProducts(id, FEATURED_PER_DEPARTMENT))));
 
   if (featured.includes(undefined)) {
@@ -45,5 +46,5 @@ export async function getStoreMenu(): Promise<StoreMenu> {
     cacheLife('hours');
   }
 
-  return toStoreMenu(Object.fromEntries(ids.map((id, index) => [id, (featured[index] ?? []).map(toFeaturedProduct)])));
+  return toStoreMenu(nav, Object.fromEntries(ids.map((id, index) => [id, (featured[index] ?? []).map(toFeaturedProduct)])));
 }

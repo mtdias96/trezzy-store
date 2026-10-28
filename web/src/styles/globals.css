@@ -186,7 +186,6 @@
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
 
   --rotate-sticker: -6deg;
-  /* Fitas cruzadas do separador de seções: uma sobe, a outra desce. */
   --rotate-ribbon: -2.3deg;
   --rotate-ribbon-cross: 1.5deg;
 
@@ -329,6 +328,24 @@
   font-size: clamp(2.75rem, calc(100cqi / (var(--hero-letters, 6) * 0.95)), 7.5rem);
   line-height: 0.9;
   letter-spacing: -0.04em;
+}
+
+/* Painel lateral que acompanha a rolagem logo abaixo do header da loja (h-17, 68px, no lg) e rola por dentro quando
+   passa da altura da tela. É utility, e não classes soltas: a altura máxima é um calc, valor arbitrário no lint. */
+@utility sticky-panel {
+  position: sticky;
+  top: 5.25rem; /* 84px: o header e 16px de respiro */
+  max-height: calc(100dvh - 6.25rem); /* 84px em cima e 16px embaixo */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Estilo display do design: Archivo itálico, peso 900, largura 125% e caixa alta. */

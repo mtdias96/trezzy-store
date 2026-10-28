@@ -15,11 +15,7 @@ type DropHeroProps = {
   drop: Drop;
 };
 
-// O título é <h2>: o <h1> da home é o nome da loja. Uma palavra por linha, como no design, com o tamanho calculado
-// para a mais longa encher a largura do card (text-display-hero). O espaço entre os <span> mantém o texto lido
-// como "Runner 03 Lima Ácida", e não "Runner03LimaÁcida".
-// Colunas iguais: o título cresce com a largura e preenche o card até perto da altura da foto; o contador e os
-// botões ficam no pé.
+// O espaço entre os <span> mantém o título lido como "Runner 03 Lima Ácida", e não "Runner03LimaÁcida".
 export function DropHero({ drop }: DropHeroProps) {
   const titleSize = { '--hero-letters': longestWordLength(drop.title) } as CSSProperties;
 

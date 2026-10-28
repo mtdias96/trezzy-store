@@ -8,3 +8,5 @@ export type ActionResult<T = void>
       // O React limpa o formulário depois da action: values devolve o que foi digitado (nunca a senha).
       values?: Record<string, string>;
     };
+
+export type FormAction<T = void> = (state: ActionResult<T> | null, formData: FormData) => Promise<ActionResult<T>>;

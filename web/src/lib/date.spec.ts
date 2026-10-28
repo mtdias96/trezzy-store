@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatLongWeekdayHour, formatRelativeDate, formatShortDate, formatWeekdayHour, greetingFor } from './date';
+import { formatLongWeekdayHour, formatRelativeDate, formatShortDate, formatTimeAgo, formatWeekdayHour, greetingFor } from './date';
 
 // Datas em UTC: São Paulo fica em UTC-3 (sem horário de verão desde 2019), então 15h UTC são 12h na loja.
 const storeTime = (day: number, hour: number) => new Date(Date.UTC(2026, 9, day, hour + 3));
@@ -66,5 +66,24 @@ describe('formatLongWeekdayHour', () => {
     [25, 0, 'Domingo, 0h'],
   ])('formats day %i at %ih (store time) as %s', (day, hour, text) => {
     expect(formatLongWeekdayHour(storeTime(day, hour))).toBe(text);
+  });
+});
+
+describe('formatTimeAgo', () => {
+  const now = storeTime(28, 12);
+  const daysAgo = (days: number) => new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+  it.each([
+    [0, 'hoje'],
+    [1, 'ontem'],
+    [3, 'há 3 dias'],
+    [7, 'há 1 semana'],
+    [15, 'há 2 semanas'],
+    [30, 'há 1 mês'],
+    [150, 'há 5 meses'],
+    [365, 'há 1 ano'],
+    [800, 'há 2 anos'],
+  ])('labels %i days ago as %s', (days, label) => {
+    expect(formatTimeAgo(daysAgo(days), now)).toBe(label);
   });
 });

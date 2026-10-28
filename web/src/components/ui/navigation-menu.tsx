@@ -2,9 +2,8 @@ import { NavigationMenu as NavigationMenuPrimitive } from '@base-ui/react/naviga
 import { cva } from 'class-variance-authority';
 import { cn } from 'cn';
 
-// Ajustado ao mega menu da loja: o painel abre em largura cheia embaixo do header (o anchor vem de quem usa), e só
-// opacity e translate animam. O original anima largura, altura e posição, que recalculam o layout a cada quadro.
-// O Root não monta o Positioner sozinho: quem usa põe o NavigationMenuPositioner com o anchor.
+// Ajustado: o original anima largura, altura e posição, que recalculam o layout a cada quadro; aqui só opacity e
+// translate. O Root não monta o Positioner: quem usa passa o anchor.
 
 function NavigationMenu({ className, ...props }: NavigationMenuPrimitive.Root.Props) {
   return <NavigationMenuPrimitive.Root data-slot="navigation-menu" className={cn('relative', className)} {...props} />;
@@ -24,8 +23,7 @@ function NavigationMenuItem(props: React.ComponentPropsWithRef<typeof Navigation
   return <NavigationMenuPrimitive.Item data-slot="navigation-menu-item" {...props} />;
 }
 
-// Item do header escuro, com ou sem painel: o aberto fica marcado como o hover. Usado sem o cn: ele trata o
-// text-body como cor e o descarta ao lado do text-gray-0, e o botão cairia nos 16px do body.
+// Sem cn: ele trata o text-body como cor e o descarta ao lado do text-gray-0, e o botão cairia nos 16px do body.
 const navigationMenuTriggerStyle = cva(
   'inline-flex h-ctl items-center gap-2 rounded-pill px-2.5 text-body font-semibold whitespace-nowrap text-gray-0 transition-colors duration-base outline-none hover:bg-ink-soft focus-visible:bg-ink-soft data-popup-open:bg-ink-soft xl:px-3.5',
 );
@@ -40,7 +38,6 @@ function NavigationMenuTrigger(props: Omit<NavigationMenuPrimitive.Trigger.Props
   );
 }
 
-// O conteúdo que sai fica por cima (position: absolute, do Base UI) enquanto some, e o que entra aparece no lugar.
 function NavigationMenuContent({ className, ...props }: NavigationMenuPrimitive.Content.Props) {
   return (
     <NavigationMenuPrimitive.Content
@@ -54,7 +51,6 @@ function NavigationMenuContent({ className, ...props }: NavigationMenuPrimitive.
   );
 }
 
-// fixed: o header é sticky, e o painel acompanha a rolagem sem recalcular a posição a cada scroll.
 function NavigationMenuPositioner({ className, ...props }: NavigationMenuPrimitive.Positioner.Props) {
   return (
     <NavigationMenuPrimitive.Portal>

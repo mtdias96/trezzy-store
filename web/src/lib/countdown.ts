@@ -12,7 +12,6 @@ export type Countdown = {
   seconds: number;
 };
 
-// Prazo vencido fica em zero, e não negativo: a contagem para em 00d 00:00:00.
 export function toCountdown(remainingMs: number): Countdown {
   const remaining = Math.max(0, remainingMs);
 
@@ -24,7 +23,6 @@ export function toCountdown(remainingMs: number): Countdown {
   };
 }
 
-// "03d 05:46:50"
 export function formatCountdown({ days, hours, minutes, seconds }: Countdown): string {
   return `${twoDigits(days)}d ${twoDigits(hours)}:${twoDigits(minutes)}:${twoDigits(seconds)}`;
 }

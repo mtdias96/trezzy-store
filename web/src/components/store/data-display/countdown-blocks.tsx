@@ -7,7 +7,6 @@ import type { Countdown } from '@/lib/countdown';
 import { twoDigits } from '@/lib/text';
 
 type CountdownBlocksProps = {
-  // ISO 8601 com fuso, como vem da API.
   endsAt: string;
 };
 
@@ -18,7 +17,6 @@ const UNITS = [
   ['seconds', 'Seg'],
 ] as const satisfies readonly (readonly [keyof Countdown, string])[];
 
-// Um bloco por unidade, para o fundo escuro do hero. Só atualiza enquanto aparece na tela.
 export function CountdownBlocks({ endsAt }: CountdownBlocksProps) {
   const ref = useRef<HTMLDivElement>(null);
   const countdown = useCountdown(endsAt, ref);

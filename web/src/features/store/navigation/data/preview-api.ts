@@ -9,22 +9,23 @@ function product(slug: string, title: string, brandName: string, priceInCents: n
   return { id: slug, slug, title, brandName, priceInCents, coverUrl: null };
 }
 
+// Os mesmos slugs do catálogo de exemplo: o card do menu abre a página do produto.
 const FEATURED: Record<string, FeaturedProductDto[]> = {
   streetwear: [
     product('camiseta-pesada-galeria', 'Camiseta Pesada “Galeria”', 'Pátio 9', 27990),
     product('jaqueta-coach-norte', 'Jaqueta Coach “Norte”', 'Norte/Sul', 63990),
   ],
   sneakers: [
-    product('runner-02-grafite', 'Runner 02 “Grafite”', 'Forte Athletics', 79990),
-    product('court-low-off-white', 'Court Low “Off-White”', 'Pátio 9', 54990),
+    product('tenis-low-court-couro-branco', 'Tênis Low Court Couro Branco', 'KAIRO', 64990),
+    product('tenis-runner-03-lima-acida', 'Tênis Runner 03 “Lima Ácida”', 'Forte Athletics', 119990),
   ],
   eyewear: [
-    product('oculos-shield-lima', 'Óculos Shield “Lima”', 'Norte/Sul', 42990),
-    product('armacao-redonda-fume', 'Armação Redonda “Fumê”', 'Pátio 9', 38990),
+    product('oculos-shield-lima', 'Óculos Shield “Lima”', 'Lente Crua', 42990),
+    product('oculos-vidro-02-acetato-preto', 'Óculos Vidro 02 Acetato Preto', 'Lente Crua', 59990),
   ],
   brands: [
-    product('moletom-canguru-patio', 'Moletom Canguru “Pátio”', 'Pátio 9', 45990),
-    product('runner-02-grafite', 'Runner 02 “Grafite”', 'Forte Athletics', 79990),
+    product('moletom-heavyweight-patio', 'Moletom Heavyweight “Pátio”', 'Pátio 9', 48990),
+    product('tenis-runner-03-lima-acida', 'Tênis Runner 03 “Lima Ácida”', 'Forte Athletics', 119990),
   ],
 };
 

@@ -6,10 +6,8 @@ type DropHeroPhotoProps = {
   sticker: string | null;
 };
 
-// A maior imagem acima da dobra no desktop (LCP): carrega já, com prioridade alta. O card tem no mínimo a proporção
-// das fotos de drop (15/16), para a foto aparecer inteira; se o texto ao lado for mais alto, ele estica junto
-// (self-stretch) e corta as laterais, e o w-full impede a proporção de alargá-lo além da coluna.
-// No celular, o selo encolhe inteiro (scale): o text-hand já é o menor tamanho da fonte manuscrita.
+// self-stretch: com o texto ao lado mais alto, o card estica e corta as laterais; o w-full impede a proporção de
+// alargá-lo além da coluna. No celular o selo encolhe inteiro (scale): o text-hand é o menor tamanho manuscrito.
 export function DropHeroPhoto({ src, alt, sticker }: DropHeroPhotoProps) {
   return (
     <div className="relative aspect-15/16 w-full overflow-hidden rounded-block bg-brand-900 lg:self-stretch">

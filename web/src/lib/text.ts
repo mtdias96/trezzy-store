@@ -13,12 +13,10 @@ export function words(text: string): string[] {
   return text.split(/\s+/).filter(Boolean);
 }
 
-// Letras da palavra mais longa: o título em display usa para caber uma palavra por linha.
 export function longestWordLength(text: string): number {
   return Math.max(0, ...words(text).map((word) => word.length));
 }
 
-// "07": contador, número do drop.
 export function twoDigits(value: number): string {
   return String(value).padStart(2, '0');
 }
