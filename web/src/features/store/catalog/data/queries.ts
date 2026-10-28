@@ -14,15 +14,9 @@ import type {
 import { isRequestFailure } from '@/lib/http';
 import { pendingRoute } from '@/lib/route';
 
-import {
-  type DepartmentDto,
-  fetchDepartments,
-  fetchNewestProducts,
-  fetchProduct,
-  fetchRecentReviews,
-  type ProductDetailDto,
-  type ProductDto,
-} from './api';
+import type { DepartmentDto, ProductDetailDto, ProductDto } from './api';
+// PRÉVIA (não commitar): o catálogo de exemplo no lugar das rotas.
+import { fetchDepartments, fetchNewestProducts, fetchProduct, fetchRecentReviews } from './preview-api';
 
 function toDepartment({ slug, name, productCount, imageUrl }: DepartmentDto): Department {
   return { slug, name, productCount, imageUrl, href: pendingRoute(`/${slug}`) };
