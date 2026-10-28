@@ -34,7 +34,8 @@ export function CatalogFilterPanel({ idPrefix, departments, sizes, brands, filte
   return (
     <div className="flex flex-col gap-5">
       <FilterSection titleId={ids.departments} title={CATALOG_LABELS.departments}>
-        <FilterLinks labelledBy={ids.departments} items={departments} />
+        {/* Prefetch completo, como as abas: são as outras páginas do catálogo, com a lista em cache. */}
+        <FilterLinks labelledBy={ids.departments} items={departments} prefetch />
       </FilterSection>
       {sizes.length > 0
         ? (
