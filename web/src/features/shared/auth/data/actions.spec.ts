@@ -2,11 +2,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
 
-import { signInToPanel, signOut } from '@/features/shared/auth/data/actions';
-import { requestSignIn, requestSignOut } from '@/features/shared/auth/data/api';
 import { ADMIN_SCOPE } from '@/features/shared/auth/model/access-token';
 import { createSession, deleteSession, getRefreshToken } from '@/features/shared/auth/session/session';
 import { HttpError } from '@/lib/http';
+
+import { signInToPanel, signOut } from './actions';
+import { requestSignIn, requestSignOut } from './api';
 
 vi.mock('@/config/env', () => ({ env: { API_URL: 'https://api.test' } }));
 vi.mock('next/navigation', () => ({

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import * as z from 'zod';
 
-import { signInSchema } from '@/features/shared/auth/model/schema';
+import { signInSchema } from './schema';
 
 describe('signInSchema', () => {
   it('normalizes the e-mail and turns the checkbox into a boolean', () => {

@@ -7,7 +7,7 @@
 O Next 16 tem breaking changes: APIs, convenções e estrutura de arquivos podem diferir do seu treinamento. OBRIGATÓRIO ler o guia do assunto em `node_modules/next/dist/docs/` (a documentação da versão instalada) antes de escrever código, e respeitar os avisos de depreciação.
 
 - Stack: Next 16 (App Router, Turbopack, Cache Components, React Compiler), React 19, TypeScript strict, Tailwind v4, shadcn/ui sobre Base UI, zod e Vitest. Deploy na Vercel (seção 12).
-- Previstos, ainda não instalados (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): nuqs, react-hook-form e Playwright. A regra que depende de um deles vale a partir da instalação.
+- Previstos, ainda não instalados (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): react-hook-form e Playwright. A regra que depende de um deles vale a partir da instalação.
 
 ## Definition of Done
 
@@ -28,7 +28,7 @@ pnpm --filter trezzy-web build
 - Arquivos em kebab-case (`product-card.tsx`), componentes em PascalCase (`ProductCard`) e hooks em `use-*.ts`.
 - Features nomeadas pelo domínio (`catalog`, `cart`, `orders`…), dentro da pasta da área: `store` (loja), `admin` (painel) ou `shared` (usada pelas duas, como o `auth`). O mesmo nome pode existir nas duas áreas: `store/orders` e `admin/orders` são features diferentes.
 - Formatação pelo ESLint (`@stylistic`) 🔒, com as mesmas escolhas da `api/`: aspas simples (duplas no JSX), ponto e vírgula, vírgula no fim de lista multilinha e 2 espaços. Imports ordenados pelo `simple-import-sort` 🔒. O VSCode corrige ao salvar.
-- Fora da pasta atual, importe pelo alias `@/` 🔒: `../` é proibido.
+- Na mesma pasta, import relativo (`./x`); fora dela, pelo alias `@/` 🔒: `../` é proibido. O `components/ui` mantém o alias que o shadcn gera.
 - OBRIGATÓRIO `import * as z from 'zod'`, como na `api/`: o `import { z }` impede o tree-shaking.
 
 ## 2. Arquitetura por área e feature
@@ -46,8 +46,9 @@ src/
 │   ├── admin/<feature>/         ← dashboard, products, orders…
 │   └── shared/<feature>/        ← auth
 ├── components/
-│   ├── ui/ · common/ · layout/  ← das duas áreas
-│   └── store/ · admin/          ← de uma área só
+│   ├── ui/                      ← shadcn, sem subpastas
+│   ├── common/<categoria>/      ← das duas áreas
+│   └── <área>/<categoria>/      ← de uma área só (store, admin)
 ├── hooks/ · lib/ · config/      ← lógica sem domínio, das duas áreas
 └── styles/                      ← estilo global: globals.css, tokens.ts e fonts.ts
 ```
@@ -72,14 +73,16 @@ app → features → components · hooks → lib → config
 - A raiz do `app/` tem só o layout raiz, o `not-found` e o `global-error`. Cada área é um route group:
   - `(admin)`: painel, com `layout` (que aplica `data-area="admin"` e tira o painel dos buscadores), `loading` e `error`. As rotas ficam em `(admin)/admin/…`, em sub-grupos como na loja:
     - `(auth)`: entrar (`/admin/entrar`), na tela dividida do `AuthShell`, sem a navegação do painel;
-    - `(panel)`: o painel logado (`/admin`…), com o cabeçalho (depois a sidebar) no layout. O layout não lê a sessão (seção 6).
+    - `(panel)`: o painel logado (`/admin`…), com a sidebar e o cabeçalho no layout. O layout não lê a sessão (seção 6): o menu da sidebar, que depende das permissões, entra num `<Suspense>`.
   - `(store)`: a loja, dividida em sub-grupos por tipo de layout e de cache, cada um com seu `layout`, `loading` e `error`. Sub-grupo não muda a URL.
 - Sub-grupos da loja:
   - `(auth)`: entrar e cadastro, com layout enxuto;
   - `(account)`: área do cliente, dinâmica;
-  - previstos: `(shop)`, a vitrine cacheada, e `(checkout)`, a sacola e o checkout sem a navegação da loja.
+  - `(shop)`: a vitrine cacheada (home, catálogo, produto), com o header da loja no layout. O menu e o drop vêm de `'use cache'` e entram no shell estático, sem `<Suspense>`;
+  - previsto: `(checkout)`, a sacola e o checkout sem a navegação da loja.
 - O `(store)` não tem layout próprio. Layout aninhado não se desliga, então um header no `(store)` apareceria também no `(auth)` e no `(checkout)`. O header da loja entra no layout de cada sub-grupo que o mostra.
 - URLs em pt-BR (`/produtos`, `/sacola`): o nome da pasta da rota vira texto que o cliente vê e que o Google indexa. É a única exceção à regra de pastas em inglês.
+- Link para página da loja que ainda não existe: `pendingRoute('/caminho')` (`lib/route.ts`), porque o `typedRoutes` só aceita rota com `page.tsx`. Quando a página entrar, a chamada vira o literal.
 - PROIBIDO componente solto e pasta `_components`. Página é composição, não implementação.
 
 ### Isolamento entre áreas e features
@@ -102,13 +105,25 @@ features/<área>/<feature>/
 ├── model/       types.ts · schema.ts · compute.ts · search-params.ts     ← regra pura
 ├── containers/  *.tsx                                                    ← lógica: busca e decide
 ├── hooks/       use-*.ts                                                 ← lógica de client
-├── components/  *.tsx                                                    ← UI: só props
+├── components/  *.tsx ou <contexto>/*.tsx                               ← UI: só props
 └── session/     session.ts · cookies.ts · authorized-http.ts · guard.ts  ← só em shared/auth
 ```
 
 - `data/`: todo o I/O. `api.ts` é o transporte HTTP (sobre o `lib/http.ts`), `queries.ts` a leitura e `actions.ts` (`'use server'`) a escrita.
 - `model/`: tipos e regra pura, sem I/O, com os testes co-localizados.
 - `containers/`, `hooks/` e `components/`: o padrão Container & Presentational, descrito abaixo.
+
+### Pastas dentro de `components/`
+
+- `components/common` e `components/<área>`: OBRIGATÓRIO todo arquivo numa pasta de categoria, desde o primeiro 🔒. As categorias seguem os nomes do MUI e do Chakra: `layout/` (composição de página), `navigation/`, `forms/` (campos e cards de formulário), `data-display/`, `feedback/` (erro, vazio e carregamento) e `overlay/`. A `<área>` tem também `shell/`, a casca da área (header, sidebar e logo). Pastas criadas sob demanda; categoria nova entra nesta lista e no `eslint.config.mjs` no mesmo commit.
+- `components/` da feature: arquivos soltos enquanto a feature tem um contexto só (`auth`, `navigation`). No segundo contexto, a pasta inteira é dividida: PROIBIDO arquivo solto ao lado de subpasta.
+- Contexto é uma tela, no singular (`list/`, `editor/`), ou um subdomínio com o nome do arquivo do `model/` (`media/` ↔ `model/media.ts`).
+- PROIBIDO subpasta dentro de subpasta: o contexto que cresce vira um contexto irmão.
+- Card de produto da loja: um só, `components/store/data-display/product-card.tsx`, em toda grade (home, catálogo, busca). A feature monta o `ProductCardData` a partir da API e escolhe o `imageSizes` da grade; PROIBIDO card de produto próprio numa feature.
+- Peça sem domínio usada por dois contextos sobe para `components/<área>`, em vez de um contexto importar o outro (o `FormCard` do cadastro de produto está em `components/admin/forms/`).
+- Spec e skeleton ficam junto do componente.
+- Código de prévia fica em `components/<área>/preview/`, fora das categorias, e entra nas Pendências.
+- `components/ui` segue o layout do shadcn, sem subpastas.
 
 ### Container & Presentational
 
@@ -126,7 +141,7 @@ A lógica fica separada da UI. No App Router, o container costuma ser um Server 
 
 ### Quem importa o quê
 
-Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `layout`, `hooks`, `lib`, `config` e `styles`.
+Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma área e da mesma feature, e "compartilhados" são `ui`, `common`, `hooks`, `lib`, `config` e `styles`.
 
 | De | Pode importar |
 | :--- | :--- |
@@ -134,21 +149,21 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 | `app/(store)` e `app/(admin)` | `containers`, `components`, `data` e `model` das features da própria área e da `shared`; `components/<própria área>`; `shared/auth/session` e compartilhados |
 | `proxy.ts` | `shared/auth/session`, `lib` e `config` |
 | `containers/` | da feature: `data`, `model`, `components`, `hooks` e `containers`; `components/<própria área>`; `shared/auth/session` e compartilhados |
-| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `layout`, `hooks`, `lib` e `styles` |
+| `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `hooks`, `lib` e `styles` |
 | `hooks/` da feature | da feature: `hooks`, `model` e `data/actions.ts`; `hooks` e `lib` |
 | `data/` | da feature: `data` e `model`; `shared/auth/session`, `lib` e `config` |
 | `model/` | da feature: `model`; `lib` |
 | `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
 | `components/ui` | `components/ui`, `hooks`, `lib` e `styles` |
-| `components/common`, `layout`, `store` e `admin` | `ui`, `common`, `layout`, `hooks`, `lib` e `styles`, e nunca a outra área |
+| `components/common` | `ui`, `common`, `hooks`, `lib` e `styles` |
+| `components/store` e `admin` | `components/<própria área>`, `ui`, `common`, `hooks`, `lib` e `styles`, e nunca a outra área |
 | `hooks/` · `lib/` · `config/` · `styles/` | `hooks` → `lib`; `lib` → `config`; `config` → só `config`; `styles` → só `styles` |
 
 ### Camadas compartilhadas
 
 - `components/ui/`: só o que o shadcn gera. O lint de tokens é mais brando aqui (seção 8).
-- `components/common/`: nossos componentes de apresentação sem domínio (`MessageScreen`, `RouteError`, `PageSkeleton`), com o lint de tokens inteiro.
-- `components/layout/`: primitivos de composição de página (`Screen`, `Section`).
-- `components/store/` e `components/admin/`: apresentação de uma área só, como o header e o footer da loja ou a sidebar e a tabela de dados do painel.
+- `components/common/`: nossos componentes de apresentação sem domínio, por categoria (`feedback/` com `RouteError` e `PageSkeleton`, `forms/` com `PasswordInput`, `layout/` com os primitivos de página `Screen` e `Section`), com o lint de tokens inteiro.
+- `components/store/` e `components/admin/`: apresentação de uma área só, por categoria: `shell/` (header, footer, sidebar e logo), `data-display/` (cards e tabelas), `forms/` (campos e cards de formulário)…
 - `hooks/`: hooks de client sem domínio (é o alias `hooks` do `components.json`).
 - `lib/`: utilitários sem domínio (`cn`, `http`, `ActionResult`, formatadores).
 - `config/`: variáveis de ambiente validadas com zod no boot. PROIBIDO ler `process.env` fora de `config/`.
@@ -195,6 +210,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - Página cacheada com um pedaço dinâmico isola esse pedaço num `<Suspense>` com skeleton, e o resto entra no shell estático.
 - PROIBIDO ler cookie ou sessão no topo de um `layout.tsx`: o `await` segura o segmento inteiro, inclusive o `children`, atrás da requisição.
 - Hora atual e valores aleatórios (`Date.now()`, `new Date()`, `Math.random()`, `crypto.randomUUID()`) em componente de servidor: `await io()` (de `next/cache`) antes. Ler `cookies()` antes não basta: com o `partialPrefetching`, a casca da rota renderiza com os cookies da sessão, e o Next recusa a hora nesse prerender. O `connection()` fica para quando a renderização precisa esperar a requisição real, porque ele bloqueia também o prefetch.
+- Hora atual em client component (saudação, data de hoje): `useClientValue` de `hooks/`. O servidor e a hidratação renderizam o fallback (um skeleton), e o browser troca pelo valor logo depois. Datas do painel no fuso da loja, pelo `lib/date.ts`.
 
 ### Cache
 
@@ -232,6 +248,8 @@ Server Action é endpoint público. Toda action:
 - Filtros, ordenação, busca e paginação de listagem ficam na URL, via `nuqs`.
 - Os parsers ficam em `model/search-params.ts` da feature e são reutilizados no servidor (`createSearchParamsCache`) e no client.
 - PROIBIDO `useSearchParams` manual para estado de filtro.
+- O `NuqsAdapter` fica no layout do `(panel)`. Quando é o servidor que filtra a lista, o filtro atualiza com `shallow: false` e numa transição (`startTransition`), para a lista atual ficar na tela até a nova chegar; a busca espera a digitação parar (`limitUrlUpdates: debounce(300)`).
+- Ordenação por coluna é link (`createSerializer` dos mesmos parsers): funciona sem JavaScript no client.
 
 ## 6. Proteção de rota (`proxy.ts`)
 
@@ -240,6 +258,7 @@ Server Action é endpoint público. Toda action:
 - Se o painel ganhar um subdomínio próprio (`admin.…`), quem roteia pelo host é o `proxy.ts`, sem virar outro app.
 - O proxy faz só o redirect otimista (sem sessão → login, com o destino em `?next=`). Ele roda em toda navegação, até no prefetch, então só lê o cookie e nunca chama a API. A checagem real fica perto do dado, em cada `queries.ts` e `actions.ts` protegido.
 - Quem está logado e abre o login vê o formulário: mandá-lo ao painel com um token revogado criaria um loop de redirects.
+- O menu do painel segue as permissões efetivas da conta (`GET /me/permissions`), pelo catálogo em `features/admin/navigation/model/nav.ts`. Item novo entra ali com a permissão que a rota exige, junto com a página dele. Esconder o item não protege nada: quem protege é a rota.
 
 ### Sessão (BFF)
 
@@ -279,6 +298,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Movimento | `duration-fast`, `animate-pop`, `animate-appear`, `animate-skeleton`, `rotate-sticker` |
 
 - `type-display` aplica o estilo display do design (itálico, peso 900, largura 125% e caixa alta), e o tamanho vem do `text-display-*`.
+- O título do hero usa a utility `text-display-hero` (`globals.css`): o tamanho sai da largura do `@container` e da palavra mais longa, passada em `--hero-letters` no `style` do elemento. É utility, e não token: o token mora no `:root`, onde a variável do elemento não existe.
 - Espaçamento (`p-4`, `gap-3`) e largura de container (`max-w-md`, `@md:`) seguem a escala padrão do Tailwind, porque o design não define esses tokens.
 
 ### Regras impostas pelo lint 🔒
@@ -309,8 +329,19 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Os slots apontam para tokens no `:root` (superfícies da loja). No painel, o container com `data-area="admin"` troca as superfícies para os cinzas frios e aplica `bg-background`.
 - Elemento com papel de interface usa o slot (`bg-primary`, `text-muted-foreground`, `border-border`). O token direto fica para o que não tem slot (`bg-lime`, `bg-status-paid-bg`).
 - Manter `cn()`, `data-slot` e os aliases do `components.json`. A composição de primitivo é pela prop `render` do Base UI, que não tem `asChild`/`Slot`.
+- O `shadcn add` reescreve os componentes de que o novo depende (a sidebar traz o `button` e o `input`), e os nossos têm ajustes: depois de rodar, restaure-os com `git checkout` e confira o diff.
+- Sidebar do painel: os slots `--sidebar-*` e as larguras `--sidebar-width*` ficam no `:root`, e não no `[data-area="admin"]`, porque no celular ela abre num Sheet, que o portal renderiza fora do container do painel. Fora do `components/ui`, o estado recolhido se escreve com a variante `sidebar-collapsed:` do `globals.css`.
+- Portais no painel (Dialog, Popover, Sheet…) renderizam no `<body>`, fora do `[data-area="admin"]`, e voltariam às superfícies da loja. O conteúdo do portal leva `data-area="admin"` (ex: `<DialogContent data-area="admin">`).
+- Paleta de comandos: `Dialog` + `Combobox` do shadcn (Base UI) com `inline`, e não o `command` do shadcn, que traz o `cmdk` (sobre o Radix). O campo sem moldura é o `ComboboxChipsInput`: o `ComboboxInput` sempre envolve o campo num `InputGroup`.
 - Fonte pelo `next/font`, em `src/styles/fonts.ts`, numa variável própria (`--font-archivo`) que o token `--font-sans` lê.
-- O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar.
+- O `globals.css` desliga as animações com `prefers-reduced-motion`. Movimento infinito (`animate-marquee`) também precisa de um jeito de pausar: a caixa "Pausar animações" da faixa de avisos aparece no foco do teclado e, marcada, para todos os marquees da página, sem JS. Marquee novo usa o `Marquee` de `components/store/data-display`, que já tem a variante `motion-paused:`.
+- `navigation-menu` (mega menu da loja): ajustado no arquivo para abrir em largura cheia, ancorado no `<header>`. Os painéis usam `keepMounted`, para os links das categorias irem no HTML do servidor.
+
+### Movimento e fluidez
+
+- Animação e transição só em `transform` e `opacity`, que rodam no compositor. PROIBIDO animar `width`, `height`, `top`, `left`, `margin` ou `padding`: cada quadro recalcula o layout da página.
+- Texto que muda a cada segundo (relógio, contador) usa `tabular-nums` e só atualiza enquanto aparece na tela (`useCountdown`, de `hooks/`).
+- Medido na home (Chrome, 1440px, 3 s parado): os três marquees rodam sem layout nem recálculo de estilo; o único layout é o do contador do hero, 1 por segundo.
 
 ### Imagens
 
@@ -373,15 +404,28 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | :--- | :--- |
 | Projeto na Vercel | Criar o projeto (Root Directory `web`) e cadastrar o `API_URL`. É um passo manual, feito por quem tem acesso à conta. Depois, trocar o `project.json` local pelo `vercel link`. |
 | Pre-push | O build da Vercel antes do push é regra escrita, sem hook: a barreira obrigatória continua sendo a CI e o preview da Vercel. |
-| Dependências | nuqs, react-hook-form e Playwright aguardam aprovação. |
+| Dependências | react-hook-form e Playwright aguardam aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
-| Home | Não há página em `/`, que responde 404 até a loja entrar. A descrição da metadata é provisória. Os links para `/` usam `'/' as Route`, porque o `typedRoutes` só aceita rota com página: tirar o cast quando a home entrar. |
+| Home | Header, hero do drop, a fita diagonal, os departamentos e "Chegou agora": as outras seções entram uma a uma. Os departamentos de prévia não têm foto (o card mostra um ícone). A descrição da metadata do layout raiz é provisória. A foto do drop de prévia tem 992px: no desktop retina, o hero pede ~1500px. |
+| Rotas da vitrine na API | O front já consome os contratos: `GET /store/products?department=&featured=true&limit=` (`features/store/navigation/data/api.ts`); `GET /store/drops/next` (`features/store/drops/data/api.ts`; 404 quando não há drop); `GET /store/departments`, `GET /store/products?sort=newest&limit=&department=`, `GET /store/products/{slug}` (com o resumo das avaliações) e `GET /store/products/{slug}/reviews?limit=` (`features/store/catalog/data/api.ts`; parcelas e preço no Pix vêm prontos). Falta a API, e o domínio do CDN das fotos em `images.remotePatterns`. Com a API fora do ar, o menu sai sem os destaques, a home sem o drop, os departamentos e os lançamentos, e a entrada de cache dura minutos, não horas. Quando o painel editar produtos e drops, as actions invalidam as tags `catalog` e `drops`. Quando o drop começa, os contadores param em zero até a entrada do cache vencer (até 1 h). |
+| Lembrete do drop e favoritos | O "Ativar lembrete" e o coração do card só guardam a escolha no navegador (`useStoredFlag`): nada avisa o cliente, e os favoritos não seguem para outro aparelho. A lista de desejos entra com rota na API. O aviso de verdade (e-mail ou push) entra com uma rota na API e, se exigir conta, com a área do cliente. |
+| SEO da loja | Falta a URL pública do site: sem ela não há `metadataBase`, `canonical`, `sitemap`, `robots`, o `BreadcrumbList` em JSON-LD da página do produto, e o Open Graph e o JSON-LD só levam fotos com URL absoluta. Entram com a variável da URL no `config/`. |
+| 404 do produto | Slug inexistente responde 200 com `noindex`: o produto entra em streaming, e o status já saiu (comportamento documentado do Next; o Google não indexa). Um 404 de verdade pediria checar o slug no `proxy.ts` contra uma lista em cache, sem chamar a API. Quando o painel editar um produto, a action invalida a tag `product:{slug}`. |
+| Avaliações | A página do produto mostra as 3 mais recentes: falta a página com todas e o formulário para avaliar (pede conta e compra). Quando entrar uma avaliação, a API invalida as tags `reviews:{slug}` e `product:{slug}` (o resumo vem no produto). |
+| Sacola e frete | A página do produto já envia para `addToBag` (`features/store/cart`) e `estimateShipping` (`features/store/shipping`), que validam a entrada e respondem que não deu: faltam o carrinho e o cálculo de frete na API, e a sacola no header continua sem contagem. |
+| Páginas da loja | Os links do header usam `pendingRoute` até cada página existir: `/novidades`, `/streetwear`, `/sneakers`, `/eyewear`, `/marcas` (e as subpáginas), `/drops`, `/outlet`, `/busca`, `/sacola` e `/conta`. As categorias e marcas do menu são fixas em `features/store/navigation/model/nav.ts` até a API listar as ativas. |
+| Sacola e avisos | A sacola não mostra contagem: ela vem do carrinho, num `<Suspense>` (lê cookie). Os avisos da faixa do topo são fixos em `features/store/announcements` até existir onde editá-los. |
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
+| Rotas do catálogo na API | O front já consome o contrato em `features/admin/products/data/api.ts` (schemas zod): `GET /admin/products`, `GET /admin/products/{id}`, `GET /admin/brands`, `GET /admin/categories`, `POST /admin/media` (URL pré-assinada) e `POST /admin/media/{id}/confirm`. Falta a API: as rotas com essas respostas e permissões (`products:read`, `products:write`), o CORS do bucket aceitando o `PUT` do domínio do painel e o domínio do CDN das fotos em `images.remotePatterns` do `next.config.ts` (sem ele, o `next/image` recusa a foto). O Next filtra e ordena a lista inteira; quando a API paginar, os parâmetros da URL vão para ela. |
+| Seções vazias do painel | Pedidos, estoque, cupons e marcas e categorias são páginas vazias da prévia do sidebar (`components/admin/preview/section-preview.tsx`), com a permissão do Dashboard: saem quando cada seção entrar. |
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
 | `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |
 | Renovação da sessão | A API não tem `POST /auth/refresh`: a sessão dura o access token (60 min em dev). O refresh token já fica guardado, e a renovação entra no `proxy.ts` quando a rota existir. |
 | Recuperação de senha | A API não tem o fluxo: o "Esqueci a senha" abre um e-mail para o suporte. |
 | Área logada da loja | Só o painel tem área privada. O `authorizedHttp` volta ao login do painel; com a área do cliente, o login de destino passa a depender da área. |
 | Botões de ícone | Os tamanhos `icon*` do `Button` ainda usam a escala padrão (`size-8`): o design não tem token de largura para controles. |
+| Nome da conta | A API não guarda nome: a saudação do Dashboard mostra só o período ("Boa tarde"), e o avatar usa as iniciais do e-mail. Entra com o nome na tabela `accounts`, no cadastro e no `GET /me`. |
+| Busca do painel | A paleta do ⌘K filtra só o que recebe (ações rápidas e pedidos recentes): a busca por pedido, produto e SKU chega com a API de busca. |
+| Sidebar recolhida | O estado aberto/recolhido não sobrevive ao recarregar a página: o cookie do shadcn só seria lido no layout, o que a seção 4 proíbe. |
 | ESLint 9 | Sem suporte oficial. Subir para o 10 quando os plugins do `eslint-config-next` aceitarem. |

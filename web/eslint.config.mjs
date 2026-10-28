@@ -54,6 +54,11 @@ const SHADCN_ONLY_CLASSES = [
 // uma área da outra e uma feature da outra. Os parênteses dos route groups são escapados no padrão.
 const FEATURE_LAYERS = ['data', 'model', 'containers', 'components', 'hooks'];
 
+// Categorias de components/common e components/<área> (web/AGENTS.md, seção 2). Arquivo solto ou numa pasta fora da
+// lista não vira elemento, e o no-unknown-files acusa.
+const COMMON_CATEGORIES = '{layout,navigation,forms,data-display,feedback,overlay}';
+const AREA_CATEGORIES = '{shell,layout,navigation,forms,data-display,feedback,overlay,preview}';
+
 const ELEMENTS = [
   { type: 'app-store', pattern: 'src/app/\\(store\\)' },
   { type: 'app-admin', pattern: 'src/app/\\(admin\\)' },
@@ -65,9 +70,8 @@ const ELEMENTS = [
   })),
   { type: 'feature-session', pattern: 'src/features/shared/auth/session' },
   { type: 'ui', pattern: 'src/components/ui' },
-  { type: 'common', pattern: 'src/components/common' },
-  { type: 'layout', pattern: 'src/components/layout' },
-  { type: 'area-components', pattern: 'src/components/{store,admin}', capture: ['area'] },
+  { type: 'common', pattern: `src/components/common/${COMMON_CATEGORIES}` },
+  { type: 'area-components', pattern: `src/components/{store,admin}/${AREA_CATEGORIES}`, capture: ['area'] },
   { type: 'hooks', pattern: 'src/hooks' },
   { type: 'lib', pattern: 'src/lib' },
   { type: 'config', pattern: 'src/config' },
@@ -81,7 +85,7 @@ const SAME_AREA = { area: '{{ from.element.captured.area }}' };
 const SAME_FEATURE = { ...SAME_AREA, feature: '{{ from.element.captured.feature }}' };
 const same = (type, extra = {}) => ({ type, captured: SAME_FEATURE, ...extra });
 const anyOf = (...types) => ({ types: { anyOf: types } });
-const SHARED = ['ui', 'common', 'layout', 'hooks', 'lib', 'config', 'styles'];
+const SHARED = ['ui', 'common', 'hooks', 'lib', 'config', 'styles'];
 
 // Rota de uma área compõe features da própria área e da shared, e os componentes da própria área.
 const areaRoute = (area) => [
@@ -114,7 +118,7 @@ const IMPORTS = {
     same('feature-components'),
     same('feature-model'),
     { type: 'area-components', captured: SAME_AREA },
-    anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles'),
+    anyOf('ui', 'common', 'hooks', 'lib', 'styles'),
   ],
   // Lógica de client: estado da feature e chamada das Server Actions, nunca das queries.
   'feature-hooks': [
@@ -130,10 +134,13 @@ const IMPORTS = {
     anyOf('lib', 'config'),
   ],
   ui: [anyOf('ui', 'hooks', 'lib', 'styles')],
-  common: [anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles')],
-  layout: [anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles')],
-  // Componentes de uma área (header da loja, sidebar do painel): não enxergam a outra área.
-  'area-components': [anyOf('ui', 'common', 'layout', 'hooks', 'lib', 'styles')],
+  common: [anyOf('ui', 'common', 'hooks', 'lib', 'styles')],
+  // Componentes de uma área (header da loja, sidebar do painel): usam as outras categorias da própria área (o header
+  // usa o container de layout/) e não enxergam a outra área.
+  'area-components': [
+    { type: 'area-components', captured: SAME_AREA },
+    anyOf('ui', 'common', 'hooks', 'lib', 'styles'),
+  ],
   hooks: [anyOf('hooks', 'lib')],
   lib: [anyOf('lib', 'config')],
   config: [anyOf('config')],

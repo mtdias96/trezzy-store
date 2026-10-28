@@ -1,3 +1,3 @@
-import { PageSkeleton } from '@/components/common/page-skeleton';
+import { PageSkeleton } from '@/components/common/feedback/page-skeleton';
 
 export default PageSkeleton;

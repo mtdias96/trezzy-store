@@ -8,8 +8,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/80',
+        accent:
+          'bg-lime text-ink hover:bg-lime-500 *:data-[slot=kbd]:bg-ink *:data-[slot=kbd]:text-lime',
+        inverse: 'bg-ink text-gray-0 hover:bg-ink-soft',
         outline:
-          'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
+          'border-gray-250 bg-card hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)] aria-expanded:bg-secondary aria-expanded:text-secondary-foreground',
         ghost:
@@ -31,10 +34,23 @@ const buttonVariants = cva(
           'size-7 rounded-[min(var(--radius-md),12px)] in-data-[slot=button-group]:rounded-lg',
         'icon-lg': 'size-9',
       },
+      // rounded-full, e não o token rounded-pill: o cn só conhece a escala padrão e não trocaria o rounded-lg pelo token.
+      shape: {
+        default: '',
+        pill: 'rounded-full',
+      },
     },
+    compoundVariants: [
+      {
+        shape: 'pill',
+        size: ['default', 'sm', 'lg'],
+        className: 'px-4 has-data-[icon=inline-end]:pr-3.5 has-data-[icon=inline-start]:pl-3.5',
+      },
+    ],
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      shape: 'default',
     },
   },
 );
@@ -43,12 +59,13 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  shape = 'default',
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, shape, className }))}
       {...props}
     />
   );

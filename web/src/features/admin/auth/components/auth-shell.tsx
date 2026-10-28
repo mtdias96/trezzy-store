@@ -3,12 +3,11 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { ArrowUpRightIcon, LockIcon } from 'lucide-react';
 
-import { AdminLogo } from '@/components/admin/admin-logo';
+import { AdminLogo } from '@/components/admin/shell/admin-logo';
 
 import { AuthShowcase } from './auth-showcase';
 
-// Sem página em / ainda, o typedRoutes recusa o link: tirar o cast quando a home da loja entrar.
-const STORE_HOME = '/' as Route;
+const STORE_HOME: Route = '/';
 
 type AuthShellProps = {
   children: ReactNode;

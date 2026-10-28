@@ -4,6 +4,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Tudo o que se move em loop para quando a caixa "Pausar animações" (faixa de avisos da loja) está marcada:
+   a pausa que a WCAG 2.2.2 exige para movimento infinito vale para a página inteira, sem JS. */
+@custom-variant motion-paused (&:where(body:has([data-pause-motion]:checked) *));
+
+/* Sidebar do shadcn recolhida no modo ícone. Fora do components/ui, o group-data-[collapsible=icon]: é valor
+   arbitrário, proibido pelo lint. */
+@custom-variant sidebar-collapsed (&:where([data-collapsible="icon"] *));
+
 /*
  * Tokens da Trezzy: única fonte dos valores de estilo do web.
  * Cada grupo resetado com `--*: initial` só tem os utilitários listados aqui: `bg-red-500` ou
@@ -173,10 +181,13 @@
   --animate-pop: pop 140ms ease-out;
   --animate-appear: appear 180ms ease-out;
   --animate-marquee: marquee 40s linear infinite;
+  --animate-marquee-reverse: marquee 40s linear infinite reverse;
   --animate-shake: shake 380ms ease-in-out;
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
 
   --rotate-sticker: -6deg;
+  --rotate-ribbon: -2.3deg;
+  --rotate-ribbon-cross: 1.5deg;
 
   @keyframes pop {
     from {
@@ -285,14 +296,19 @@
   --chart-3: var(--color-info-500);
   --chart-4: var(--color-success-500);
   --chart-5: var(--color-warning-500);
-  --sidebar: var(--color-gray-0);
-  --sidebar-foreground: var(--color-ink);
-  --sidebar-primary: var(--color-brand);
-  --sidebar-primary-foreground: var(--color-gray-0);
-  --sidebar-accent: var(--color-gray-150);
-  --sidebar-accent-foreground: var(--color-ink);
-  --sidebar-border: var(--color-gray-200);
-  --sidebar-ring: var(--color-brand);
+  /* Sidebar do painel. Fica no :root, e não no [data-area="admin"]: no celular ela abre num Sheet, que o portal
+     renderiza no <body>, fora do container do painel. */
+  --sidebar: var(--color-brand-950);
+  --sidebar-foreground: var(--color-brand-200);
+  --sidebar-primary: var(--color-lime);
+  --sidebar-primary-foreground: var(--color-ink);
+  --sidebar-accent: var(--color-brand-900);
+  --sidebar-accent-foreground: var(--color-gray-0);
+  --sidebar-border: var(--color-brand-900);
+  --sidebar-ring: var(--color-lime);
+  --sidebar-width: 14.5rem; /* 232px */
+  --sidebar-width-icon: 4.25rem; /* 68px: botão de 44px + 12px de cada lado */
+  --sidebar-width-mobile: 18rem; /* 288px */
 }
 
 /* Painel: o layout do (admin) marca o container com data-area="admin" e aplica bg-background. */
@@ -303,6 +319,23 @@
   --accent: var(--color-gray-150);
   --border: var(--color-gray-200);
   --input: var(--color-gray-300);
+}
+
+/* Título do hero, uma palavra por linha: a palavra mais longa (--hero-letters, no style do elemento) enche a
+   largura do card (100cqi, do @container mais próximo). Cada letra do display ocupa até ~0.95em. De 44px a 120px.
+   É utility, e não token --text-*: o token mora no :root, e lá o var(--hero-letters) do título não existe. */
+@utility text-display-hero {
+  font-size: clamp(2.75rem, calc(100cqi / (var(--hero-letters, 6) * 0.95)), 7.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Estilo display do design: Archivo itálico, peso 900, largura 125% e caixa alta. */
@@ -327,6 +360,10 @@
   :focus-visible {
     outline: 2px solid var(--color-brand);
     outline-offset: 2px;
+  }
+  /* O list-none tira a setinha nativa do <summary> no Chrome e no Firefox; o Safari desenha a dele por aqui. */
+  summary::-webkit-details-marker {
+    display: none;
   }
   ::selection {
     background-color: var(--color-brand);
