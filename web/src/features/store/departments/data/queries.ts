@@ -6,7 +6,9 @@ import type { Department } from '@/features/store/departments/model/types';
 import { isRequestFailure } from '@/lib/http';
 import { pendingRoute } from '@/lib/route';
 
-import { type DepartmentDto, fetchDepartments } from './api';
+import type { DepartmentDto } from './api';
+// PRÉVIA (não commitar): os departamentos de exemplo no lugar da rota.
+import { fetchDepartments } from './preview-api';
 
 function toDepartment({ slug, name, productCount, imageUrl }: DepartmentDto): Department {
   return { slug, name, productCount, imageUrl, href: pendingRoute(`/${slug}`) };
