@@ -2,17 +2,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRightIcon, ImageIcon } from 'lucide-react';
 
-import { productCountLabel } from '@/features/store/departments/model/departments';
-import type { Department } from '@/features/store/departments/model/types';
+import { productCountLabel } from '@/features/store/catalog/model/departments';
+import type { Department } from '@/features/store/catalog/model/types';
 
 type DepartmentCardProps = {
   department: Department;
 };
 
-// O card inteiro é o link. A foto tem alt vazio: o nome do departamento já está no texto do link.
-// Hover e foco pelo teclado: o card sobe, a foto aproxima e a seta anda. Só transform e opacity animam, no compositor:
-// a sombra é uma camada (::after) que só troca a opacidade, porque animar o box-shadow repinta a cada quadro. Ela
-// fica fora da moldura com overflow-hidden, que a cortaria. No toque (sem hover), o active afunda o card.
+// A sombra é uma camada (::after) que só troca a opacidade, porque animar o box-shadow repinta a cada quadro; fica
+// fora da moldura com overflow-hidden, que a cortaria.
 export function DepartmentCard({ department }: DepartmentCardProps) {
   return (
     <Link

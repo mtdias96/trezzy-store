@@ -1,5 +1,5 @@
 import { PageContainer } from '@/components/store/layout/page-container';
-import type { Department } from '@/features/store/departments/model/types';
+import type { Department } from '@/features/store/catalog/model/types';
 
 import { DepartmentCard } from './department-card';
 

@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 
-import { DepartmentShowcaseContainer } from '@/features/store/departments/containers/department-showcase-container';
+import { DepartmentShowcaseContainer } from '@/features/store/catalog/containers/department-showcase-container';
+import { NewArrivalsContainer } from '@/features/store/catalog/containers/new-arrivals-container';
 import { DropHeroContainer } from '@/features/store/drops/containers/drop-hero-container';
 import { DropRibbonContainer } from '@/features/store/drops/containers/drop-ribbon-container';
-import { DEPARTMENTS_TITLE, STREET_TAGLINE } from '@/features/store/home/model/content';
+import { DEPARTMENTS_TITLE, NEW_ARRIVALS_TITLE, STREET_TAGLINE } from '@/features/store/home/model/content';
 
 export const metadata: Metadata = {
   title: { absolute: 'Trezzy Store: streetwear, sneakers e eyewear' },
@@ -18,6 +19,7 @@ export default function Page() {
       <DropHeroContainer />
       <DropRibbonContainer tagline={STREET_TAGLINE} />
       <DepartmentShowcaseContainer title={DEPARTMENTS_TITLE} />
+      <NewArrivalsContainer title={NEW_ARRIVALS_TITLE} />
     </>
   );
 }

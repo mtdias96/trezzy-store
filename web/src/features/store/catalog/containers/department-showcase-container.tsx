@@ -1,11 +1,10 @@
-import { DepartmentShowcase } from '@/features/store/departments/components/department-showcase';
-import { listDepartments } from '@/features/store/departments/data/queries';
+import { DepartmentShowcase } from '@/features/store/catalog/components/departments/department-showcase';
+import { listDepartments } from '@/features/store/catalog/data/queries';
 
 type DepartmentShowcaseContainerProps = {
   title: string;
 };
 
-// Sem departamentos (ou com a API fora do ar), a seção não aparece.
 export async function DepartmentShowcaseContainer({ title }: DepartmentShowcaseContainerProps) {
   const departments = await listDepartments();
 
