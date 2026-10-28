@@ -8,7 +8,7 @@ export type Department = {
   href: Route;
 };
 
-export type ProductTag = 'drop' | 'new' | 'last-units';
+export type ProductTag = 'drop' | 'new' | 'last-units' | 'sold-out';
 
 export type ProductSummary = {
   id: string;
@@ -22,6 +22,25 @@ export type ProductSummary = {
   pixPriceInCents: number | null;
   rating: number | null;
   tag: ProductTag | null;
+};
+
+export type SizeFacet = {
+  value: string;
+  count: number;
+};
+
+export type BrandFacet = {
+  slug: string;
+  name: string;
+  count: number;
+};
+
+// Uma página da listagem. As contagens de cada filtro ignoram o próprio filtro: marcar uma marca não zera as outras.
+export type CatalogResults = {
+  products: ProductSummary[];
+  total: number;
+  sizes: SizeFacet[];
+  brands: BrandFacet[];
 };
 
 export type NewArrivalsTab = {

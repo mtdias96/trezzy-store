@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/store/layout/page-container';
 import { Breadcrumb } from '@/components/store/navigation/breadcrumb';
+import { HOME_CRUMB } from '@/features/store/catalog/model/scope';
 import type { ProductDetail } from '@/features/store/catalog/model/types';
 
 import { ProductGallery } from './product-gallery';
@@ -19,7 +20,7 @@ type ProductDetailViewProps = {
 
 export function ProductDetailView({ product, sizeChart, purchase, shipping, reviews }: ProductDetailViewProps) {
   const trail = [
-    { name: 'Home', href: '/' as const },
+    HOME_CRUMB,
     product.department,
     ...(product.category ? [product.category] : []),
   ];

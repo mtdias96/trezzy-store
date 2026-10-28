@@ -9,6 +9,7 @@ import { http, HttpError } from '@/lib/http';
 // Vira parte da URL (/streetwear, /produtos/moletom-patio): só minúsculas, números e hífen.
 const slugSchema = z.string().regex(/^[a-z0-9-]+$/);
 
+// O name vem do painel, mas a vitrine mostra o de model/taxonomy.ts até a árvore da loja vir da API.
 const departmentSchema = z.object({
   slug: slugSchema,
   name: z.string(),
@@ -37,7 +38,8 @@ const productSchema = z.object({
   installments: z.object({ count: z.number().int().positive(), valueInCents: z.number().int().positive() }).nullable(),
   pixPriceInCents: z.number().int().positive().nullable(),
   rating: z.number().min(0).max(5).nullable(),
-  tag: z.enum(['drop', 'new', 'last-units']).nullable(),
+  // last-units e sold-out saem do estoque: a API escolhe um selo só.
+  tag: z.enum(['drop', 'new', 'last-units', 'sold-out']).nullable(),
   coverUrl: z.url().nullable(),
 });
 
@@ -64,6 +66,70 @@ export async function fetchNewestProducts({ limit, department }: ProductQuery): 
   return http(`/store/products?${query.toString()}`, {
     schema: z.object({ products: z.array(productSchema), total: z.number().int().nonnegative() }),
   });
+}
+
+const countSchema = z.number().int().nonnegative();
+
+const catalogPageSchema = z.object({
+  products: z.array(productSchema),
+  total: countSchema,
+  facets: z.object({
+    // Na ordem da grade (P, M, G… ou 37, 38…), só os tamanhos com estoque no recorte.
+    sizes: z.array(z.object({ value: z.string(), count: countSchema })),
+    // Todas as marcas ativas, inclusive as com zero no recorte.
+    brands: z.array(z.object({ slug: slugSchema, name: z.string(), count: countSchema })),
+  }),
+});
+
+export type CatalogPageDto = z.infer<typeof catalogPageSchema>;
+
+export type CatalogSortDto = 'relevance' | 'newest' | 'best-selling' | 'price-asc' | 'price-desc';
+
+export type CatalogPageQuery = {
+  department: string | null;
+  category: string | null;
+  sizes: string[];
+  brands: string[];
+  priceAboveInCents: number | null;
+  priceUpToInCents: number | null;
+  onSale: boolean;
+  sort: CatalogSortDto;
+  page: number;
+  limit: number;
+};
+
+// GET /store/products?department=&category=&size=M&size=G&brand=&priceAboveInCents=&priceUpToInCents=&onSale=true
+//   &sort=relevance&page=1&limit=24 → { products, total, facets: { sizes, brands } }
+// Preço: acima de priceAboveInCents (exclusivo) e até priceUpToInCents (inclusivo). Promoção: preço "de" maior que o
+// preço. As contagens de cada filtro ignoram o próprio filtro: marcar uma marca não zera as outras.
+export async function fetchCatalogPage(params: CatalogPageQuery): Promise<CatalogPageDto> {
+  const { department, category, sizes, brands, priceAboveInCents, priceUpToInCents, onSale, sort, page, limit } = params;
+  const query = new URLSearchParams({ sort, page: String(page), limit: String(limit) });
+
+  if (department) {
+    query.set('department', department);
+  }
+
+  if (category) {
+    query.set('category', category);
+  }
+
+  if (priceAboveInCents !== null) {
+    query.set('priceAboveInCents', String(priceAboveInCents));
+  }
+
+  if (priceUpToInCents !== null) {
+    query.set('priceUpToInCents', String(priceUpToInCents));
+  }
+
+  if (onSale) {
+    query.set('onSale', 'true');
+  }
+
+  sizes.forEach((size) => query.append('size', size));
+  brands.forEach((brand) => query.append('brand', brand));
+
+  return http(`/store/products?${query.toString()}`, { schema: catalogPageSchema });
 }
 
 const productDetailSchema = productSchema.omit({ coverUrl: true }).extend({

@@ -1,108 +1,64 @@
 import { pendingRoute } from '@/lib/route';
 
-import type { DepartmentId, FeaturedProduct, NavEntry, NavLink, NavSection, StoreMenu } from './types';
-
-type Path = `/${string}`;
+import type { FeaturedProduct, MenuDepartment, NavDepartment, NavEntry, NavLink, StoreMenu } from './types';
 
 type LinkSeed = readonly [label: string, slug: string];
 
-function links(base: Path, seeds: readonly LinkSeed[]): NavLink[] {
+function links(base: `/${string}`, seeds: readonly LinkSeed[]): NavLink[] {
   return seeds.map(([label, slug]) => ({ label, href: pendingRoute(`${base}/${slug}`) }));
 }
 
-function categories(base: Path, seeds: readonly LinkSeed[]): NavSection {
-  return { title: 'Categorias', links: links(base, seeds) };
-}
+const BRANDS: NavDepartment = {
+  kind: 'department',
+  id: 'brands',
+  label: 'Marcas',
+  href: pendingRoute('/marcas'),
+  allLabel: 'Ver todas as marcas',
+  sections: [
+    {
+      title: 'Em alta',
+      links: links('/marcas', [
+        ['Pátio 9', 'patio-9'],
+        ['Norte/Sul', 'norte-sul'],
+        ['Forte Athletics', 'forte-athletics'],
+      ]),
+    },
+    { title: 'Destaques', links: links('/marcas', [['Novidades', 'novidades'], ['Collabs', 'collabs']]) },
+  ],
+};
 
-function highlights(base: Path): NavSection {
+function toNavDepartment({ id, label, href, categories, shortcuts }: MenuDepartment): NavDepartment {
   return {
-    title: 'Destaques',
-    links: links(base, [['Novidades', 'novidades'], ['Mais vendidos', 'mais-vendidos'], ['Outlet', 'outlet']]),
+    kind: 'department',
+    id,
+    label,
+    href,
+    allLabel: `Ver tudo em ${label}`,
+    sections: [
+      { title: 'Categorias', links: categories },
+      { title: 'Destaques', links: shortcuts },
+    ],
   };
 }
 
-export const STORE_NAV: readonly NavEntry[] = [
-  { kind: 'link', label: 'Novidades', href: pendingRoute('/novidades') },
-  {
-    kind: 'department',
-    id: 'streetwear',
-    label: 'Streetwear',
-    href: pendingRoute('/streetwear'),
-    allLabel: 'Ver tudo em Streetwear',
-    sections: [
-      categories('/streetwear', [
-        ['Camisetas', 'camisetas'],
-        ['Moletons', 'moletons'],
-        ['Jaquetas', 'jaquetas'],
-        ['Calças', 'calcas'],
-        ['Shorts', 'shorts'],
-        ['Acessórios', 'acessorios'],
-      ]),
-      highlights('/streetwear'),
-    ],
-  },
-  {
-    kind: 'department',
-    id: 'sneakers',
-    label: 'Sneakers',
-    href: pendingRoute('/sneakers'),
-    allLabel: 'Ver tudo em Sneakers',
-    sections: [
-      categories('/sneakers', [
-        ['Casual', 'casual'],
-        ['Skate', 'skate'],
-        ['Corrida', 'corrida'],
-        ['Basquete', 'basquete'],
-        ['Chinelos e slides', 'chinelos-e-slides'],
-      ]),
-      highlights('/sneakers'),
-    ],
-  },
-  {
-    kind: 'department',
-    id: 'eyewear',
-    label: 'Eyewear',
-    href: pendingRoute('/eyewear'),
-    allLabel: 'Ver tudo em Eyewear',
-    sections: [
-      categories('/eyewear', [
-        ['Óculos de sol', 'oculos-de-sol'],
-        ['Armações', 'armacoes'],
-        ['Esportivos', 'esportivos'],
-        ['Estojos e cordões', 'estojos-e-cordoes'],
-      ]),
-      highlights('/eyewear'),
-    ],
-  },
-  {
-    kind: 'department',
-    id: 'brands',
-    label: 'Marcas',
-    href: pendingRoute('/marcas'),
-    allLabel: 'Ver todas as marcas',
-    sections: [
-      {
-        title: 'Em alta',
-        links: links('/marcas', [
-          ['Pátio 9', 'patio-9'],
-          ['Norte/Sul', 'norte-sul'],
-          ['Forte Athletics', 'forte-athletics'],
-        ]),
-      },
-      { title: 'Destaques', links: links('/marcas', [['Novidades', 'novidades'], ['Collabs', 'collabs']]) },
-    ],
-  },
-  { kind: 'link', label: 'Drops', href: pendingRoute('/drops'), highlight: true },
-  { kind: 'link', label: 'Outlet', href: pendingRoute('/outlet') },
-];
+// Ordem do header: Novidades, os departamentos do catálogo, Marcas, Drops e Outlet.
+export function storeNav(departments: readonly MenuDepartment[]): NavEntry[] {
+  return [
+    { kind: 'link', label: 'Novidades', href: pendingRoute('/novidades') },
+    ...departments.map(toNavDepartment),
+    BRANDS,
+    { kind: 'link', label: 'Drops', href: pendingRoute('/drops'), highlight: true },
+    { kind: 'link', label: 'Outlet', href: pendingRoute('/outlet') },
+  ];
+}
 
-export function departmentIds(nav: readonly NavEntry[] = STORE_NAV): DepartmentId[] {
+export function departmentIds(nav: readonly NavEntry[]): string[] {
   return nav.flatMap((entry) => (entry.kind === 'department' ? [entry.id] : []));
 }
 
 export function toStoreMenu(
-  featured: Partial<Record<DepartmentId, readonly FeaturedProduct[]>>,
-  nav: readonly NavEntry[] = STORE_NAV,
+  nav: readonly NavEntry[],
+  featured: Partial<Record<string, readonly FeaturedProduct[]>>,
 ): StoreMenu {
   return {
     entries: nav.map((entry) => (entry.kind === 'department' ? { ...entry, featured: featured[entry.id] ?? [] } : entry)),
