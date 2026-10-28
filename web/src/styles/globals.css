@@ -330,6 +330,16 @@
   letter-spacing: -0.04em;
 }
 
+/* Painel lateral que acompanha a rolagem logo abaixo do header da loja (h-17, 68px, no lg) e rola por dentro quando
+   passa da altura da tela. É utility, e não classes soltas: a altura máxima é um calc, valor arbitrário no lint. */
+@utility sticky-panel {
+  position: sticky;
+  top: 5.25rem; /* 84px: o header e 16px de respiro */
+  max-height: calc(100dvh - 6.25rem); /* 84px em cima e 16px embaixo */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 @utility scrollbar-none {
   scrollbar-width: none;
 
