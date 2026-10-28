@@ -3,7 +3,14 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { NEW_ARRIVALS_LIMIT, toNewArrivals } from '@/features/store/catalog/model/new-arrivals';
-import type { Department, NewArrivals, ProductSummary } from '@/features/store/catalog/model/types';
+import { productHref } from '@/features/store/catalog/model/product-detail';
+import type {
+  Department,
+  NewArrivals,
+  ProductDetail,
+  ProductReview,
+  ProductSummary,
+} from '@/features/store/catalog/model/types';
 import { isRequestFailure } from '@/lib/http';
 import { pendingRoute } from '@/lib/route';
 
@@ -11,6 +18,9 @@ import {
   type DepartmentDto,
   fetchDepartments,
   fetchNewestProducts,
+  fetchProduct,
+  fetchRecentReviews,
+  type ProductDetailDto,
   type ProductDto,
 } from './api';
 
@@ -25,7 +35,7 @@ function toProductSummary(product: ProductDto): ProductSummary {
     id,
     name: title,
     brand: brandName,
-    href: pendingRoute(`/produtos/${slug}`),
+    href: productHref(slug),
     imageUrl: coverUrl,
     priceInCents,
     compareAtPriceInCents,
@@ -92,5 +102,62 @@ export async function getNewArrivals(): Promise<NewArrivals | null> {
     cacheLife('minutes');
 
     return null;
+  }
+}
+
+function toProductDetail(product: ProductDetailDto): ProductDetail {
+  const { slug, title, brandName, department, category, ...detail } = product;
+
+  return {
+    ...detail,
+    slug,
+    name: title,
+    brand: brandName,
+    href: productHref(slug),
+    department: { name: department.name, href: pendingRoute(`/${department.slug}`) },
+    category: category && { name: category.name, href: pendingRoute(`/${department.slug}/${category.slug}`) },
+  };
+}
+
+// 'use cache: remote': slug lido em runtime, cache compartilhado entre as instâncias da Vercel. Falha da API vai
+// para o error.tsx, e não vira 404: um 404 por API fora do ar tiraria o produto do Google.
+export async function getProduct(slug: string): Promise<ProductDetail | null> {
+  'use cache: remote';
+  cacheTag(`product:${slug}`);
+
+  const product = await fetchProduct(slug);
+
+  if (!product) {
+    cacheLife('minutes');
+
+    return null;
+  }
+
+  cacheLife('hours');
+
+  return toProductDetail(product);
+}
+
+const RECENT_REVIEWS = 3;
+
+// Com a API fora do ar, a lista sai vazia: avaliação não pode derrubar a compra.
+export async function getRecentReviews(slug: string): Promise<ProductReview[]> {
+  'use cache: remote';
+  cacheTag(`reviews:${slug}`);
+
+  try {
+    const reviews = await fetchRecentReviews(slug, RECENT_REVIEWS);
+
+    cacheLife('hours');
+
+    return reviews;
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return [];
   }
 }
