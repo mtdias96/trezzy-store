@@ -23,3 +23,11 @@ export function parsePriceInput(text: string): number | null {
 
   return Number(digits);
 }
+
+export function discountPercent(fromCents: number, toCents: number): number {
+  if (fromCents <= 0 || toCents >= fromCents) {
+    return 0;
+  }
+
+  return Math.round(((fromCents - toCents) / fromCents) * 100);
+}
