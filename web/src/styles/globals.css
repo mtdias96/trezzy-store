@@ -186,7 +186,6 @@
   --animate-skeleton: skeleton 1.2s ease-in-out infinite;
 
   --rotate-sticker: -6deg;
-  /* Fitas cruzadas do separador de seções: uma sobe, a outra desce. */
   --rotate-ribbon: -2.3deg;
   --rotate-ribbon-cross: 1.5deg;
 
@@ -329,6 +328,14 @@
   font-size: clamp(2.75rem, calc(100cqi / (var(--hero-letters, 6) * 0.95)), 7.5rem);
   line-height: 0.9;
   letter-spacing: -0.04em;
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Estilo display do design: Archivo itálico, peso 900, largura 125% e caixa alta. */
