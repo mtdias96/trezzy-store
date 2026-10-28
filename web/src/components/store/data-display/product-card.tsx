@@ -8,7 +8,7 @@ import { formatRating } from '@/lib/number';
 
 import { FavoriteButton } from './favorite-button';
 
-export type ProductTag = 'drop' | 'new' | 'last-units';
+export type ProductTag = 'drop' | 'new' | 'last-units' | 'sold-out';
 
 export type ProductCardData = {
   id: string;
@@ -26,21 +26,28 @@ export type ProductCardData = {
 
 type ProductCardProps = {
   product: ProductCardData;
-  // Só quem monta a grade sabe a largura da foto em cada tela.
+  // Só quem monta a grade sabe a largura da foto em cada tela e quais cards abrem a página visíveis (o LCP).
   imageSizes: string;
+  imageLoading?: 'eager' | 'lazy';
 };
 
-type BadgeTone = 'brand' | 'danger' | 'warning' | 'ink';
+type BadgeTone = 'brand' | 'danger' | 'warning' | 'ink' | 'muted';
 
 const badgeToneClass = {
   brand: 'bg-brand text-gray-0',
   danger: 'bg-danger-600 text-gray-0',
   warning: 'bg-warning-500 text-ink',
   ink: 'bg-ink text-gray-0',
+  muted: 'bg-gray-700 text-gray-0',
 } satisfies Record<BadgeTone, string>;
 
+// Esgotado vence tudo: um "-17%" num produto que não dá para comprar engana.
 function badgeFor({ tag, priceInCents, compareAtPriceInCents }: ProductCardData): { label: string; tone: BadgeTone } | null {
   const discount = compareAtPriceInCents === null ? 0 : discountPercent(compareAtPriceInCents, priceInCents);
+
+  if (tag === 'sold-out') {
+    return { label: 'Esgotado', tone: 'muted' };
+  }
 
   if (tag === 'drop') {
     return { label: 'Drop', tone: 'brand' };
@@ -59,7 +66,7 @@ function badgeFor({ tag, priceInCents, compareAtPriceInCents }: ProductCardData)
 
 // O link do nome cobre o card (::after), e o favorito fica fora dele: botão dentro de link é HTML inválido.
 // A sombra é uma camada (::after) que só troca a opacidade: animar o box-shadow repinta a cada quadro.
-export function ProductCard({ product, imageSizes }: ProductCardProps) {
+export function ProductCard({ product, imageSizes, imageLoading = 'lazy' }: ProductCardProps) {
   const badge = badgeFor(product);
   const { compareAtPriceInCents: compareAt, priceInCents } = product;
   const wasPrice = compareAt !== null && compareAt > priceInCents ? compareAt : null;
@@ -69,7 +76,7 @@ export function ProductCard({ product, imageSizes }: ProductCardProps) {
       <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-paper-stone">
         <div className="absolute inset-0 transition-transform duration-slow ease-out group-hover/card:scale-105">
           {product.imageUrl
-            ? <Image src={product.imageUrl} alt="" fill sizes={imageSizes} className="object-cover" />
+            ? <Image src={product.imageUrl} alt="" fill sizes={imageSizes} loading={imageLoading} className="object-cover" />
             : <ImageIcon aria-hidden className="absolute inset-0 m-auto size-7 text-gray-500" />}
         </div>
         {badge

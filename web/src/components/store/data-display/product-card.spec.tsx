@@ -35,6 +35,7 @@ describe('ProductCard', () => {
   });
 
   it.each([
+    [{ tag: 'sold-out', compareAtPriceInCents: 58990 }, 'Esgotado'],
     [{ tag: 'drop', compareAtPriceInCents: 58990 }, 'Drop'],
     [{ tag: 'last-units', compareAtPriceInCents: 58990 }, '-17%'],
     [{ tag: 'last-units' }, 'Últimas unidades'],
@@ -49,7 +50,7 @@ describe('ProductCard', () => {
     // Sem o Pix, o único "-N%" possível seria o do selo.
     renderCard({ pixPriceInCents: null });
 
-    expect(screen.queryByText(/^(Drop|Novo|Últimas unidades|-\d+%)$/)).toBeNull();
+    expect(screen.queryByText(/^(Esgotado|Drop|Novo|Últimas unidades|-\d+%)$/)).toBeNull();
   });
 
   it('strikes the old price only when it is higher', () => {
