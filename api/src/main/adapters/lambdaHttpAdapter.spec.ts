@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import * as z from 'zod';
 
 import { Schema } from '@kernel/decorators/Schema';
+import { PERMISSIONS } from '@application/authorization/Permission';
 import { Controller } from '@application/contracts/Controller';
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
@@ -452,7 +453,7 @@ describe('lambdaHttpAdapter', () => {
       const res = await call(adminRoute, { routeKey: 'GET /admin/dashboard', requestContext: adminToken });
 
       expect(res.statusCode).toBe(200);
-      expect(JSON.parse(res.body!)).toEqual({ permissions: ['dashboard:access'] });
+      expect(JSON.parse(res.body!)).toEqual({ permissions: PERMISSIONS });
     });
 
     it('responds 403 to a customer token on a route that requires a permission', async () => {

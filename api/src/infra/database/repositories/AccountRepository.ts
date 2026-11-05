@@ -3,7 +3,7 @@ import { count, eq } from 'drizzle-orm';
 import { Injectable } from '@kernel/decorators/Injectable';
 import { Account } from '@application/entities/Account';
 import { DrizzleClient } from '@infra/database/drizzle/DrizzleClient';
-import { accounts } from '@infra/database/drizzle/schema';
+import { accounts } from '@infra/database/drizzle/schema/accounts';
 
 @Injectable()
 export class AccountRepository {
