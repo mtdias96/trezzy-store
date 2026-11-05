@@ -48,7 +48,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version-file: .nvmrc
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
 
@@ -63,3 +63,43 @@ jobs:
 
       - name: Run Tests
         run: pnpm --filter trezzy-api test
+
+  validate-web:
+    name: Lint, Typecheck, Test, and Build (Web)
+    runs-on: ubuntu-latest
+    needs: [branch-flow-check]
+    if: always() && (needs.branch-flow-check.result == 'success' || needs.branch-flow-check.result == 'skipped')
+    env:
+      # Valor fictício: o build só valida o formato. A URL real fica nas variáveis da Vercel.
+      API_URL: https://api.example.test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint
+        run: pnpm --filter trezzy-web lint
+
+      - name: Run Typecheck
+        run: pnpm --filter trezzy-web typecheck
+
+      - name: Run Tests
+        run: pnpm --filter trezzy-web test
+
+      - name: Run Build
+        run: pnpm --filter trezzy-web build
