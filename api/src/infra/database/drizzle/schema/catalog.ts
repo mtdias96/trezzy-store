@@ -55,7 +55,7 @@ export const products = pgTable('products', {
   id: uuid().primaryKey().defaultRandom(),
   slug: text().notNull().unique('products_slug_unique'),
   title: text().notNull(),
-  // HTML já sanitizado no servidor (allowlist), pronto para renderizar.
+  // Texto puro, nunca renderizado como HTML. Editor rico exige sanitizar no servidor.
   description: text().notNull().default(''),
   // Produto com pedido nunca é apagado: vai para `archived`.
   status: text({ enum: ['draft', 'active', 'inactive', 'archived'] }).notNull().default('draft'),
