@@ -13,7 +13,7 @@ type FilterSectionProps = {
 
 export function FilterSection({ titleId, title, onClear, children }: FilterSectionProps) {
   return (
-    <div className="border-t border-paper-line pt-5 first:border-t-0 first:pt-0">
+    <div className="border-t border-line pt-5 first:border-t-0 first:pt-0">
       <div className="flex items-center justify-between gap-3">
         <h2 id={titleId} className="text-micro font-extrabold text-ink uppercase">
           {title}

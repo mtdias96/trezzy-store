@@ -28,8 +28,8 @@ const swatchClass = {
 // Classes inteiras por estado, sem cn: ele descartaria o text-body ao lado da cor do texto.
 const submitClass = {
   ready: 'flex h-cta flex-1 items-center justify-center rounded-pill bg-brand px-6 text-body font-extrabold text-gray-0 uppercase transition-colors duration-base hover:bg-brand-600 disabled:opacity-60',
-  pick: 'flex h-cta flex-1 items-center justify-center rounded-pill bg-paper-stone px-6 text-body font-extrabold text-gray-700 uppercase transition-colors duration-base hover:bg-paper-sand',
-  soldOut: 'flex h-cta flex-1 items-center justify-center rounded-pill bg-paper-stone px-6 text-body font-extrabold text-gray-600 uppercase',
+  pick: 'flex h-cta flex-1 items-center justify-center rounded-pill bg-surface px-6 text-body font-extrabold text-gray-700 uppercase transition-colors duration-base hover:bg-line-strong',
+  soldOut: 'flex h-cta flex-1 items-center justify-center rounded-pill bg-surface px-6 text-body font-extrabold text-gray-600 uppercase',
 } satisfies Record<'ready' | 'pick' | 'soldOut', string>;
 
 // Sem tamanho, o botão continua clicável e leva o foco ao primeiro disponível: um botão desabilitado o leitor de
@@ -113,7 +113,7 @@ export function PurchaseForm({ product, sizeChart, action, pending, result }: Pu
           {sizeChart
             ? (
                 <>
-                  <span aria-hidden className="h-4 w-px bg-paper-line" />
+                  <span aria-hidden className="h-4 w-px bg-line" />
                   <SizeChartDialog>{sizeChart}</SizeChartDialog>
                 </>
               )
@@ -140,7 +140,7 @@ export function PurchaseForm({ product, sizeChart, action, pending, result }: Pu
                 }}
                 className="peer sr-only"
               />
-              <span className="flex h-ctl-lg min-w-11 items-center justify-center rounded-pill border border-paper-sand px-3 text-body font-semibold text-ink transition-colors duration-base peer-checked:border-ink peer-checked:bg-ink peer-checked:text-gray-0 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand peer-disabled:border-paper-line peer-disabled:text-gray-500 peer-disabled:line-through peer-enabled:hover:border-ink">
+              <span className="flex h-ctl-lg min-w-11 items-center justify-center rounded-pill border border-line-strong px-3 text-body font-semibold text-ink transition-colors duration-base peer-checked:border-ink peer-checked:bg-ink peer-checked:text-gray-0 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand peer-disabled:border-line peer-disabled:text-gray-500 peer-disabled:line-through peer-enabled:hover:border-ink">
                 {option}
                 {id === null ? <span className="sr-only"> (esgotado)</span> : null}
               </span>

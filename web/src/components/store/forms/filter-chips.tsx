@@ -17,7 +17,7 @@ export function FilterChips({ labelledBy, options, selected, onToggle }: FilterC
           type="button"
           aria-pressed={selected.includes(option)}
           onClick={() => onToggle(option)}
-          className="flex h-ctl-lg items-center justify-center rounded-xl border border-paper-line bg-gray-0 px-2 text-body font-bold text-ink transition-colors duration-base hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-gray-0"
+          className="flex h-ctl-lg items-center justify-center rounded-xl border border-line bg-gray-0 px-2 text-body font-bold text-ink transition-colors duration-base hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-gray-0"
         >
           {option}
         </button>

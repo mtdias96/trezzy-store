@@ -24,7 +24,7 @@ export function DropTeaserCard({ drop }: DropTeaserCardProps) {
       </p>
       <NavigationMenuLink
         render={<Link href={DROPS_HREF} />}
-        className="mt-5 flex h-ctl-lg items-center justify-between rounded-xl bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:bg-paper-stone"
+        className="mt-5 flex h-ctl-lg items-center justify-between rounded-xl bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:bg-surface"
       >
         Ver drops
         <ArrowRightIcon aria-hidden className="size-4" />

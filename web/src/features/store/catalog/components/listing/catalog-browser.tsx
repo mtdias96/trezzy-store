@@ -21,7 +21,7 @@ export function CatalogBrowser({ toolbar, sidebar, busy, children }: CatalogBrow
       <div className="mt-4 flex items-start gap-6 lg:mt-5">
         <aside
           aria-label="Filtros"
-          className="hidden w-68 shrink-0 rounded-card border border-paper-line bg-gray-0 p-5 lg:sticky-panel lg:block"
+          className="hidden w-68 shrink-0 rounded-card border border-line bg-gray-0 p-5 lg:sticky-panel lg:block"
         >
           {sidebar}
         </aside>

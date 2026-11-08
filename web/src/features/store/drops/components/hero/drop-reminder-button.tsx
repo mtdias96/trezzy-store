@@ -12,7 +12,7 @@ type DropReminderButtonProps = {
 // Classes inteiras por estado, sem cn: ele descartaria o text-body ao lado da cor do texto.
 const stateClass = {
   idle: 'flex h-cta items-center justify-between gap-2 rounded-xl bg-lime px-4 text-body font-bold text-ink transition-colors duration-base hover:bg-lime-500',
-  active: 'flex h-cta items-center justify-between gap-2 rounded-xl bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:bg-paper-stone',
+  active: 'flex h-cta items-center justify-between gap-2 rounded-xl bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:bg-surface',
 } satisfies Record<'idle' | 'active', string>;
 
 // O status só fala depois de um clique: o valor salvo entra após a hidratação, e anunciá-lo a cada visita seria ruído.

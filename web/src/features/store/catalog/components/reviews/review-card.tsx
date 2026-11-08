@@ -8,7 +8,7 @@ type ReviewCardProps = {
 
 export function ReviewCard({ review }: ReviewCardProps) {
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-paper-line p-4">
+    <article className="flex h-full flex-col rounded-2xl border border-line p-4">
       <div className="flex items-center justify-between gap-3">
         <RatingStars rating={review.rating} />
         <p className="text-caption text-gray-700">
@@ -21,7 +21,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
         {review.size || review.verified
           ? (
               <ul className="flex flex-wrap gap-1.5">
-                {review.size ? <li className="rounded-pill bg-paper-stone px-2 py-0.5 text-caption font-semibold text-ink">{`Comprou ${review.size}`}</li> : null}
+                {review.size ? <li className="rounded-pill bg-surface px-2 py-0.5 text-caption font-semibold text-ink">{`Comprou ${review.size}`}</li> : null}
                 {review.verified ? <li className="rounded-pill bg-success-50 px-2 py-0.5 text-caption font-semibold text-success-700">Compra verificada</li> : null}
               </ul>
             )

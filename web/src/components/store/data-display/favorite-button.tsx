@@ -14,7 +14,7 @@ type FavoriteButtonProps = {
 
 const sizeClass = {
   sm: 'size-10 bg-gray-0 text-ink shadow-knob',
-  lg: 'size-12.5 border border-paper-line bg-gray-0 text-ink hover:border-ink',
+  lg: 'size-12.5 border border-line bg-gray-0 text-ink hover:border-ink',
 } satisfies Record<FavoriteButtonSize, string>;
 
 // Rótulo fixo e estado no aria-pressed (botão de alternância). relative z-10: fica acima do link que cobre o card.

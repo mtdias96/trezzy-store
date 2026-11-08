@@ -29,7 +29,7 @@ export function FilterSheet({ triggerLabel, activeCount, doneLabel, children }: 
       {/* aria-label com o total por extenso: um span sr-only perderia o espaço antes do texto ("1filtro ativo"). */}
       <SheetTrigger
         aria-label={activeCount > 0 ? `${triggerLabel}, ${activeCount} ${activeCount === 1 ? 'filtro ativo' : 'filtros ativos'}` : undefined}
-        className="flex h-ctl-lg items-center gap-2 rounded-xl border border-paper-line bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:border-ink"
+        className="flex h-ctl-lg items-center gap-2 rounded-xl border border-line bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:border-ink"
       >
         <SlidersHorizontalIcon aria-hidden className="size-4" />
         {triggerLabel}

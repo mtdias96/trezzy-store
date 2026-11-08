@@ -9,7 +9,7 @@ type PaginationProps = {
   next: Route | null;
 };
 
-const LINK_CLASS = 'flex h-ctl-lg items-center gap-1.5 rounded-pill border border-paper-line bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:border-ink';
+const LINK_CLASS = 'flex h-ctl-lg items-center gap-1.5 rounded-pill border border-line bg-gray-0 px-4 text-body font-bold text-ink transition-colors duration-base hover:border-ink';
 
 export function Pagination({ page, pageCount, previous, next }: PaginationProps) {
   if (pageCount <= 1) {

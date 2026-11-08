@@ -38,7 +38,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
 
   if (total === 0) {
     return (
-      <div className="relative aspect-4/5 rounded-block bg-paper-stone">
+      <div className="relative aspect-4/5 rounded-block bg-surface-media">
         <ImageIcon aria-hidden className="absolute inset-0 m-auto size-10 text-gray-500" />
       </div>
     );
@@ -59,7 +59,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
                       aria-current={index === current ? 'true' : undefined}
                       data-current={index === current ? '' : undefined}
                       onClick={() => goTo(index)}
-                      className="relative block aspect-4/5 w-full overflow-hidden rounded-xl border-2 border-transparent bg-paper-stone transition-colors duration-base hover:border-paper-sand data-current:border-ink"
+                      className="relative block aspect-4/5 w-full overflow-hidden rounded-xl border-2 border-transparent bg-surface-media transition-colors duration-base hover:border-line-strong data-current:border-ink"
                     >
                       <Image src={url} alt="" fill sizes="80px" className="object-cover" />
                     </button>
@@ -77,7 +77,7 @@ export function ProductGallery({ images }: ProductGalleryProps) {
           aria-roledescription="carrossel"
           aria-label="Fotos do produto"
           tabIndex={0}
-          className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-block bg-paper-stone"
+          className="scrollbar-none flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain rounded-block bg-surface-media"
         >
           {images.map(({ url, alt }, index) => (
             <div

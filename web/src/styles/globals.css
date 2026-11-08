@@ -65,11 +65,12 @@
   --color-gray-800: #4A4650;
   --color-gray-900: #111014;
 
-  /* Loja: superfícies quentes. */
+  /* Loja: neutros nomeados pelo papel na interface. */
   --color-paper: #F3F0EA;
-  --color-paper-sand: #DCD7CE;
-  --color-paper-stone: #EEEAE3;
-  --color-paper-line: #E3DED6;
+  --color-surface: #EEEAE3; /* pills, hover, cabeçalho de tabela, skeleton */
+  --color-surface-media: #EEEAE3; /* fundo da foto do produto */
+  --color-line: #E3DED6;
+  --color-line-strong: #DCD7CE; /* borda de controle, hover de borda e inativo */
 
   --color-success-50: #E5F4EA;
   --color-success-500: #1E9E55;
@@ -281,15 +282,15 @@
   --popover-foreground: var(--color-ink);
   --primary: var(--color-brand);
   --primary-foreground: var(--color-gray-0);
-  --secondary: var(--color-paper-stone);
+  --secondary: var(--color-surface);
   --secondary-foreground: var(--color-ink);
-  --muted: var(--color-paper-stone);
+  --muted: var(--color-surface);
   --muted-foreground: var(--color-gray-700);
-  --accent: var(--color-paper-stone);
+  --accent: var(--color-surface);
   --accent-foreground: var(--color-ink);
   --destructive: var(--color-danger-600);
-  --border: var(--color-paper-line);
-  --input: var(--color-paper-sand);
+  --border: var(--color-line);
+  --input: var(--color-line-strong);
   --ring: var(--color-brand);
   --chart-1: var(--color-brand);
   --chart-2: var(--color-lime-500);

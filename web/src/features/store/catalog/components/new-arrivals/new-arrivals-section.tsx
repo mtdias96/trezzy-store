@@ -43,7 +43,7 @@ export function NewArrivalsSection({ title, arrivals }: NewArrivalsSectionProps)
             </TabsList>
             <Link
               href={NEW_ARRIVALS_HREF}
-              className="flex shrink-0 items-center gap-1.5 text-body font-bold text-ink lg:border-l lg:border-paper-line lg:pl-6"
+              className="flex shrink-0 items-center gap-1.5 text-body font-bold text-ink lg:border-l lg:border-line lg:pl-6"
             >
               <span className="underline decoration-2 underline-offset-4">Ver tudo</span>
               <span className="sr-only">

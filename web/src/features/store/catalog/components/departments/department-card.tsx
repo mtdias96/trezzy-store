@@ -17,7 +17,7 @@ export function DepartmentCard({ department }: DepartmentCardProps) {
       href={department.href}
       className="group relative block rounded-card transition-transform duration-slow ease-out after:pointer-events-none after:absolute after:inset-0 after:rounded-card after:opacity-0 after:shadow-pop after:transition-opacity after:duration-slow hover:-translate-y-1 hover:after:opacity-100 focus-visible:-translate-y-1 focus-visible:after:opacity-100 active:translate-y-0"
     >
-      <div className="relative aspect-4/3 overflow-hidden rounded-card bg-paper-stone md:aspect-3/4">
+      <div className="relative aspect-4/3 overflow-hidden rounded-card bg-surface-media md:aspect-3/4">
         <div className="absolute inset-0 transition-transform duration-slow ease-out group-hover:scale-105 group-focus-visible:scale-105">
           {department.imageUrl
             ? (

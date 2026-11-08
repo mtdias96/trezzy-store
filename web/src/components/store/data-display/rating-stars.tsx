@@ -16,7 +16,7 @@ export function RatingStars({ rating }: RatingStarsProps) {
         <StarIcon
           key={star}
           aria-hidden
-          className={star <= filled ? 'size-3.5 fill-ink text-ink' : 'size-3.5 fill-paper-line text-paper-line'}
+          className={star <= filled ? 'size-3.5 fill-ink text-ink' : 'size-3.5 fill-line text-line'}
         />
       ))}
     </span>
