@@ -16,7 +16,7 @@ export function ReviewsSection({ product, list }: ReviewsSectionProps) {
   const { rating, reviewCount, reviewSummary } = product;
 
   return (
-    <section aria-labelledby="reviews-title" className="rounded-block border border-line bg-gray-0 p-5 sm:p-7 lg:p-8">
+    <section aria-labelledby="reviews-title" className="rounded-tile border border-line bg-gray-0 p-5 sm:p-7 lg:p-8">
       <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
         <div className="flex flex-col gap-5 lg:col-span-4">
           <div>

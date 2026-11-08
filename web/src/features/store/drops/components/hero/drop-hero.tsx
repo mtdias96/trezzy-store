@@ -22,7 +22,7 @@ export function DropHero({ drop }: DropHeroProps) {
   return (
     <section aria-labelledby="drop-hero-title">
       <PageContainer className="grid gap-3 pt-4 lg:grid-cols-2 lg:gap-4 lg:pt-6">
-        <div className="@container flex flex-col rounded-block bg-brand-950 p-5 text-gray-0 sm:p-7 lg:p-8">
+        <div className="@container flex flex-col rounded-tile bg-brand-950 p-5 text-gray-0 sm:p-7 lg:p-8">
           <p className="flex items-center gap-2 self-start rounded-pill bg-brand px-3 py-1.5 text-micro font-extrabold uppercase">
             <span aria-hidden className="size-1.5 rounded-pill bg-lime" />
             {drop.longLabel}

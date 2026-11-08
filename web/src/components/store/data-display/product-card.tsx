@@ -72,8 +72,8 @@ export function ProductCard({ product, imageSizes, imageLoading = 'lazy' }: Prod
   const wasPrice = compareAt !== null && compareAt > priceInCents ? compareAt : null;
 
   return (
-    <article className="group/card @container relative flex h-full flex-col rounded-card border border-line bg-gray-0 p-1.5 transition duration-slow ease-out after:pointer-events-none after:absolute after:inset-0 after:rounded-card after:opacity-0 after:shadow-pop after:transition-opacity after:duration-slow focus-within:border-brand hover:-translate-y-1 hover:border-brand hover:after:opacity-100 has-focus-visible:-translate-y-1 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand has-focus-visible:after:opacity-100">
-      <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-surface-media">
+    <article className="group/card @container relative flex h-full flex-col rounded-tile border border-line bg-gray-0 p-1.5 transition duration-slow ease-out after:pointer-events-none after:absolute after:inset-0 after:rounded-tile after:opacity-0 after:shadow-pop after:transition-opacity after:duration-slow focus-within:border-brand hover:-translate-y-1 hover:border-brand hover:after:opacity-100 has-focus-visible:-translate-y-1 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-brand has-focus-visible:after:opacity-100">
+      <div className="relative aspect-4/5 overflow-hidden rounded-tile bg-surface-media">
         <div className="absolute inset-0 transition-transform duration-slow ease-out group-hover/card:scale-105">
           {product.imageUrl
             ? <Image src={product.imageUrl} alt="" fill sizes={imageSizes} loading={imageLoading} className="object-cover" />
@@ -81,7 +81,7 @@ export function ProductCard({ product, imageSizes, imageLoading = 'lazy' }: Prod
         </div>
         {badge
           ? (
-              <span className={`absolute top-2.5 left-2.5 rounded-pill px-2.5 py-1 text-micro font-extrabold uppercase ${badgeToneClass[badge.tone]}`}>
+              <span className={`absolute top-2.5 left-2.5 rounded-tag px-2.5 py-1 text-micro font-extrabold uppercase ${badgeToneClass[badge.tone]}`}>
                 {badge.label}
               </span>
             )
@@ -105,7 +105,7 @@ export function ProductCard({ product, imageSizes, imageLoading = 'lazy' }: Prod
               )}
         </div>
         <h3 className="mt-1.5 line-clamp-2 text-body font-medium text-ink @2xs:text-body-lg">
-          <Link href={product.href} className="outline-none after:absolute after:inset-0 after:rounded-card">
+          <Link href={product.href} className="outline-none after:absolute after:inset-0 after:rounded-tile">
             {product.name}
           </Link>
         </h3>

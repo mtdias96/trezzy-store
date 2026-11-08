@@ -8,7 +8,7 @@ export function SizeChart({ chart }: SizeChartProps) {
   const [sizeHeader, ...measureHeaders] = chart.headers;
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-line">
+    <div className="overflow-x-auto rounded-tile border border-line">
       <table className="w-full text-left text-body-sm">
         <caption className="sr-only">Tabela de medidas</caption>
         <thead className="bg-surface">

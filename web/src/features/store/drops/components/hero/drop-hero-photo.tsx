@@ -10,7 +10,7 @@ type DropHeroPhotoProps = {
 // alargá-lo além da coluna. No celular o selo encolhe inteiro (scale): o text-hand é o menor tamanho manuscrito.
 export function DropHeroPhoto({ src, alt, sticker }: DropHeroPhotoProps) {
   return (
-    <div className="relative aspect-15/16 w-full overflow-hidden rounded-block bg-brand-900 lg:self-stretch">
+    <div className="relative aspect-15/16 w-full overflow-hidden rounded-tile bg-brand-900 lg:self-stretch">
       <Image
         src={src}
         alt={alt}

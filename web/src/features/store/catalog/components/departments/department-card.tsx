@@ -15,9 +15,9 @@ export function DepartmentCard({ department }: DepartmentCardProps) {
   return (
     <Link
       href={department.href}
-      className="group relative block rounded-card transition-transform duration-slow ease-out after:pointer-events-none after:absolute after:inset-0 after:rounded-card after:opacity-0 after:shadow-pop after:transition-opacity after:duration-slow hover:-translate-y-1 hover:after:opacity-100 focus-visible:-translate-y-1 focus-visible:after:opacity-100 active:translate-y-0"
+      className="group relative block rounded-tile transition-transform duration-slow ease-out after:pointer-events-none after:absolute after:inset-0 after:rounded-tile after:opacity-0 after:shadow-pop after:transition-opacity after:duration-slow hover:-translate-y-1 hover:after:opacity-100 focus-visible:-translate-y-1 focus-visible:after:opacity-100 active:translate-y-0"
     >
-      <div className="relative aspect-4/3 overflow-hidden rounded-card bg-surface-media md:aspect-3/4">
+      <div className="relative aspect-4/3 overflow-hidden rounded-tile bg-surface-media md:aspect-3/4">
         <div className="absolute inset-0 transition-transform duration-slow ease-out group-hover:scale-105 group-focus-visible:scale-105">
           {department.imageUrl
             ? (
@@ -31,7 +31,7 @@ export function DepartmentCard({ department }: DepartmentCardProps) {
               )
             : <ImageIcon aria-hidden className="absolute inset-0 m-auto size-8 text-gray-500" />}
         </div>
-        <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-2xl bg-gray-0 py-2 pr-2 pl-5">
+        <div className="absolute inset-x-3 bottom-3 flex items-center justify-between gap-3 rounded-tile bg-gray-0 py-2 pr-2 pl-5">
           <div className="min-w-0">
             <h3 className="truncate type-display text-display-sm not-italic lg:text-display-md">{department.name}</h3>
             <p className="text-caption text-gray-700">{productCountLabel(department.productCount)}</p>

@@ -6,7 +6,7 @@ export function ProductDetailSkeleton() {
       <span className="sr-only">Carregando produto…</span>
       <div className="h-5 w-1/3 animate-skeleton rounded-md bg-surface" />
       <div className="mt-4 grid gap-6 lg:mt-6 lg:grid-cols-12 lg:gap-10">
-        <div className="aspect-4/5 animate-skeleton rounded-block bg-surface lg:col-span-7 lg:ml-24" />
+        <div className="aspect-4/5 animate-skeleton rounded-tile bg-surface lg:col-span-7 lg:ml-24" />
         <div className="flex flex-col gap-4 lg:col-span-5">
           <div className="h-4 w-24 animate-skeleton rounded-md bg-surface" />
           <div className="h-ctl w-3/4 animate-skeleton rounded-md bg-surface" />

@@ -8,7 +8,7 @@ type ReviewCardProps = {
 
 export function ReviewCard({ review }: ReviewCardProps) {
   return (
-    <article className="flex h-full flex-col rounded-2xl border border-line p-4">
+    <article className="flex h-full flex-col rounded-tile border border-line p-4">
       <div className="flex items-center justify-between gap-3">
         <RatingStars rating={review.rating} />
         <p className="text-caption text-gray-700">

@@ -93,7 +93,7 @@ export const textTokens = [
   'hand',
 ] as const;
 
-export const radiusTokens = ['seal', 'md', 'lg', 'xl', '2xl', '3xl', 'card', 'block', 'pill'] as const;
+export const radiusTokens = ['tag', 'tile', 'seal', 'md', 'lg', 'xl', '2xl', '3xl', 'card', 'pill'] as const;
 
 export const shadowTokens = ['pop', 'modal', 'float', 'hero', 'soft', 'knob', 'focus-brand'] as const;
 
