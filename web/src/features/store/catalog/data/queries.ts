@@ -24,8 +24,7 @@ import type {
 import { isRequestFailure } from '@/lib/http';
 
 import type { CatalogSortDto, DepartmentDto, ProductDetailDto, ProductDto } from './api';
-// PRÉVIA (não commitar): o catálogo de exemplo no lugar das rotas.
-import { fetchCatalogPage, fetchDepartments, fetchNewestProducts, fetchProduct, fetchRecentReviews } from './preview-api';
+import { fetchCatalogPage, fetchDepartments, fetchNewestProducts, fetchProduct, fetchRecentReviews } from './api';
 
 // Na ordem e com os nomes da taxonomia. Departamento que a API não conhece fica de fora, e o que ela não manda
 // (sem produto) também.
