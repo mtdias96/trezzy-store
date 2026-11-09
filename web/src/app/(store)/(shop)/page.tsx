@@ -7,6 +7,7 @@ import { DepartmentShowcaseContainer } from '@/features/store/catalog/containers
 import { NewArrivalsContainer } from '@/features/store/catalog/containers/new-arrivals-container';
 import { OutletContainer } from '@/features/store/catalog/containers/outlet-container';
 import { DropHero } from '@/features/store/drops/components/hero/drop-hero';
+import { DropCalendarContainer } from '@/features/store/drops/containers/drop-calendar-container';
 import { getNextDrop } from '@/features/store/drops/data/queries';
 import { HeroBanner } from '@/features/store/home/components/hero-banner';
 import { StorePerks } from '@/features/store/home/components/store-perks';
@@ -15,6 +16,7 @@ import { getHomeBanners } from '@/features/store/home/data/queries';
 import {
   COLLECTIONS_SECTION,
   DEPARTMENTS_HEADING,
+  DROP_CALENDAR_SECTION,
   HERO_CAROUSEL_LABEL,
   NEW_ARRIVALS_SECTION,
   OUTLET_SECTION,
@@ -50,6 +52,7 @@ export default async function Page() {
         <NewArrivalsContainer {...NEW_ARRIVALS_SECTION} addToBagAction={addToBag} />
         <OutletContainer {...OUTLET_SECTION} />
         <CollectionsContainer {...COLLECTIONS_SECTION} />
+        <DropCalendarContainer {...DROP_CALENDAR_SECTION} />
       </div>
     </>
   );

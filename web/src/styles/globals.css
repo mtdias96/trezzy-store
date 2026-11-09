@@ -398,6 +398,12 @@
   writing-mode: vertical-rl;
 }
 
+/* Faixa com as bordas de cima e de baixo em diagonal, subindo para a direita. Em vw: a inclinação é a mesma em
+   qualquer tela. O conteúdo precisa de respiro vertical maior que o corte. */
+@utility clip-slant {
+  clip-path: polygon(0 3.8vw, 100% 0, 100% calc(100% - 3.8vw), 0 100%);
+}
+
 /* Em telas maiores que Full HD, o hero para de crescer e fica no centro, com o fundo indo até as bordas: a altura vem
    da largura, e sem limite passaria da primeira tela. A imagem some aos poucos nas laterais, para não marcar um corte
    vertical. São utilities porque o limite acima do xl e a máscara seriam valores arbitrários no lint. */

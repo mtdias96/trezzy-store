@@ -27,6 +27,12 @@ export const COLLECTIONS_SECTION = {
   featuredLinkLabel: 'Ver coleção',
 };
 
+export const DROP_CALENDAR_SECTION = {
+  eyebrow: 'Calendário',
+  title: 'Próximos drops',
+  description: 'Lançamentos toda sexta às 19h. Ativa o lembrete e a gente avisa 1h antes.',
+};
+
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 
 export const STORE_PERKS: readonly StorePerk[] = [

@@ -67,6 +67,24 @@ export function formatWeekdayHour(date: Date): string {
   return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)} ${hour}h`;
 }
 
+const weekdayDate = new Intl.DateTimeFormat('pt-BR', {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  hour: 'numeric',
+  hourCycle: 'h23',
+  timeZone: STORE_TIME_ZONE,
+});
+
+// "Sex, 13 nov · 19h", sem os pontos e o "de" do formato padrão do pt-BR.
+export function formatWeekdayDateHour(date: Date): string {
+  const parts = weekdayDate.formatToParts(date);
+  const part = (type: Intl.DateTimeFormatPartTypes) => parts.find((item) => item.type === type)?.value.replace('.', '') ?? '';
+  const weekday = part('weekday');
+
+  return `${weekday.charAt(0).toUpperCase()}${weekday.slice(1)}, ${part('day')} ${part('month')} · ${part('hour')}h`;
+}
+
 const longWeekday = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', timeZone: STORE_TIME_ZONE });
 
 // Sem o "-feira" do pt-BR: "Sexta, 19h".

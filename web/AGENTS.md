@@ -110,7 +110,7 @@ features/<área>/<feature>/
 └── session/     session.ts · cookies.ts · authorized-http.ts · guard.ts  ← só em shared/auth
 ```
 
-- `data/`: todo o I/O. `api.ts` é o transporte HTTP (sobre o `lib/http.ts`), `queries.ts` a leitura e `actions.ts` (`'use server'`) a escrita.
+- `data/`: todo o I/O. `api.ts` é o transporte HTTP (sobre o `lib/http.ts`), `queries.ts` a leitura e `actions.ts` (`'use server'`) a escrita. `client.ts` é a exceção que roda no navegador: lê uma rota do próprio app, sem `server-only`, e só um hook da feature o chama.
 - `model/`: tipos e regra pura, sem I/O, com os testes co-localizados.
 - `containers/`, `hooks/` e `components/`: o padrão Container & Presentational, descrito abaixo.
 
@@ -153,7 +153,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 | `proxy.ts` | `shared/auth/session`, `lib` e `config` |
 | `containers/` | da feature: `data`, `model`, `components`, `hooks` e `containers`; `components/<própria área>`; `shared/auth/session` e compartilhados |
 | `components/` da feature | da feature: `components` e `model`; `components/<própria área>`, `ui`, `common`, `hooks`, `lib` e `styles` |
-| `hooks/` da feature | da feature: `hooks`, `model` e `data/actions.ts`; `hooks` e `lib` |
+| `hooks/` da feature | da feature: `hooks`, `model`, `data/actions.ts` e `data/client.ts`; `hooks` e `lib` |
 | `data/` | da feature: `data` e `model`; `shared/auth/session`, `lib` e `config` |
 | `model/` | da feature: `model`; `lib` |
 | `shared/auth/session/` | `data` e `model` do auth; `lib` e `config` |
@@ -224,6 +224,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 - Tags: `<recurso>:<id>` para um item e um nome curto para a lista ou página (ex: `product:{id}`, `catalog`, `home`).
 - Toda action que muda dado cacheado invalida as tags afetadas, com `revalidateTag(tag, 'max')` ou com `updateTag(tag)` quando quem mudou precisa ver na hora (o `updateTag` só funciona em Server Action). O perfil do `revalidateTag` é obrigatório: a forma com um argumento está depreciada.
 - Dado que pode mudar fora do Next fica dinâmico ou com `cacheLife` curto, porque nenhuma action vai invalidá-lo.
+- A rota inteira fica com o menor `cacheLife` entre as suas partes. Dado de vida curta dentro de página de vida longa não encurta a página: vai numa route handler com `cacheLife` curto, lida no navegador (`data/client.ts`). A CDN responde, e cada regeneração é uma chamada à API. Ex: `/api/drops/stock`, o estoque do calendário de drops.
 - Na Vercel, cada instância serverless tem a própria memória. O `'use cache'` comum só rende no que entra no shell estático (pré-renderizado no build). Dado cacheado lido em runtime, como uma página com parâmetro dinâmico, usa `'use cache: remote'`, compartilhado entre as instâncias.
 - `'use cache: remote'` só onde a chave se repete. Com filtros na chave (tamanho, marca, faixa de preço), quase toda combinação é única: o cache remoto só soma a latência da consulta a ele, e a chamada vai direto à API. No catálogo, `isSharedQuery` separa os dois casos: a página como os links a abrem (qualquer ordem, página ou promoção) é cacheada, e a lista com filtro não.
 
