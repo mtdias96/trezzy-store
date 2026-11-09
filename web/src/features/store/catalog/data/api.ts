@@ -71,6 +71,24 @@ export async function fetchNewestProducts({ limit, department }: ProductQuery): 
   });
 }
 
+const catalogRefSchema = z.object({ slug: slugSchema, name: z.string() });
+
+const outletProductSchema = productSchema
+  .pick({ id: true, slug: true, title: true, priceInCents: true, compareAtPriceInCents: true, coverUrl: true })
+  .extend({ department: catalogRefSchema, category: catalogRefSchema.nullable() });
+
+export type OutletProductDto = z.infer<typeof outletProductSchema>;
+
+// GET /store/products?onSale=true&sort=best-selling&limit={n} → { products }
+export async function fetchOutletProducts(limit: number): Promise<OutletProductDto[]> {
+  const query = new URLSearchParams({ onSale: 'true', sort: 'best-selling', limit: String(limit) });
+  const { products } = await http(`/store/products?${query.toString()}`, {
+    schema: z.object({ products: z.array(outletProductSchema) }),
+  });
+
+  return products;
+}
+
 const countSchema = z.number().int().nonnegative();
 
 const catalogPageSchema = z.object({
@@ -144,8 +162,8 @@ const productDetailSchema = productSchema.omit({ coverUrl: true, hoverImageUrl: 
     distribution: z.tuple([z.number().int(), z.number().int(), z.number().int(), z.number().int(), z.number().int()]),
     fit: z.enum(['small', 'true-to-size', 'large']).nullable(),
   }),
-  department: z.object({ slug: slugSchema, name: z.string() }),
-  category: z.object({ slug: slugSchema, name: z.string() }).nullable(),
+  department: catalogRefSchema,
+  category: catalogRefSchema.nullable(),
   images: z.array(z.object({ url: z.url(), alt: z.string() })),
   colors: z.array(z.object({ id: z.string(), name: z.string(), swatch: z.enum(['black', 'white', 'off-white', 'heather-gray', 'green']) })),
   sizes: z.array(z.string()),

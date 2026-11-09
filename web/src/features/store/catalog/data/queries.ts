@@ -4,6 +4,7 @@ import { cacheLife, cacheTag } from 'next/cache';
 
 import { CATALOG_PAGE_SIZE, type CatalogSort } from '@/features/store/catalog/model/listing';
 import { NEW_ARRIVALS_LIMIT } from '@/features/store/catalog/model/new-arrivals';
+import { OUTLET_TILES, type OutletCandidate, toOutletShowcase } from '@/features/store/catalog/model/outlet';
 import { productHref } from '@/features/store/catalog/model/product-detail';
 import { toProductTabs } from '@/features/store/catalog/model/product-tabs';
 import { type CatalogQuery, isSharedQuery } from '@/features/store/catalog/model/scope';
@@ -17,6 +18,7 @@ import {
 import type {
   CatalogResults,
   Department,
+  OutletShowcase,
   ProductDetail,
   ProductReview,
   ProductSummary,
@@ -24,8 +26,15 @@ import type {
 } from '@/features/store/catalog/model/types';
 import { isRequestFailure } from '@/lib/http';
 
-import type { CatalogSortDto, DepartmentDto, ProductDetailDto, ProductDto } from './api';
-import { fetchCatalogPage, fetchDepartments, fetchNewestProducts, fetchProduct, fetchRecentReviews } from './api';
+import type { CatalogSortDto, DepartmentDto, OutletProductDto, ProductDetailDto, ProductDto } from './api';
+import {
+  fetchCatalogPage,
+  fetchDepartments,
+  fetchNewestProducts,
+  fetchOutletProducts,
+  fetchProduct,
+  fetchRecentReviews,
+} from './api';
 
 // Na ordem e com os nomes da taxonomia. Departamento que a API não conhece fica de fora, e o que ela não manda
 // (sem produto) também.
@@ -113,6 +122,41 @@ export async function getNewArrivals(): Promise<ProductTabs | null> {
         products: (byDepartment[index]?.products ?? []).map(toProductSummary),
       })),
     );
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return null;
+  }
+}
+
+// Nome da taxonomia na etiqueta; o da API só aparece para categoria que ela não conhece.
+function toOutletCandidate({ slug, title, department, category, coverUrl, ...prices }: OutletProductDto): OutletCandidate {
+  const known = findDepartment(department.slug);
+  const knownCategory = known && category ? findCategory(known, category.slug) : undefined;
+
+  return {
+    ...prices,
+    name: title,
+    categoryName: knownCategory?.name ?? category?.name ?? null,
+    href: productHref(slug),
+    imageUrl: coverUrl,
+  };
+}
+
+export async function getOutletShowcase(): Promise<OutletShowcase | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  try {
+    const products = await fetchOutletProducts(OUTLET_TILES);
+
+    cacheLife('hours');
+
+    return toOutletShowcase(products.map(toOutletCandidate));
   } catch (error) {
     if (!isRequestFailure(error)) {
       throw error;

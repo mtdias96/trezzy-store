@@ -13,6 +13,12 @@ export const NEW_ARRIVALS_SECTION = {
   title: 'Chegou agora',
 };
 
+export const OUTLET_SECTION = {
+  eyebrow: 'Outlet',
+  title: 'Preço de rua',
+  description: 'Peças selecionadas com desconto. Corre antes que acabe o seu tamanho.',
+};
+
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 
 export const STORE_PERKS: readonly StorePerk[] = [

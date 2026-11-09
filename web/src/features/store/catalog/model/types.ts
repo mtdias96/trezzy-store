@@ -55,6 +55,21 @@ export type ProductTabs = {
   tabs: ProductTab[];
 };
 
+export type OutletProduct = {
+  id: string;
+  name: string;
+  categoryName: string | null;
+  href: Route;
+  imageUrl: string | null;
+  priceInCents: number;
+  compareAtPriceInCents: number;
+};
+
+export type OutletShowcase = {
+  products: OutletProduct[];
+  topDiscountPercent: number;
+};
+
 export type ColorSwatch = 'black' | 'white' | 'off-white' | 'heather-gray' | 'green';
 
 export type ProductColor = {
