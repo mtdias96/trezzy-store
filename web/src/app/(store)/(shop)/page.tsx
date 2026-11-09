@@ -10,8 +10,10 @@ import { DropHero } from '@/features/store/drops/components/hero/drop-hero';
 import { getNextDrop } from '@/features/store/drops/data/queries';
 import { HeroBanner } from '@/features/store/home/components/hero-banner';
 import { StorePerks } from '@/features/store/home/components/store-perks';
+import { CollectionsContainer } from '@/features/store/home/containers/collections-container';
 import { getHomeBanners } from '@/features/store/home/data/queries';
 import {
+  COLLECTIONS_SECTION,
   DEPARTMENTS_HEADING,
   HERO_CAROUSEL_LABEL,
   NEW_ARRIVALS_SECTION,
@@ -47,6 +49,7 @@ export default async function Page() {
         <DepartmentShowcaseContainer {...DEPARTMENTS_HEADING} />
         <NewArrivalsContainer {...NEW_ARRIVALS_SECTION} addToBagAction={addToBag} />
         <OutletContainer {...OUTLET_SECTION} />
+        <CollectionsContainer {...COLLECTIONS_SECTION} />
       </div>
     </>
   );

@@ -19,6 +19,14 @@ export const OUTLET_SECTION = {
   description: 'Peças selecionadas com desconto. Corre antes que acabe o seu tamanho.',
 };
 
+export const COLLECTIONS_SECTION = {
+  eyebrow: 'Coleções',
+  title: 'Coleções em alta',
+  description: 'Recortes montados pelo time da loja. Muda conforme a rua muda.',
+  featuredBadge: 'Coleção da semana',
+  featuredLinkLabel: 'Ver coleção',
+};
+
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 
 export const STORE_PERKS: readonly StorePerk[] = [
