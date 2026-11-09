@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { addToBag } from '@/features/store/cart/data/actions';
 import { CatalogContainer } from '@/features/store/catalog/containers/catalog-container';
 import { allProductsScope } from '@/features/store/catalog/model/scope';
 
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page({ searchParams }: PageProps<'/produtos'>) {
-  return <CatalogContainer scope={scope} searchParams={searchParams} />;
+  return <CatalogContainer scope={scope} searchParams={searchParams} addToBagAction={addToBag} />;
 }

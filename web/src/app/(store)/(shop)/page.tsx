@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { HeroCarousel, type HeroSlide } from '@/components/store/data-display/hero-carousel';
 import { RibbonDivider } from '@/components/store/layout/ribbon-divider';
+import { addToBag } from '@/features/store/cart/data/actions';
 import { DepartmentShowcaseContainer } from '@/features/store/catalog/containers/department-showcase-container';
 import { NewArrivalsContainer } from '@/features/store/catalog/containers/new-arrivals-container';
 import { DropHero } from '@/features/store/drops/components/hero/drop-hero';
@@ -12,7 +13,7 @@ import { getHomeBanners } from '@/features/store/home/data/queries';
 import {
   DEPARTMENTS_HEADING,
   HERO_CAROUSEL_LABEL,
-  NEW_ARRIVALS_TITLE,
+  NEW_ARRIVALS_SECTION,
   STORE_PERKS,
   STREET_TAGLINE,
 } from '@/features/store/home/model/content';
@@ -42,7 +43,7 @@ export default async function Page() {
       <div className="flex flex-col gap-16 pb-16 lg:gap-30 lg:pb-30">
         <StorePerks perks={STORE_PERKS} />
         <DepartmentShowcaseContainer {...DEPARTMENTS_HEADING} />
-        <NewArrivalsContainer title={NEW_ARRIVALS_TITLE} />
+        <NewArrivalsContainer {...NEW_ARRIVALS_SECTION} addToBagAction={addToBag} />
       </div>
     </>
   );

@@ -6,6 +6,7 @@ import { FavoriteButton } from '@/components/store/data-display/favorite-button'
 import { initialColorId, isSoldOut, sizeOptions } from '@/features/store/catalog/model/product-detail';
 import type { ColorSwatch, ProductDetail } from '@/features/store/catalog/model/types';
 import type { ActionResult } from '@/lib/action-result';
+import { sizeLabel } from '@/lib/size';
 
 import { SizeChartDialog } from './size-chart-dialog';
 
@@ -141,7 +142,7 @@ export function PurchaseForm({ product, sizeChart, action, pending, result }: Pu
                 className="peer sr-only"
               />
               <span className="flex h-ctl-lg min-w-11 items-center justify-center rounded-pill border border-line-strong px-3 text-body font-semibold text-ink transition-colors duration-base peer-checked:border-ink peer-checked:bg-ink peer-checked:text-gray-0 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand peer-disabled:border-line peer-disabled:text-gray-500 peer-disabled:line-through peer-enabled:hover:border-ink">
-                {option}
+                {sizeLabel(option)}
                 {id === null ? <span className="sr-only"> (esgotado)</span> : null}
               </span>
             </label>
@@ -155,7 +156,7 @@ export function PurchaseForm({ product, sizeChart, action, pending, result }: Pu
         <button type="submit" disabled={soldOut || pending} className={submitClass[state]}>
           {soldOut ? 'Esgotado' : pending ? 'Adicionando…' : variantId ? 'Adicionar à sacola' : 'Selecione um tamanho'}
         </button>
-        <FavoriteButton productId={product.id} productName={product.name} size="lg" />
+        <FavoriteButton productId={product.id} productName={product.name} />
       </div>
       {result
         ? (

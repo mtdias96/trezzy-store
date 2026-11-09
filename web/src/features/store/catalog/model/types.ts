@@ -9,20 +9,19 @@ export type Department = {
   categories: readonly { name: string; href: Route }[];
 };
 
-export type ProductTag = 'drop' | 'new' | 'last-units' | 'sold-out';
-
 export type ProductSummary = {
   id: string;
   name: string;
   brand: string;
   href: Route;
   imageUrl: string | null;
+  hoverImageUrl: string | null;
   priceInCents: number;
   compareAtPriceInCents: number | null;
   installments: { count: number; valueInCents: number } | null;
   pixPriceInCents: number | null;
   rating: number | null;
-  tag: ProductTag | null;
+  sizeOptions: SizeOption[];
 };
 
 export type SizeFacet = {
@@ -44,16 +43,16 @@ export type CatalogResults = {
   brands: BrandFacet[];
 };
 
-export type NewArrivalsTab = {
+export type ProductTab = {
   // "all" ou o slug do departamento.
   id: string;
   label: string;
   products: ProductSummary[];
 };
 
-export type NewArrivals = {
+export type ProductTabs = {
   total: number;
-  tabs: NewArrivalsTab[];
+  tabs: ProductTab[];
 };
 
 export type ColorSwatch = 'black' | 'white' | 'off-white' | 'heather-gray' | 'green';
@@ -101,7 +100,7 @@ export type ProductReview = {
   location: string | null;
 };
 
-export type ProductDetail = Omit<ProductSummary, 'imageUrl'> & {
+export type ProductDetail = Omit<ProductSummary, 'imageUrl' | 'hoverImageUrl' | 'sizeOptions'> & {
   slug: string;
   description: string[];
   composition: string[];

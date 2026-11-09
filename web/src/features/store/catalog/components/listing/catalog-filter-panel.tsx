@@ -7,6 +7,7 @@ import { FilterLinks } from '@/components/store/navigation/filter-links';
 import { CATALOG_LABELS, type CatalogFilters, PRICE_RANGES, toggleValue } from '@/features/store/catalog/model/listing';
 import type { DepartmentFilterItem } from '@/features/store/catalog/model/scope';
 import type { BrandFacet } from '@/features/store/catalog/model/types';
+import { sizeLabel } from '@/lib/size';
 
 export type PanelFilters = Pick<CatalogFilters, 'tamanho' | 'marca' | 'preco' | 'promocao'>;
 
@@ -49,6 +50,7 @@ export function CatalogFilterPanel({ idPrefix, departments, sizes, brands, filte
                 options={sizes}
                 selected={filters.tamanho}
                 onToggle={(size) => onChange({ tamanho: toggleValue(filters.tamanho, size) })}
+                getLabel={sizeLabel}
               />
             </FilterSection>
           )

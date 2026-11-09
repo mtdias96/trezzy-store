@@ -17,13 +17,13 @@ export function CatalogResultsSkeleton() {
       </div>
       <div className="mt-4 flex items-start gap-6 lg:mt-5">
         <div className="hidden h-120 w-68 shrink-0 animate-skeleton rounded-tile bg-surface lg:block" />
-        <ul className="grid min-w-0 flex-1 grid-cols-2 gap-3 md:grid-cols-3 lg:gap-4">
+        <ul className="grid min-w-0 flex-1 grid-cols-2 gap-3 sm:grid-cols-3 lg:gap-4">
           {Array.from({ length: CARDS }, (_, index) => (
-            <li key={index} className="flex flex-col gap-3 rounded-tile border border-line bg-gray-0 p-1.5 pb-4">
+            <li key={index} className="flex flex-col gap-3">
               <div className="aspect-4/5 animate-skeleton rounded-tile bg-surface" />
-              <div className="mx-2 h-3 w-1/3 animate-skeleton rounded-md bg-surface" />
-              <div className="mx-2 h-4 w-3/4 animate-skeleton rounded-md bg-surface" />
-              <div className="mx-2 h-5 w-1/2 animate-skeleton rounded-md bg-surface" />
+              <div className="h-3 w-1/3 animate-skeleton rounded-md bg-surface" />
+              <div className="h-4 w-3/4 animate-skeleton rounded-md bg-surface" />
+              <div className="h-5 w-1/2 animate-skeleton rounded-md bg-surface" />
             </li>
           ))}
         </ul>

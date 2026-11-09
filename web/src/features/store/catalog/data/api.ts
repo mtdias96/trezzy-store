@@ -38,9 +38,12 @@ const productSchema = z.object({
   installments: z.object({ count: z.number().int().positive(), valueInCents: z.number().int().positive() }).nullable(),
   pixPriceInCents: z.number().int().positive().nullable(),
   rating: z.number().min(0).max(5).nullable(),
-  // last-units e sold-out saem do estoque: a API escolhe um selo só.
-  tag: z.enum(['drop', 'new', 'last-units', 'sold-out']).nullable(),
   coverUrl: z.url().nullable(),
+  // A segunda foto da galeria, que entra no lugar da capa no hover do card. null: produto com uma foto só.
+  hoverImageUrl: z.url().nullable(),
+  // Os tamanhos da primeira cor com estoque, a que a página do produto abre selecionada, na ordem da grade (34–46,
+  // PP–XGG ou U). variantId null: esgotado nessa cor. A variante que a barra do card põe na sacola sai daqui.
+  sizeOptions: z.array(z.object({ size: z.string(), variantId: z.string().nullable() })),
 });
 
 export type ProductDto = z.infer<typeof productSchema>;
@@ -132,7 +135,7 @@ export async function fetchCatalogPage(params: CatalogPageQuery): Promise<Catalo
   return http(`/store/products?${query.toString()}`, { schema: catalogPageSchema });
 }
 
-const productDetailSchema = productSchema.omit({ coverUrl: true }).extend({
+const productDetailSchema = productSchema.omit({ coverUrl: true, hoverImageUrl: true, sizeOptions: true }).extend({
   description: z.array(z.string()),
   composition: z.array(z.string()),
   reviewCount: z.number().int().nonnegative(),

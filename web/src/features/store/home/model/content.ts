@@ -8,7 +8,10 @@ export const DEPARTMENTS_HEADING = {
   description: 'Do tênis ao óculos, tudo original, com nota fiscal e primeira troca grátis.',
 };
 
-export const NEW_ARRIVALS_TITLE = 'Chegou agora';
+export const NEW_ARRIVALS_SECTION = {
+  eyebrow: 'Novidades',
+  title: 'Chegou agora',
+};
 
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 

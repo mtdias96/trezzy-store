@@ -3,8 +3,9 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { CATALOG_PAGE_SIZE, type CatalogSort } from '@/features/store/catalog/model/listing';
-import { NEW_ARRIVALS_LIMIT, toNewArrivals } from '@/features/store/catalog/model/new-arrivals';
+import { NEW_ARRIVALS_LIMIT } from '@/features/store/catalog/model/new-arrivals';
 import { productHref } from '@/features/store/catalog/model/product-detail';
+import { toProductTabs } from '@/features/store/catalog/model/product-tabs';
 import { type CatalogQuery, isSharedQuery } from '@/features/store/catalog/model/scope';
 import {
   categoryHref,
@@ -16,10 +17,10 @@ import {
 import type {
   CatalogResults,
   Department,
-  NewArrivals,
   ProductDetail,
   ProductReview,
   ProductSummary,
+  ProductTabs,
 } from '@/features/store/catalog/model/types';
 import { isRequestFailure } from '@/lib/http';
 
@@ -46,7 +47,7 @@ function toDepartments(departments: DepartmentDto[]): Department[] {
 }
 
 function toProductSummary(product: ProductDto): ProductSummary {
-  const { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, tag, coverUrl } = product;
+  const { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, coverUrl, hoverImageUrl, sizeOptions } = product;
 
   return {
     id,
@@ -54,12 +55,13 @@ function toProductSummary(product: ProductDto): ProductSummary {
     brand: brandName,
     href: productHref(slug),
     imageUrl: coverUrl,
+    hoverImageUrl,
     priceInCents,
     compareAtPriceInCents,
     installments,
     pixPriceInCents,
     rating,
-    tag,
+    sizeOptions,
   };
 }
 
@@ -84,7 +86,7 @@ export async function listDepartments(): Promise<Department[]> {
   }
 }
 
-export async function getNewArrivals(): Promise<NewArrivals | null> {
+export async function getNewArrivals(): Promise<ProductTabs | null> {
   'use cache';
   cacheTag('catalog');
 
@@ -102,7 +104,7 @@ export async function getNewArrivals(): Promise<NewArrivals | null> {
       cacheLife('hours');
     }
 
-    return toNewArrivals(
+    return toProductTabs(
       all.total,
       all.products.map(toProductSummary),
       departments.map(({ slug, name }, index) => ({

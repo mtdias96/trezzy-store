@@ -16,7 +16,6 @@ const product: ProductDetail = {
   rating: 4.7,
   reviewCount: 12,
   reviewSummary: { distribution: [0, 0, 0, 0, 0], fit: null },
-  tag: null,
   description: ['Algodão pesado e modelagem boxy.'],
   composition: ['100% algodão'],
   department: { name: 'Streetwear', href: '/' },
