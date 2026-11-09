@@ -7,8 +7,15 @@ import { NewArrivalsContainer } from '@/features/store/catalog/containers/new-ar
 import { DropHero } from '@/features/store/drops/components/hero/drop-hero';
 import { getNextDrop } from '@/features/store/drops/data/queries';
 import { HeroBanner } from '@/features/store/home/components/hero-banner';
+import { StorePerks } from '@/features/store/home/components/store-perks';
 import { getHomeBanners } from '@/features/store/home/data/queries';
-import { DEPARTMENTS_TITLE, HERO_CAROUSEL_LABEL, NEW_ARRIVALS_TITLE, STREET_TAGLINE } from '@/features/store/home/model/content';
+import {
+  DEPARTMENTS_HEADING,
+  HERO_CAROUSEL_LABEL,
+  NEW_ARRIVALS_TITLE,
+  STORE_PERKS,
+  STREET_TAGLINE,
+} from '@/features/store/home/model/content';
 
 export const metadata: Metadata = {
   title: { absolute: 'Trezzy Store: streetwear, sneakers e eyewear' },
@@ -32,8 +39,11 @@ export default async function Page() {
       <h1 className="sr-only">Trezzy Store: streetwear, sneakers e eyewear</h1>
       {slides.length > 0 ? <HeroCarousel label={HERO_CAROUSEL_LABEL} slides={slides} /> : null}
       <RibbonDivider highlight={drop?.shortLabel} tagline={STREET_TAGLINE} placement={ribbonPlacement} />
-      <DepartmentShowcaseContainer title={DEPARTMENTS_TITLE} />
-      <NewArrivalsContainer title={NEW_ARRIVALS_TITLE} />
+      <div className="flex flex-col gap-16 pb-16 lg:gap-30 lg:pb-30">
+        <StorePerks perks={STORE_PERKS} />
+        <DepartmentShowcaseContainer {...DEPARTMENTS_HEADING} />
+        <NewArrivalsContainer title={NEW_ARRIVALS_TITLE} />
+      </div>
     </>
   );
 }

@@ -6,3 +6,8 @@ export type HomeBanner = {
   imageAlt: string;
   href: Route;
 };
+
+export type StorePerk = {
+  title: string;
+  description: string;
+};

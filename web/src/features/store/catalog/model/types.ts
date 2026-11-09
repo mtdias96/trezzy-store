@@ -6,6 +6,7 @@ export type Department = {
   productCount: number;
   imageUrl: string | null;
   href: Route;
+  categories: readonly { name: string; href: Route }[];
 };
 
 export type ProductTag = 'drop' | 'new' | 'last-units' | 'sold-out';

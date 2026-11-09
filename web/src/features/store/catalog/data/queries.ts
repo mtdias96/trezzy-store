@@ -29,11 +29,18 @@ import { fetchCatalogPage, fetchDepartments, fetchNewestProducts, fetchProduct, 
 // Na ordem e com os nomes da taxonomia. Departamento que a API não conhece fica de fora, e o que ela não manda
 // (sem produto) também.
 function toDepartments(departments: DepartmentDto[]): Department[] {
-  return STORE_DEPARTMENTS.flatMap(({ slug, name }) => {
+  return STORE_DEPARTMENTS.flatMap(({ slug, name, categories }) => {
     const department = departments.find((item) => item.slug === slug);
 
     return department
-      ? [{ slug, name, productCount: department.productCount, imageUrl: department.imageUrl, href: departmentHref(slug) }]
+      ? [{
+          slug,
+          name,
+          productCount: department.productCount,
+          imageUrl: department.imageUrl,
+          href: departmentHref(slug),
+          categories: categories.map((category) => ({ name: category.name, href: categoryHref(slug, category.slug) })),
+        }]
       : [];
   });
 }
