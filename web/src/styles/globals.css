@@ -144,7 +144,7 @@
   --text-seal: 0.5625rem; /* 9px */
   --text-seal--line-height: 1;
   --text-seal--letter-spacing: 0.12em;
-  /* Manuscrito (font-hand), no máximo um por tela. */
+  /* Manuscrito (font-hand), só nos momentos de hero. */
   --text-hand: 1.125rem; /* 18px */
   --text-hand--line-height: 1.2;
 
@@ -325,13 +325,32 @@
   --input: var(--color-gray-300);
 }
 
-/* Título do hero, uma palavra por linha: a palavra mais longa (--hero-letters, no style do elemento) enche a
-   largura do card (100cqi, do @container mais próximo). Cada letra do display ocupa até ~0.95em. De 44px a 120px.
-   É utility, e não token --text-*: o token mora no :root, e lá o var(--hero-letters) do título não existe. */
+/* Título do hero: cresce com a largura da coluna (@container) e quebra as linhas sozinho. Com 13cqi, uma linha de
+   ~9 letras do display cabe na coluna. De 44px a 96px. */
 @utility text-display-hero {
-  font-size: clamp(2.75rem, calc(100cqi / (var(--hero-letters, 6) * 0.95)), 7.5rem);
+  font-size: clamp(2.75rem, 13cqi, 6rem);
   line-height: 0.9;
   letter-spacing: -0.04em;
+}
+
+/* Número do drop vazado sobre a foto do hero, do tamanho da foto (@container). O contorno é fino e fixo: em em, ele
+   engrossaria junto com a fonte. */
+@utility text-display-numeral {
+  font-size: 60cqi;
+  line-height: 0.8;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px currentColor;
+}
+
+/* Letra vazada: só o contorno, na cor do texto, proporcional ao tamanho da fonte. */
+@utility text-outline {
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.03em currentColor;
+}
+
+/* Lido de cima para baixo, com as letras deitadas. */
+@utility text-vertical {
+  writing-mode: vertical-rl;
 }
 
 /* Painel lateral que acompanha a rolagem logo abaixo do header da loja (h-17, 68px, no lg) e rola por dentro quando

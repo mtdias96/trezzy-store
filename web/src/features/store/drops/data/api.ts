@@ -8,6 +8,7 @@ import { http, HttpError } from '@/lib/http';
 
 const dropSchema = z.object({
   number: z.number().int().positive(),
+  brand: z.string(),
   title: z.string(),
   description: z.string(),
   startsAt: z.iso.datetime({ offset: true }),

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { dropLongLabel, dropShortLabel } from './drop';
+import { dropCaption, dropLongLabel, dropShortLabel } from './drop';
 
 // 19h em São Paulo (UTC-3) de sexta, 30/10/2026.
 const friday = new Date('2026-10-30T22:00:00Z');
@@ -13,10 +13,16 @@ describe('dropShortLabel', () => {
 
 describe('dropLongLabel', () => {
   it('pads the drop number and shows the long weekday and hour', () => {
-    expect(dropLongLabel(7, friday)).toBe('Drop 07 — Sexta, 19h');
+    expect(dropLongLabel(7, friday)).toBe('Drop 07 · Sexta, 19h');
   });
 
   it('keeps numbers above 99 whole', () => {
-    expect(dropLongLabel(120, friday)).toBe('Drop 120 — Sexta, 19h');
+    expect(dropLongLabel(120, friday)).toBe('Drop 120 · Sexta, 19h');
+  });
+});
+
+describe('dropCaption', () => {
+  it('joins the brand, the padded number and the edition', () => {
+    expect(dropCaption('Forte Athletics', 7)).toBe('Forte Athletics · Nº07 · Edição limitada');
   });
 });

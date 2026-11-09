@@ -3,13 +3,20 @@ import { Marquee } from '@/components/store/data-display/marquee';
 type RibbonDividerProps = {
   highlight?: string;
   tagline: string;
+  overlap?: boolean;
 };
 
-// -inset-x-16: a fita passa da tela dos dois lados, para a ponta inclinada não aparecer.
+// overlap: sobe metade da altura (h-36 e h-56), e as fitas cruzam a base da seção de cima.
+const placementClass = {
+  overlap: 'relative mx-auto -mt-18 h-36 max-w-360 overflow-hidden lg:-mt-28 lg:h-56',
+  below: 'relative mx-auto mt-4 h-36 max-w-360 overflow-hidden lg:mt-10 lg:h-56',
+} satisfies Record<'overlap' | 'below', string>;
+
+// -inset-x-16: a fita passa da largura da página dos dois lados, para a ponta inclinada não aparecer.
 // Cada item tem uns 500px: 6 por cópia passam de um monitor de 2560px.
-export function RibbonDivider({ highlight, tagline }: RibbonDividerProps) {
+export function RibbonDivider({ highlight, tagline, overlap = false }: RibbonDividerProps) {
   return (
-    <div aria-hidden className="relative mt-4 h-36 overflow-hidden lg:mt-10 lg:h-56">
+    <div aria-hidden className={overlap ? placementClass.overlap : placementClass.below}>
       {highlight
         ? (
             <div className="absolute -inset-x-16 top-1/2 -translate-y-full rotate-ribbon bg-brand py-2 text-gray-0">

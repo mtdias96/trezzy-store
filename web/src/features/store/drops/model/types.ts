@@ -1,5 +1,6 @@
 export type Drop = {
   number: number;
+  brand: string;
   title: string;
   description: string;
   startsAt: string;
@@ -8,4 +9,5 @@ export type Drop = {
   sticker: string | null;
   shortLabel: string;
   longLabel: string;
+  caption: string;
 };

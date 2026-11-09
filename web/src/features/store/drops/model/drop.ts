@@ -9,7 +9,11 @@ export function dropShortLabel(number: number, startsAt: Date): string {
 }
 
 export function dropLongLabel(number: number, startsAt: Date): string {
-  return `Drop ${twoDigits(number)} — ${formatLongWeekdayHour(startsAt)}`;
+  return `Drop ${twoDigits(number)} · ${formatLongWeekdayHour(startsAt)}`;
+}
+
+export function dropCaption(brand: string, number: number): string {
+  return `${brand} · Nº${twoDigits(number)} · Edição limitada`;
 }
 
 export function dropReminderKey(number: number): string {
