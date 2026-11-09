@@ -398,6 +398,17 @@
   writing-mode: vertical-rl;
 }
 
+/* Posição no ranking, do tamanho do card (@container). A margem negativa em em esconde a base atrás da foto, na mesma
+   proporção em qualquer largura de card. */
+@utility text-rank {
+  font-family: var(--font-display);
+  font-size: 33.5cqi;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: -0.37em;
+  margin-left: -0.01em;
+}
+
 /* Faixa com as bordas de cima e de baixo em diagonal, subindo para a direita. Em vw: a inclinação é a mesma em
    qualquer tela. O conteúdo precisa de respiro vertical maior que o corte. */
 @utility clip-slant {

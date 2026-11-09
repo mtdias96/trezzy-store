@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 
+import { BEST_SELLERS_LIMIT } from '@/features/store/catalog/model/best-sellers';
 import { CATALOG_PAGE_SIZE, type CatalogSort } from '@/features/store/catalog/model/listing';
 import { NEW_ARRIVALS_LIMIT } from '@/features/store/catalog/model/new-arrivals';
 import { OUTLET_TILES, type OutletCandidate, toOutletShowcase } from '@/features/store/catalog/model/outlet';
@@ -26,7 +27,7 @@ import type {
 } from '@/features/store/catalog/model/types';
 import { isRequestFailure } from '@/lib/http';
 
-import type { CatalogSortDto, DepartmentDto, OutletProductDto, ProductDetailDto, ProductDto } from './api';
+import type { CatalogSortDto, DepartmentDto, OutletProductDto, ProductDetailDto, ProductDto, ProductPage, ProductQuery } from './api';
 import {
   fetchCatalogPage,
   fetchDepartments,
@@ -34,6 +35,7 @@ import {
   fetchOutletProducts,
   fetchProduct,
   fetchRecentReviews,
+  fetchWeeklyBestSellers,
 } from './api';
 
 // Na ordem e com os nomes da taxonomia. Departamento que a API não conhece fica de fora, e o que ela não manda
@@ -95,16 +97,14 @@ export async function listDepartments(): Promise<Department[]> {
   }
 }
 
-export async function getNewArrivals(): Promise<ProductTabs | null> {
-  'use cache';
-  cacheTag('catalog');
-
+// Chamada de dentro de um 'use cache': o cacheLife vale para a entrada de quem chamou.
+async function fetchProductTabs(fetchPage: (query: ProductQuery) => Promise<ProductPage>, limit: number): Promise<ProductTabs | null> {
   const departments = await listDepartments();
 
   try {
     const [all, ...byDepartment] = await Promise.all([
-      fetchNewestProducts({ limit: NEW_ARRIVALS_LIMIT }),
-      ...departments.map(({ slug }) => fetchNewestProducts({ limit: NEW_ARRIVALS_LIMIT, department: slug })),
+      fetchPage({ limit }),
+      ...departments.map(({ slug }) => fetchPage({ limit, department: slug })),
     ]);
 
     if (departments.length === 0) {
@@ -131,6 +131,20 @@ export async function getNewArrivals(): Promise<ProductTabs | null> {
 
     return null;
   }
+}
+
+export async function getNewArrivals(): Promise<ProductTabs | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  return fetchProductTabs(fetchNewestProducts, NEW_ARRIVALS_LIMIT);
+}
+
+export async function getWeeklyBestSellers(): Promise<ProductTabs | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  return fetchProductTabs(fetchWeeklyBestSellers, BEST_SELLERS_LIMIT);
 }
 
 // Nome da taxonomia na etiqueta; o da API só aparece para categoria que ela não conhece.

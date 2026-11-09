@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { HeroCarousel, type HeroSlide } from '@/components/store/data-display/hero-carousel';
 import { RibbonDivider } from '@/components/store/layout/ribbon-divider';
 import { addToBag } from '@/features/store/cart/data/actions';
+import { BestSellersContainer } from '@/features/store/catalog/containers/best-sellers-container';
 import { DepartmentShowcaseContainer } from '@/features/store/catalog/containers/department-showcase-container';
 import { NewArrivalsContainer } from '@/features/store/catalog/containers/new-arrivals-container';
 import { OutletContainer } from '@/features/store/catalog/containers/outlet-container';
@@ -14,6 +15,7 @@ import { StorePerks } from '@/features/store/home/components/store-perks';
 import { CollectionsContainer } from '@/features/store/home/containers/collections-container';
 import { getHomeBanners } from '@/features/store/home/data/queries';
 import {
+  BEST_SELLERS_SECTION,
   COLLECTIONS_SECTION,
   DEPARTMENTS_HEADING,
   DROP_CALENDAR_SECTION,
@@ -53,6 +55,7 @@ export default async function Page() {
         <OutletContainer {...OUTLET_SECTION} />
         <CollectionsContainer {...COLLECTIONS_SECTION} />
         <DropCalendarContainer {...DROP_CALENDAR_SECTION} />
+        <BestSellersContainer {...BEST_SELLERS_SECTION} addToBagAction={addToBag} />
       </div>
     </>
   );

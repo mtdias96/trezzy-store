@@ -58,9 +58,8 @@ export type ProductPage = {
   total: number;
 };
 
-// GET /store/products?sort=newest&limit={n}[&department={slug}] → { products, total }
-export async function fetchNewestProducts({ limit, department }: ProductQuery): Promise<ProductPage> {
-  const query = new URLSearchParams({ sort: 'newest', limit: String(limit) });
+async function fetchProductPage(ordering: Record<string, string>, { limit, department }: ProductQuery): Promise<ProductPage> {
+  const query = new URLSearchParams({ ...ordering, limit: String(limit) });
 
   if (department) {
     query.set('department', department);
@@ -69,6 +68,17 @@ export async function fetchNewestProducts({ limit, department }: ProductQuery): 
   return http(`/store/products?${query.toString()}`, {
     schema: z.object({ products: z.array(productSchema), total: z.number().int().nonnegative() }),
   });
+}
+
+// GET /store/products?sort=newest&limit={n}[&department={slug}] → { products, total }
+export async function fetchNewestProducts(query: ProductQuery): Promise<ProductPage> {
+  return fetchProductPage({ sort: 'newest' }, query);
+}
+
+// GET /store/products?sort=best-selling&period=week&limit={n}[&department={slug}] → { products, total }
+// Do mais vendido na semana para o menos: a posição na lista é o número do ranking na home.
+export async function fetchWeeklyBestSellers(query: ProductQuery): Promise<ProductPage> {
+  return fetchProductPage({ sort: 'best-selling', period: 'week' }, query);
 }
 
 const catalogRefSchema = z.object({ slug: slugSchema, name: z.string() });

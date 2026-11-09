@@ -33,6 +33,11 @@ export const DROP_CALENDAR_SECTION = {
   description: 'Lançamentos toda sexta às 19h. Ativa o lembrete e a gente avisa 1h antes.',
 };
 
+export const BEST_SELLERS_SECTION = {
+  eyebrow: 'Top 10 da semana',
+  title: 'Mais vendidos',
+};
+
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 
 export const STORE_PERKS: readonly StorePerk[] = [
