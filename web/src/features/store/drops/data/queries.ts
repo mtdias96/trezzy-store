@@ -17,7 +17,8 @@ import { formatWeekdayDateHour } from '@/lib/date';
 import { isRequestFailure } from '@/lib/http';
 
 import type { CalendarDropDto, DropDto } from './api';
-import { fetchDropCalendar, fetchNextDrop } from './api';
+// PRÉVIA (não commitar): os drops de exemplo no lugar das rotas.
+import { fetchDropCalendar, fetchNextDrop } from './preview-api';
 
 function toDrop({ number, brand, title, description, startsAt, imageUrl, imageAlt, sticker }: DropDto): Drop {
   const date = new Date(startsAt);
