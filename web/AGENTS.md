@@ -296,7 +296,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Grupo | Exemplos |
 | :--- | :--- |
 | Cor | `bg-brand`, `text-ink-soft`, `bg-surface`, `bg-status-paid-bg`, `text-danger-700` |
-| Tipografia | `type-display text-display-xl`, `text-body`, `text-caption`, `text-micro` |
+| Tipografia | `type-display text-display-xl` (heros), `text-heading` e `text-eyebrow uppercase` (seções), `text-body`, `text-caption`, `text-micro` |
 | Fonte | `font-sans`, `font-display`, `font-mono`, `font-hand` |
 | Raio | `rounded-tile` e `rounded-tag` (loja), `rounded-card` (painel), `rounded-seal`, `rounded-pill` |
 | Sombra | `shadow-pop`, `shadow-modal`, `shadow-hero`, `shadow-focus-brand` |
