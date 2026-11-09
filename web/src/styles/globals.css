@@ -398,6 +398,20 @@
   writing-mode: vertical-rl;
 }
 
+/* Em telas maiores que Full HD, o hero para de crescer e fica no centro, com o fundo indo até as bordas: a altura vem
+   da largura, e sem limite passaria da primeira tela. A imagem some aos poucos nas laterais, para não marcar um corte
+   vertical. São utilities porque o limite acima do xl e a máscara seriam valores arbitrários no lint. */
+@utility hero-frame {
+  margin-inline: auto;
+  max-width: 120rem; /* 1920px */
+}
+
+@utility hero-edge-fade {
+  @media (width > 120rem) {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+}
+
 /* Painel lateral que acompanha a rolagem logo abaixo do header da loja (h-17, 68px, no lg) e rola por dentro quando
    passa da altura da tela. É utility, e não classes soltas: a altura máxima é um calc, valor arbitrário no lint. */
 @utility sticky-panel {

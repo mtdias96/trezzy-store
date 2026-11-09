@@ -18,10 +18,10 @@ export function DropHeroPhoto({ src, alt, number, sticker, caption }: DropHeroPh
         src={src}
         alt={alt}
         fill
-        sizes="(min-width: 1440px) 864px, (min-width: 1100px) 60vw, 100vw"
+        sizes="(min-width: 1920px) 1152px, (min-width: 1100px) 60vw, 100vw"
         loading="eager"
         fetchPriority="high"
-        className="object-cover"
+        className="hero-edge-fade object-cover"
       />
       <div
         aria-hidden

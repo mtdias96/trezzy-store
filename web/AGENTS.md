@@ -362,6 +362,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Breakpoints da Trezzy: `sm` 640px, `md` 960px, `lg` 1100px e `xl` 1440px. Não existe `2xl`. Breakpoint novo é token novo no `globals.css`, e `min-[…]:` arbitrário é proibido 🔒.
 - O layout da página responde à tela (`md:`). Componente que aparece em larguras diferentes (card no grid, na lateral, no carrinho) responde ao próprio container (`@container` e `@md:`).
 - Toda tela é construída e conferida primeiro em 360px de largura, sem rolagem horizontal até 320px.
+- Telas maiores que Full HD: o conteúdo fica no `PageContainer`, centralizado, e o fundo vai até as bordas. Altura que vem da largura (`aspect-*`) precisa de limite: o hero para em 1920px (`hero-frame`, com o `sizes` da imagem no mesmo limite) e fica centralizado. Faixa que repete (`Marquee`) cobre até 5120px.
 - Alvo de toque principal (CTA, navegação, ícone de ação) com no mínimo 44×44px no celular: `h-ctl-lg`, `h-field` ou `h-cta`. Para qualquer outro alvo, o mínimo é 24×24px (WCAG 2.2 AA). No `Button`, o `size="lg"` tem 44px (`h-ctl-lg`), o padrão tem 40px (`h-ctl`) e o `sm` tem 34px (`h-ctl-sm`).
 - Nada essencial depende de hover, porque o celular não tem. No Tailwind v4, o `hover:` só se aplica em dispositivo com hover.
 - Altura de tela cheia com `dvh` ou `svh` (`min-h-dvh`), nunca `vh`: no celular, o `vh` ignora a barra do navegador e corta o conteúdo.

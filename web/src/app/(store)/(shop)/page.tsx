@@ -1,10 +1,14 @@
 import type { Metadata } from 'next';
 
+import { HeroCarousel, type HeroSlide } from '@/components/store/data-display/hero-carousel';
+import { RibbonDivider } from '@/components/store/layout/ribbon-divider';
 import { DepartmentShowcaseContainer } from '@/features/store/catalog/containers/department-showcase-container';
 import { NewArrivalsContainer } from '@/features/store/catalog/containers/new-arrivals-container';
-import { DropHeroContainer } from '@/features/store/drops/containers/drop-hero-container';
-import { DropRibbonContainer } from '@/features/store/drops/containers/drop-ribbon-container';
-import { DEPARTMENTS_TITLE, NEW_ARRIVALS_TITLE, STREET_TAGLINE } from '@/features/store/home/model/content';
+import { DropHero } from '@/features/store/drops/components/hero/drop-hero';
+import { getNextDrop } from '@/features/store/drops/data/queries';
+import { HeroBanner } from '@/features/store/home/components/hero-banner';
+import { getHomeBanners } from '@/features/store/home/data/queries';
+import { DEPARTMENTS_TITLE, HERO_CAROUSEL_LABEL, NEW_ARRIVALS_TITLE, STREET_TAGLINE } from '@/features/store/home/model/content';
 
 export const metadata: Metadata = {
   title: { absolute: 'Trezzy Store: streetwear, sneakers e eyewear' },
@@ -12,12 +16,22 @@ export const metadata: Metadata = {
 };
 
 // O <h1> é o nome da loja, só para leitor de tela e buscadores: o maior texto visível é o título do drop (<h2>).
-export default function Page() {
+// O drop abre o carrossel. Os banners ainda não têm arte para o celular e só entram no desktop: no celular o slide do
+// drop é alto e estreito, e o corte da arte larga deixaria só o meio dela.
+// A fita sobe e cruza a base do hero onde há slide na tela; sem nenhum, fica logo abaixo do header.
+export default async function Page() {
+  const [drop, banners] = await Promise.all([getNextDrop(), getHomeBanners()]);
+  const slides: HeroSlide[] = [
+    ...(drop ? [{ id: 'drop', content: <DropHero drop={drop} />, desktopOnly: false }] : []),
+    ...banners.map((banner) => ({ id: banner.id, content: <HeroBanner banner={banner} />, desktopOnly: true })),
+  ];
+  const ribbonPlacement = drop ? 'overlap' : slides.length > 0 ? 'overlapDesktop' : 'below';
+
   return (
     <>
       <h1 className="sr-only">Trezzy Store: streetwear, sneakers e eyewear</h1>
-      <DropHeroContainer />
-      <DropRibbonContainer tagline={STREET_TAGLINE} />
+      {slides.length > 0 ? <HeroCarousel label={HERO_CAROUSEL_LABEL} slides={slides} /> : null}
+      <RibbonDivider highlight={drop?.shortLabel} tagline={STREET_TAGLINE} placement={ribbonPlacement} />
       <DepartmentShowcaseContainer title={DEPARTMENTS_TITLE} />
       <NewArrivalsContainer title={NEW_ARRIVALS_TITLE} />
     </>
