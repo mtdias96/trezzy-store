@@ -13,7 +13,7 @@ const ITEMS = CATALOG_SORTS.map((value) => ({ value, label: SORT_LABELS[value] }
 export function SortSelect({ value, onValueChange }: SortSelectProps) {
   return (
     <Select items={ITEMS} value={value} onValueChange={(next) => next && onValueChange(next)}>
-      <SelectTrigger className="w-auto gap-2.5">
+      <SelectTrigger className="w-auto min-w-0 gap-2.5">
         <span className="text-caption text-gray-700">{CATALOG_LABELS.sort}</span>
         <SelectValue className="font-bold" />
       </SelectTrigger>
