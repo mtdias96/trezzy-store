@@ -14,6 +14,7 @@ const inputVariants = cva(
         dashed: 'h-ctl rounded-pill border-dashed border-gray-300 bg-card px-4 md:text-body',
         compact: 'h-ctl-sm rounded-lg border-gray-250 bg-card px-2.5 md:text-body',
         pill: 'h-ctl rounded-pill border-gray-250 bg-card px-4 md:text-body',
+        ink: 'h-field rounded-xl border-gray-0/35 bg-ink-soft px-4 text-gray-0 placeholder:text-on-ink-subtle focus-visible:border-brand-400 focus-visible:shadow-none md:text-body-lg',
         search:
           'h-ctl-lg rounded-pill border-transparent bg-ink-soft pr-3 pl-11 text-gray-0 placeholder:text-gray-500 focus-visible:border-brand-400 focus-visible:shadow-none md:text-body',
       },
