@@ -47,6 +47,9 @@ export const colorTokens = [
   'line-strong',
   'disabled',
   'on-dark-muted',
+  'on-ink-muted',
+  'on-ink-subtle',
+  'on-ink-line',
   'numeral',
   'off-white',
   'success-50',
@@ -92,6 +95,10 @@ export const textTokens = [
   'eyebrow',
   'title',
   'feature',
+  'amount',
+  'tile-title',
+  'panel-title',
+  'panel-label',
   'subtitle',
   'lead',
   'tag',
@@ -101,6 +108,7 @@ export const textTokens = [
   'body-lg',
   'body',
   'body-sm',
+  'chip',
   'caption',
   'micro',
   'seal',
@@ -113,7 +121,9 @@ export const shadowTokens = ['pop', 'modal', 'float', 'hero', 'soft', 'knob', 'f
 
 export const heightTokens = ['ctl-sm', 'ctl', 'ctl-lg', 'field', 'cta'] as const;
 
-export const durationTokens = ['fast', 'base', 'slow'] as const;
+export const durationTokens = ['fast', 'base', 'slow', 'glide'] as const;
+
+export const easeTokens = ['glide'] as const;
 
 export const animationTokens = ['pop', 'appear', 'marquee', 'marquee-reverse', 'shake', 'skeleton'] as const;
 
@@ -132,6 +142,7 @@ export type RadiusToken = (typeof radiusTokens)[number];
 export type ShadowToken = (typeof shadowTokens)[number];
 export type HeightToken = (typeof heightTokens)[number];
 export type DurationToken = (typeof durationTokens)[number];
+export type EaseToken = (typeof easeTokens)[number];
 export type AnimationToken = (typeof animationTokens)[number];
 export type RotateToken = (typeof rotateTokens)[number];
 export type FeedbackTone = (typeof feedbackTones)[number];

@@ -73,6 +73,9 @@
   --color-line-strong: #C9C9CF; /* borda de controle, hover de borda e inativo */
   --color-disabled: #B4B4BB; /* texto desabilitado */
   --color-on-dark-muted: #B9AFCB; /* texto secundário sobre fundo roxo-escuro */
+  --color-on-ink-muted: #C9C4CF; /* texto corrido sobre fundo ink */
+  --color-on-ink-subtle: #A9A4B1; /* legenda sobre fundo ink */
+  --color-on-ink-line: #2E2B34; /* divisória sobre fundo ink */
   --color-numeral: #ECECEF; /* número decorativo atrás do conteúdo */
   /* Amostra da cor de produto, e não superfície: não muda quando a paleta da interface muda. */
   --color-off-white: #F3F0EA;
@@ -152,6 +155,25 @@
   --text-feature--line-height: 1;
   --text-feature--letter-spacing: -0.03em;
   --text-feature--font-weight: 800;
+  /* Valor em destaque num card: acompanha a largura do @container (área interna do card), de 26px a 48px. */
+  --text-amount: clamp(1.625rem, 16.73cqi, 3rem);
+  --text-amount--line-height: 1;
+  --text-amount--letter-spacing: -0.03em;
+  --text-amount--font-weight: 800;
+  /* Nome centrado sobre a foto de um card: acompanha a largura do @container, de 13px a 22px. */
+  --text-tile-title: clamp(0.8125rem, 6.57cqi, 1.375rem);
+  --text-tile-title--line-height: 1.15;
+  --text-tile-title--letter-spacing: 0.06em;
+  --text-tile-title--font-weight: 800;
+  /* Sanfona: título do painel aberto e rótulo vertical do fechado. */
+  --text-panel-title: 2rem; /* 32px */
+  --text-panel-title--line-height: 1.1;
+  --text-panel-title--letter-spacing: -0.02em;
+  --text-panel-title--font-weight: 800;
+  --text-panel-label: 1.125rem; /* 18px */
+  --text-panel-label--line-height: 1;
+  --text-panel-label--letter-spacing: 0.02em;
+  --text-panel-label--font-weight: 800;
   --text-subtitle: 1.25rem; /* 20px */
   --text-subtitle--line-height: 1.1;
   --text-subtitle--letter-spacing: -0.01em;
@@ -180,6 +202,10 @@
   --text-body--line-height: 1.5;
   --text-body-sm: 0.8125rem; /* 13px */
   --text-body-sm--line-height: 1.45;
+  /* Pílula ao lado do título de uma seção. */
+  --text-chip: 0.84375rem; /* 13.5px */
+  --text-chip--line-height: 1.45;
+  --text-chip--font-weight: 500;
   --text-caption: 0.75rem; /* 12px */
   --text-caption--line-height: 1.3;
   --text-micro: 0.6875rem; /* 11px */
@@ -225,6 +251,8 @@
   --transition-duration-fast: 120ms;
   --transition-duration-base: 150ms;
   --transition-duration-slow: 200ms;
+  --transition-duration-glide: 550ms;
+  --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* `appear` é o `in` do design: `animate-in` já é do tw-animate-css, usado pelo shadcn. */
   --animate-pop: pop 140ms ease-out;
