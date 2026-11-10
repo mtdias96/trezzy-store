@@ -3,7 +3,23 @@ import { describe, expect, it } from 'vitest';
 import { departmentLinks, findCategory, findDepartment, STORE_DEPARTMENTS } from './taxonomy';
 
 // Páginas fixas da loja na raiz: um departamento com um desses slugs ficaria escondido atrás delas.
-const STORE_PAGES = ['produtos', 'novidades', 'marcas', 'drops', 'outlet', 'busca', 'sacola', 'conta', 'admin'];
+const STORE_PAGES = [
+  'produtos',
+  'novidades',
+  'marcas',
+  'drops',
+  'outlet',
+  'busca',
+  'sacola',
+  'conta',
+  'revenda',
+  'ajuda',
+  'sobre',
+  'trabalhe-conosco',
+  'privacidade',
+  'termos-de-uso',
+  'admin',
+];
 
 describe('STORE_DEPARTMENTS', () => {
   const slugs = STORE_DEPARTMENTS.flatMap(({ slug, categories }) => [slug, ...categories.map((category) => category.slug)]);
