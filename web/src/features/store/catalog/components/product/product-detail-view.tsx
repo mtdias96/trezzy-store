@@ -28,7 +28,7 @@ export function ProductDetailView({ product, sizeChart, purchase, shipping, revi
   return (
     <PageContainer className="pt-4 pb-16 lg:pt-6 lg:pb-24">
       <Breadcrumb trail={trail} current={product.name} />
-      <div className="mt-4 grid gap-6 lg:mt-6 lg:grid-cols-12 lg:gap-10">
+      <div className="mt-4 grid grid-cols-1 gap-6 lg:mt-6 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-7">
           <ProductGallery images={product.images} />
         </div>

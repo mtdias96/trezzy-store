@@ -9,6 +9,7 @@ import { getCatalogResults } from '@/features/store/catalog/data/queries';
 import { type CatalogScope, toCatalogQuery } from '@/features/store/catalog/model/scope';
 import { loadCatalogFilters } from '@/features/store/catalog/model/search-params';
 import type { CatalogResults } from '@/features/store/catalog/model/types';
+import type { FormAction } from '@/lib/action-result';
 
 import { CatalogResultsContainer } from './catalog-results-container';
 
@@ -16,6 +17,8 @@ type CatalogContainerProps = {
   // null: a URL não é de nenhuma página do catálogo.
   scope: CatalogScope | null;
   searchParams: Promise<SearchParams>;
+  // Vem da página: a sacola é outra feature.
+  addToBagAction: FormAction;
 };
 
 async function CountContainer({ results }: { results: Promise<CatalogResults> }) {
@@ -26,7 +29,7 @@ async function CountContainer({ results }: { results: Promise<CatalogResults> })
 
 // O total no topo e a lista leem a mesma consulta: a promessa nasce uma vez aqui, sem await, e cada Suspense a
 // espera. Assim o topo continua no HTML estático, e a API é chamada uma vez por requisição.
-export function CatalogContainer({ scope, searchParams }: CatalogContainerProps) {
+export function CatalogContainer({ scope, searchParams, addToBagAction }: CatalogContainerProps) {
   if (!scope) {
     notFound();
   }
@@ -44,7 +47,7 @@ export function CatalogContainer({ scope, searchParams }: CatalogContainerProps)
       )}
     >
       <Suspense fallback={<CatalogResultsSkeleton />}>
-        <CatalogResultsContainer scope={scope} filters={filters} results={results} />
+        <CatalogResultsContainer scope={scope} filters={filters} results={results} addToBagAction={addToBagAction} />
       </Suspense>
     </CatalogView>
   );

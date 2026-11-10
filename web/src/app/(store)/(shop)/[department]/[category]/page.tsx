@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 
+import { addToBag } from '@/features/store/cart/data/actions';
 import { CatalogPageSkeleton } from '@/features/store/catalog/components/listing/catalog-skeleton';
 import { CatalogContainer } from '@/features/store/catalog/containers/catalog-container';
 import { categoryScope } from '@/features/store/catalog/model/scope';
@@ -22,7 +23,7 @@ export default function Page({ params, searchParams }: PageProps<'/[department]/
   return (
     <Suspense fallback={<CatalogPageSkeleton />}>
       {params.then(({ department, category }) => (
-        <CatalogContainer scope={categoryScope(department, category)} searchParams={searchParams} />
+        <CatalogContainer scope={categoryScope(department, category)} searchParams={searchParams} addToBagAction={addToBag} />
       ))}
     </Suspense>
   );

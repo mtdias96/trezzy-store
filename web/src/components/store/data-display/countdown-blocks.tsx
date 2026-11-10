@@ -24,7 +24,7 @@ export function CountdownBlocks({ endsAt }: CountdownBlocksProps) {
   return (
     <div ref={ref} role="timer" className="grid grid-cols-4 gap-2">
       {UNITS.map(([unit, label]) => (
-        <div key={unit} className="flex flex-col gap-1.5 rounded-xl bg-brand-900 p-3 lg:px-4">
+        <div key={unit} className="flex flex-col gap-1.5 rounded-xl border border-gray-0/15 bg-brand-900/60 p-3 lg:px-4">
           <span className="font-display text-display-lg font-extrabold tabular-nums xl:text-display-xl">
             {countdown ? twoDigits(countdown[unit]) : '--'}
           </span>

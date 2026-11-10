@@ -5,7 +5,7 @@ import type { ColorSwatch as Swatch } from '@/features/admin/products/model/vari
 const swatchClass = {
   black: 'bg-ink',
   white: 'border border-gray-300 bg-gray-0',
-  'off-white': 'border border-gray-300 bg-paper',
+  'off-white': 'border border-gray-300 bg-off-white',
   'heather-gray': 'bg-gray-400',
   green: 'bg-success-700',
 } satisfies Record<Swatch, string>;

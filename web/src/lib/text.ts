@@ -13,10 +13,6 @@ export function words(text: string): string[] {
   return text.split(/\s+/).filter(Boolean);
 }
 
-export function longestWordLength(text: string): number {
-  return Math.max(0, ...words(text).map((word) => word.length));
-}
-
 export function twoDigits(value: number): string {
   return String(value).padStart(2, '0');
 }

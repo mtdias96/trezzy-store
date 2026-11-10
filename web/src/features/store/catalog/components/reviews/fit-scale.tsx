@@ -17,7 +17,7 @@ export function FitScale({ fit }: FitScaleProps) {
       <div aria-hidden className="mt-2 grid grid-cols-3 gap-1">
         {FIT_OPTIONS.map(({ value, label }, index) => (
           <div key={value} className="flex flex-col gap-1.5">
-            <span className={value === fit ? 'h-1.5 rounded-pill bg-brand' : 'h-1.5 rounded-pill bg-paper-stone'} />
+            <span className={value === fit ? 'h-1.5 rounded-pill bg-brand' : 'h-1.5 rounded-pill bg-surface'} />
             <span className={`text-caption ${LABEL_ALIGN[index] ?? ''} ${value === fit ? 'font-bold text-ink' : 'text-gray-700'}`}>
               {label}
             </span>

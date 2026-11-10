@@ -10,7 +10,7 @@ type CatalogEmptyStateProps = {
 
 export function CatalogEmptyState({ filtered, clearHref }: CatalogEmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-paper-sand px-6 py-16 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-tile border border-dashed border-line-strong px-6 py-16 text-center">
       <SearchXIcon aria-hidden className="size-8 text-gray-500" />
       <h2 className="type-display text-display-sm not-italic">
         {filtered ? 'Nenhum produto com esses filtros' : 'Nada por aqui ainda'}

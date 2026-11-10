@@ -65,11 +65,20 @@
   --color-gray-800: #4A4650;
   --color-gray-900: #111014;
 
-  /* Loja: superfícies quentes. */
-  --color-paper: #F3F0EA;
-  --color-paper-sand: #DCD7CE;
-  --color-paper-stone: #EEEAE3;
-  --color-paper-line: #E3DED6;
+  /* Loja: neutros frios nomeados pelo papel na interface. O fundo da página é o gray-0. */
+  --color-surface: #F4F4F6; /* pills, hover, cabeçalho de tabela, skeleton */
+  --color-surface-media: #F1F1F3; /* fundo da foto do produto */
+  --color-line: #E6E6EA;
+  --color-divider: #E2E2E6;
+  --color-line-strong: #C9C9CF; /* borda de controle, hover de borda e inativo */
+  --color-disabled: #B4B4BB; /* texto desabilitado */
+  --color-on-dark-muted: #B9AFCB; /* texto secundário sobre fundo roxo-escuro */
+  --color-on-ink-muted: #C9C4CF; /* texto corrido sobre fundo ink */
+  --color-on-ink-subtle: #A9A4B1; /* legenda sobre fundo ink */
+  --color-on-ink-line: #2E2B34; /* divisória sobre fundo ink */
+  --color-numeral: #ECECEF; /* número decorativo atrás do conteúdo */
+  /* Amostra da cor de produto, e não superfície: não muda quando a paleta da interface muda. */
+  --color-off-white: #F3F0EA;
 
   --color-success-50: #E5F4EA;
   --color-success-500: #1E9E55;
@@ -127,12 +136,76 @@
   --text-display-xs: 0.90625rem; /* 14.5px */
   --text-display-xs--line-height: 1.1;
   --text-display-xs--letter-spacing: -0.01em;
+  /* Título de seção: de 30px (celular, 375px) a 46px (desktop, 1440px), acompanhando a largura da tela. */
+  --text-heading: clamp(1.875rem, 1.523rem + 1.502vw, 2.875rem);
+  --text-heading--line-height: 1.02;
+  --text-heading--letter-spacing: -0.025em;
+  --text-heading--font-weight: 800;
+  /* Etiqueta acima do título de seção, em caixa alta. */
+  --text-eyebrow: 0.75rem; /* 12px */
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.14em;
+  --text-eyebrow--font-weight: 700;
+  /* Título de card dentro de uma seção (nome do departamento). */
+  --text-title: 1.375rem; /* 22px */
+  --text-title--line-height: 1.15;
+  --text-title--letter-spacing: -0.01em;
+  /* Peça de destaque de um mosaico: acompanha a largura do @container. */
+  --text-feature: clamp(2rem, 7.43cqi, 3.25rem);
+  --text-feature--line-height: 1;
+  --text-feature--letter-spacing: -0.03em;
+  --text-feature--font-weight: 800;
+  /* Valor em destaque num card: acompanha a largura do @container (área interna do card), de 26px a 48px. */
+  --text-amount: clamp(1.625rem, 16.73cqi, 3rem);
+  --text-amount--line-height: 1;
+  --text-amount--letter-spacing: -0.03em;
+  --text-amount--font-weight: 800;
+  /* Nome centrado sobre a foto de um card: acompanha a largura do @container, de 13px a 22px. */
+  --text-tile-title: clamp(0.8125rem, 6.57cqi, 1.375rem);
+  --text-tile-title--line-height: 1.15;
+  --text-tile-title--letter-spacing: 0.06em;
+  --text-tile-title--font-weight: 800;
+  /* Sanfona: título do painel aberto e rótulo vertical do fechado. */
+  --text-panel-title: 2rem; /* 32px */
+  --text-panel-title--line-height: 1.1;
+  --text-panel-title--letter-spacing: -0.02em;
+  --text-panel-title--font-weight: 800;
+  --text-panel-label: 1.125rem; /* 18px */
+  --text-panel-label--line-height: 1;
+  --text-panel-label--letter-spacing: 0.02em;
+  --text-panel-label--font-weight: 800;
+  --text-subtitle: 1.25rem; /* 20px */
+  --text-subtitle--line-height: 1.1;
+  --text-subtitle--letter-spacing: -0.01em;
+  /* Card de produto: rótulo do painel de tamanhos, marca, nome e preço. */
+  --text-tag: 0.625rem; /* 10px */
+  --text-tag--line-height: 1;
+  --text-tag--letter-spacing: 0.08em;
+  --text-tag--font-weight: 700;
+  --text-overline: 0.6875rem; /* 11px */
+  --text-overline--line-height: 1.2;
+  --text-overline--letter-spacing: 0.08em;
+  --text-overline--font-weight: 700;
+  --text-product-name: 0.875rem; /* 14px */
+  --text-product-name--line-height: 1.35;
+  --text-product-name--font-weight: 500;
+  --text-price: 1.0625rem; /* 17px */
+  --text-price--line-height: 1.3;
+  --text-price--letter-spacing: -0.01em;
+  --text-price--font-weight: 700;
+  /* Descrição ao lado do título de seção. */
+  --text-lead: 1rem; /* 16px */
+  --text-lead--line-height: 1.5;
   --text-body-lg: 0.9375rem; /* 15px */
   --text-body-lg--line-height: 1.55;
   --text-body: 0.875rem; /* 14px */
   --text-body--line-height: 1.5;
   --text-body-sm: 0.8125rem; /* 13px */
   --text-body-sm--line-height: 1.45;
+  /* Pílula ao lado do título de uma seção. */
+  --text-chip: 0.84375rem; /* 13.5px */
+  --text-chip--line-height: 1.45;
+  --text-chip--font-weight: 500;
   --text-caption: 0.75rem; /* 12px */
   --text-caption--line-height: 1.3;
   --text-micro: 0.6875rem; /* 11px */
@@ -142,11 +215,14 @@
   --text-seal: 0.5625rem; /* 9px */
   --text-seal--line-height: 1;
   --text-seal--letter-spacing: 0.12em;
-  /* Manuscrito (font-hand), no máximo um por tela. */
+  /* Manuscrito (font-hand), só nos momentos de hero. */
   --text-hand: 1.125rem; /* 18px */
   --text-hand--line-height: 1.2;
 
   --radius-*: initial;
+  /* Loja: cantos retos em cards, fotos e painéis (tile) e nos botões de tamanho do card (tag). O painel segue no card. */
+  --radius-tag: 4px;
+  --radius-tile: 6px;
   --radius-seal: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
@@ -154,7 +230,6 @@
   --radius-2xl: 14px;
   --radius-3xl: 16px;
   --radius-card: 20px;
-  --radius-block: 24px;
   --radius-pill: 9999px;
 
   --shadow-*: initial;
@@ -176,6 +251,8 @@
   --transition-duration-fast: 120ms;
   --transition-duration-base: 150ms;
   --transition-duration-slow: 200ms;
+  --transition-duration-glide: 550ms;
+  --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
 
   /* `appear` é o `in` do design: `animate-in` já é do tw-animate-css, usado pelo shadcn. */
   --animate-pop: pop 140ms ease-out;
@@ -273,7 +350,7 @@
 /* Loja (padrão). */
 :root {
   --radius: var(--radius-lg);
-  --background: var(--color-paper);
+  --background: var(--color-gray-0);
   --foreground: var(--color-ink);
   --card: var(--color-gray-0);
   --card-foreground: var(--color-ink);
@@ -281,15 +358,15 @@
   --popover-foreground: var(--color-ink);
   --primary: var(--color-brand);
   --primary-foreground: var(--color-gray-0);
-  --secondary: var(--color-paper-stone);
+  --secondary: var(--color-surface);
   --secondary-foreground: var(--color-ink);
-  --muted: var(--color-paper-stone);
+  --muted: var(--color-surface);
   --muted-foreground: var(--color-gray-700);
-  --accent: var(--color-paper-stone);
+  --accent: var(--color-surface);
   --accent-foreground: var(--color-ink);
   --destructive: var(--color-danger-600);
-  --border: var(--color-paper-line);
-  --input: var(--color-paper-sand);
+  --border: var(--color-line);
+  --input: var(--color-line-strong);
   --ring: var(--color-brand);
   --chart-1: var(--color-brand);
   --chart-2: var(--color-lime-500);
@@ -321,13 +398,125 @@
   --input: var(--color-gray-300);
 }
 
-/* Título do hero, uma palavra por linha: a palavra mais longa (--hero-letters, no style do elemento) enche a
-   largura do card (100cqi, do @container mais próximo). Cada letra do display ocupa até ~0.95em. De 44px a 120px.
-   É utility, e não token --text-*: o token mora no :root, e lá o var(--hero-letters) do título não existe. */
+/* Título do hero: cresce com a largura da coluna (@container) e quebra as linhas sozinho. Com 13cqi, uma linha de
+   ~9 letras do display cabe na coluna. De 44px a 96px. */
 @utility text-display-hero {
-  font-size: clamp(2.75rem, calc(100cqi / (var(--hero-letters, 6) * 0.95)), 7.5rem);
+  font-size: clamp(2.75rem, 13cqi, 6rem);
   line-height: 0.9;
   letter-spacing: -0.04em;
+}
+
+/* Número do drop vazado sobre a foto do hero, do tamanho da foto (@container). O contorno é fino e fixo: em em, ele
+   engrossaria junto com a fonte. */
+@utility text-display-numeral {
+  font-size: 60cqi;
+  line-height: 0.8;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px currentColor;
+}
+
+/* Letra vazada: só o contorno, na cor do texto, proporcional ao tamanho da fonte. */
+@utility text-outline {
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0.03em currentColor;
+}
+
+/* Lido de cima para baixo, com as letras deitadas. */
+@utility text-vertical {
+  writing-mode: vertical-rl;
+}
+
+/* Posição no ranking, do tamanho do card (@container). A margem negativa em em esconde a base atrás da foto, na mesma
+   proporção em qualquer largura de card. */
+@utility text-rank {
+  font-family: var(--font-display);
+  font-size: 33.5cqi;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: -0.37em;
+  margin-left: -0.01em;
+}
+
+/* Faixa com as bordas de cima e de baixo em diagonal, subindo para a direita. Em vw: a inclinação é a mesma em
+   qualquer tela. O conteúdo precisa de respiro vertical maior que o corte. */
+@utility clip-slant {
+  clip-path: polygon(0 3.8vw, 100% 0, 100% calc(100% - 3.8vw), 0 100%);
+}
+
+/* Em telas maiores que Full HD, o hero para de crescer e fica no centro, com o fundo indo até as bordas: a altura vem
+   da largura, e sem limite passaria da primeira tela. A imagem some aos poucos nas laterais, para não marcar um corte
+   vertical. São utilities porque o limite acima do xl e a máscara seriam valores arbitrários no lint. */
+@utility hero-frame {
+  margin-inline: auto;
+  max-width: 120rem; /* 1920px */
+}
+
+@utility hero-edge-fade {
+  @media (width > 120rem) {
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+}
+
+/* Sanfona de três painéis: o aberto é 3,2 vezes mais largo. Todo painel tem sempre a largura de aberto, e quem o
+   "fecha" é o vizinho da direita, que desliza por cima: só o translate anima, no compositor, e o texto nunca quebra de
+   linha no meio do movimento. A faixa branca (::before) desenha o vão e os cantos de quem ficou por baixo. */
+@utility accordion {
+  --accordion-closed: calc((100cqi - 1rem) / 5.2);
+  --accordion-opened: calc(var(--accordion-closed) * 3.2);
+  --accordion-second: calc(var(--accordion-opened) + 0.5rem);
+  --accordion-third: calc(var(--accordion-opened) + var(--accordion-closed) + 1rem);
+
+  position: relative;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: var(--radius-tile);
+
+  &[data-open='1'],
+  &[data-open='2'] {
+    --accordion-second: calc(var(--accordion-closed) + 0.5rem);
+  }
+
+  &[data-open='2'] {
+    --accordion-third: calc(var(--accordion-closed) * 2 + 1rem);
+  }
+
+  & > li {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: var(--accordion-opened);
+    transition: translate var(--transition-duration-glide) var(--ease-glide);
+  }
+
+  & > li:nth-child(2) {
+    translate: var(--accordion-second);
+  }
+
+  & > li:nth-child(3) {
+    translate: var(--accordion-third);
+  }
+
+  & > li:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    right: calc(100% - var(--radius-tile));
+    width: calc(0.5rem + var(--radius-tile) * 2);
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 0 100%, transparent calc(var(--radius-tile) - 0.5px), var(--color-gray-0) var(--radius-tile)) top left / var(--radius-tile) var(--radius-tile) no-repeat,
+      radial-gradient(circle at 0 0, transparent calc(var(--radius-tile) - 0.5px), var(--color-gray-0) var(--radius-tile)) bottom left / var(--radius-tile) var(--radius-tile) no-repeat,
+      linear-gradient(var(--color-gray-0), var(--color-gray-0)) right / calc(100% - var(--radius-tile)) 100% no-repeat;
+  }
+}
+
+@utility accordion-closed-width {
+  width: var(--accordion-closed);
+}
+
+/* Painel fechado: a foto recua para o meio dela ficar na faixa visível. */
+@utility accordion-photo-closed {
+  translate: calc(var(--accordion-closed) * -1.1);
 }
 
 /* Painel lateral que acompanha a rolagem logo abaixo do header da loja (h-17, 68px, no lg) e rola por dentro quando

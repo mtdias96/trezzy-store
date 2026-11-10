@@ -120,11 +120,11 @@ const IMPORTS = {
     { type: 'area-components', captured: SAME_AREA },
     anyOf('ui', 'common', 'hooks', 'lib', 'styles'),
   ],
-  // Lógica de client: estado da feature e chamada das Server Actions, nunca das queries.
+  // Lógica de client: estado da feature, Server Actions e leitura de rota do próprio app, nunca as queries.
   'feature-hooks': [
     same('feature-hooks'),
     same('feature-model'),
-    same('feature-data', { internalPath: 'actions.ts' }),
+    same('feature-data', { internalPath: '{actions,client}.ts' }),
     anyOf('hooks', 'lib'),
   ],
   'feature-data': [same('feature-data'), same('feature-model'), anyOf('feature-session', 'lib', 'config')],

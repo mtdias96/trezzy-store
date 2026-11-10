@@ -17,8 +17,8 @@ type FilterLinksProps = {
 };
 
 const linkClass = {
-  idle: 'flex h-11 items-center gap-3 rounded-xl px-2.5 text-body-lg text-ink transition-colors duration-base hover:bg-paper-stone',
-  active: 'flex h-11 items-center gap-3 rounded-xl bg-paper-stone px-2.5 text-body-lg font-bold text-ink',
+  idle: 'flex h-11 items-center gap-3 rounded-xl px-2.5 text-body-lg text-ink transition-colors duration-base hover:bg-surface',
+  active: 'flex h-11 items-center gap-3 rounded-xl bg-surface px-2.5 text-body-lg font-bold text-ink',
 } satisfies Record<'idle' | 'active', string>;
 
 // Filtro que troca de página (departamento), e não de parâmetro: é link, e funciona sem JavaScript.

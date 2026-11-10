@@ -6,9 +6,24 @@ export type Department = {
   productCount: number;
   imageUrl: string | null;
   href: Route;
+  categories: readonly DepartmentCategory[];
 };
 
-export type ProductTag = 'drop' | 'new' | 'last-units' | 'sold-out';
+export type DepartmentCategory = {
+  slug: string;
+  name: string;
+  href: Route;
+  productCount: number;
+};
+
+export type PieceIconName = 'sneaker' | 'shirt' | 'hoodie' | 'jacket' | 'pants' | 'shorts' | 'glasses' | 'cap' | 'tag';
+
+export type PieceShortcut = {
+  name: string;
+  icon: PieceIconName;
+  href: Route;
+  productCount: number;
+};
 
 export type ProductSummary = {
   id: string;
@@ -16,12 +31,13 @@ export type ProductSummary = {
   brand: string;
   href: Route;
   imageUrl: string | null;
+  hoverImageUrl: string | null;
   priceInCents: number;
   compareAtPriceInCents: number | null;
   installments: { count: number; valueInCents: number } | null;
   pixPriceInCents: number | null;
   rating: number | null;
-  tag: ProductTag | null;
+  sizeOptions: SizeOption[];
 };
 
 export type SizeFacet = {
@@ -43,16 +59,52 @@ export type CatalogResults = {
   brands: BrandFacet[];
 };
 
-export type NewArrivalsTab = {
+export type ProductTab = {
   // "all" ou o slug do departamento.
   id: string;
   label: string;
   products: ProductSummary[];
 };
 
-export type NewArrivals = {
+export type ProductTabs = {
   total: number;
-  tabs: NewArrivalsTab[];
+  tabs: ProductTab[];
+};
+
+export type OutletProduct = {
+  id: string;
+  name: string;
+  categoryName: string | null;
+  href: Route;
+  imageUrl: string | null;
+  priceInCents: number;
+  compareAtPriceInCents: number;
+};
+
+export type OutletShowcase = {
+  products: OutletProduct[];
+  topDiscountPercent: number;
+};
+
+export type BrandTile = {
+  slug: string;
+  name: string;
+  productCount: number;
+  imageUrl: string | null;
+  href: Route;
+};
+
+export type PriceBandPhoto = {
+  id: string;
+  imageUrl: string | null;
+};
+
+export type PriceBand = {
+  href: Route;
+  caption: string;
+  amount: string;
+  productCount: number;
+  photos: PriceBandPhoto[];
 };
 
 export type ColorSwatch = 'black' | 'white' | 'off-white' | 'heather-gray' | 'green';
@@ -100,7 +152,7 @@ export type ProductReview = {
   location: string | null;
 };
 
-export type ProductDetail = Omit<ProductSummary, 'imageUrl'> & {
+export type ProductDetail = Omit<ProductSummary, 'imageUrl' | 'hoverImageUrl' | 'sizeOptions'> & {
   slug: string;
   description: string[];
   composition: string[];

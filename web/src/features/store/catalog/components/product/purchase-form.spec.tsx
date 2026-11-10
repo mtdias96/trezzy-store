@@ -18,7 +18,6 @@ const product: ProductDetail = {
   rating: null,
   reviewCount: 0,
   reviewSummary: { distribution: [0, 0, 0, 0, 0], fit: null },
-  tag: null,
   description: [],
   composition: [],
   department: { name: 'Streetwear', href: '/' },

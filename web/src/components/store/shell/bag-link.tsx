@@ -20,7 +20,7 @@ export function BagLink({ count = 0 }: BagLinkProps) {
     <Link
       href={pendingRoute('/sacola')}
       aria-label={bagLabel(count)}
-      className="relative flex size-11 shrink-0 items-center justify-center rounded-pill transition-colors duration-base hover:bg-ink-soft xl:h-ctl-lg xl:w-auto xl:gap-2.5 xl:bg-gray-0 xl:pr-1.5 xl:pl-4 xl:text-body xl:font-bold xl:text-ink xl:hover:bg-paper-stone"
+      className="relative flex size-11 shrink-0 items-center justify-center rounded-pill transition-colors duration-base hover:bg-ink-soft xl:h-ctl-lg xl:w-auto xl:gap-2.5 xl:bg-gray-0 xl:pr-1.5 xl:pl-4 xl:text-body xl:font-bold xl:text-ink xl:hover:bg-surface"
     >
       <ShoppingBagIcon aria-hidden className="size-5 xl:hidden" />
       <span aria-hidden className="hidden xl:inline">

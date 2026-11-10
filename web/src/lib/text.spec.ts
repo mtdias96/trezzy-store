@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { longestWordLength, matchesSearch, twoDigits, words } from './text';
+import { matchesSearch, twoDigits, words } from './text';
 
 describe('matchesSearch', () => {
   it('ignores accents and case', () => {
@@ -23,16 +23,6 @@ describe('matchesSearch', () => {
 describe('words', () => {
   it('splits on any whitespace and drops empty parts', () => {
     expect(words('  Runner 03\nLima   Ácida ')).toEqual(['Runner', '03', 'Lima', 'Ácida']);
-  });
-});
-
-describe('longestWordLength', () => {
-  it('counts the letters of the longest word', () => {
-    expect(longestWordLength('Runner 03 Lima Ácida')).toBe(6);
-  });
-
-  it('is zero for an empty text', () => {
-    expect(longestWordLength('   ')).toBe(0);
   });
 });
 

@@ -2,9 +2,14 @@ import 'server-only';
 
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { CATALOG_PAGE_SIZE, type CatalogSort } from '@/features/store/catalog/model/listing';
-import { NEW_ARRIVALS_LIMIT, toNewArrivals } from '@/features/store/catalog/model/new-arrivals';
+import { BEST_SELLERS_LIMIT } from '@/features/store/catalog/model/best-sellers';
+import { BRAND_TILES, brandHref, toBrandShowcase } from '@/features/store/catalog/model/brands';
+import { CATALOG_PAGE_SIZE, type CatalogSort, PRICE_RANGES } from '@/features/store/catalog/model/listing';
+import { NEW_ARRIVALS_LIMIT } from '@/features/store/catalog/model/new-arrivals';
+import { OUTLET_TILES, type OutletCandidate, toOutletShowcase } from '@/features/store/catalog/model/outlet';
+import { PRICE_BAND_PHOTOS, toPriceBands } from '@/features/store/catalog/model/price-bands';
 import { productHref } from '@/features/store/catalog/model/product-detail';
+import { toProductTabs } from '@/features/store/catalog/model/product-tabs';
 import { type CatalogQuery, isSharedQuery } from '@/features/store/catalog/model/scope';
 import {
   categoryHref,
@@ -14,33 +19,57 @@ import {
   STORE_DEPARTMENTS,
 } from '@/features/store/catalog/model/taxonomy';
 import type {
+  BrandTile,
   CatalogResults,
   Department,
-  NewArrivals,
+  OutletShowcase,
+  PriceBand,
   ProductDetail,
   ProductReview,
   ProductSummary,
+  ProductTabs,
 } from '@/features/store/catalog/model/types';
 import { isRequestFailure } from '@/lib/http';
 
-import type { CatalogSortDto, DepartmentDto, ProductDetailDto, ProductDto } from './api';
+import type { CatalogSortDto, DepartmentDto, OutletProductDto, ProductDetailDto, ProductDto, ProductPage, ProductQuery } from './api';
 // PRÉVIA (não commitar): o catálogo de exemplo no lugar das rotas.
-import { fetchCatalogPage, fetchDepartments, fetchNewestProducts, fetchProduct, fetchRecentReviews } from './preview-api';
+import {
+  fetchCatalogPage,
+  fetchDepartments,
+  fetchFeaturedBrands,
+  fetchNewestProducts,
+  fetchOutletProducts,
+  fetchProduct,
+  fetchRecentReviews,
+  fetchWeeklyBestSellers,
+} from './preview-api';
 
 // Na ordem e com os nomes da taxonomia. Departamento que a API não conhece fica de fora, e o que ela não manda
 // (sem produto) também.
 function toDepartments(departments: DepartmentDto[]): Department[] {
-  return STORE_DEPARTMENTS.flatMap(({ slug, name }) => {
+  return STORE_DEPARTMENTS.flatMap(({ slug, name, categories }) => {
     const department = departments.find((item) => item.slug === slug);
 
     return department
-      ? [{ slug, name, productCount: department.productCount, imageUrl: department.imageUrl, href: departmentHref(slug) }]
+      ? [{
+          slug,
+          name,
+          productCount: department.productCount,
+          imageUrl: department.imageUrl,
+          href: departmentHref(slug),
+          categories: categories.map((category) => ({
+            slug: category.slug,
+            name: category.name,
+            href: categoryHref(slug, category.slug),
+            productCount: department.categories.find((item) => item.slug === category.slug)?.productCount ?? 0,
+          })),
+        }]
       : [];
   });
 }
 
 function toProductSummary(product: ProductDto): ProductSummary {
-  const { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, tag, coverUrl } = product;
+  const { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, coverUrl, hoverImageUrl, sizeOptions } = product;
 
   return {
     id,
@@ -48,12 +77,13 @@ function toProductSummary(product: ProductDto): ProductSummary {
     brand: brandName,
     href: productHref(slug),
     imageUrl: coverUrl,
+    hoverImageUrl,
     priceInCents,
     compareAtPriceInCents,
     installments,
     pixPriceInCents,
     rating,
-    tag,
+    sizeOptions,
   };
 }
 
@@ -78,16 +108,14 @@ export async function listDepartments(): Promise<Department[]> {
   }
 }
 
-export async function getNewArrivals(): Promise<NewArrivals | null> {
-  'use cache';
-  cacheTag('catalog');
-
+// Chamada de dentro de um 'use cache': o cacheLife vale para a entrada de quem chamou.
+async function fetchProductTabs(fetchPage: (query: ProductQuery) => Promise<ProductPage>, limit: number): Promise<ProductTabs | null> {
   const departments = await listDepartments();
 
   try {
     const [all, ...byDepartment] = await Promise.all([
-      fetchNewestProducts({ limit: NEW_ARRIVALS_LIMIT }),
-      ...departments.map(({ slug }) => fetchNewestProducts({ limit: NEW_ARRIVALS_LIMIT, department: slug })),
+      fetchPage({ limit }),
+      ...departments.map(({ slug }) => fetchPage({ limit, department: slug })),
     ]);
 
     if (departments.length === 0) {
@@ -96,7 +124,7 @@ export async function getNewArrivals(): Promise<NewArrivals | null> {
       cacheLife('hours');
     }
 
-    return toNewArrivals(
+    return toProductTabs(
       all.total,
       all.products.map(toProductSummary),
       departments.map(({ slug, name }, index) => ({
@@ -113,6 +141,113 @@ export async function getNewArrivals(): Promise<NewArrivals | null> {
     cacheLife('minutes');
 
     return null;
+  }
+}
+
+export async function getNewArrivals(): Promise<ProductTabs | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  return fetchProductTabs(fetchNewestProducts, NEW_ARRIVALS_LIMIT);
+}
+
+export async function getWeeklyBestSellers(): Promise<ProductTabs | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  return fetchProductTabs(fetchWeeklyBestSellers, BEST_SELLERS_LIMIT);
+}
+
+// Nome da taxonomia na etiqueta; o da API só aparece para categoria que ela não conhece.
+function toOutletCandidate({ slug, title, department, category, coverUrl, ...prices }: OutletProductDto): OutletCandidate {
+  const known = findDepartment(department.slug);
+  const knownCategory = known && category ? findCategory(known, category.slug) : undefined;
+
+  return {
+    ...prices,
+    name: title,
+    categoryName: knownCategory?.name ?? category?.name ?? null,
+    href: productHref(slug),
+    imageUrl: coverUrl,
+  };
+}
+
+export async function getOutletShowcase(): Promise<OutletShowcase | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  try {
+    const products = await fetchOutletProducts(OUTLET_TILES);
+
+    cacheLife('hours');
+
+    return toOutletShowcase(products.map(toOutletCandidate));
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return null;
+  }
+}
+
+export async function getFeaturedBrands(): Promise<BrandTile[] | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  try {
+    const brands = await fetchFeaturedBrands(BRAND_TILES);
+
+    cacheLife('hours');
+
+    return toBrandShowcase(brands.map((brand) => ({ ...brand, href: brandHref(brand.slug) })));
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return null;
+  }
+}
+
+// Uma consulta por faixa, à mesma rota da listagem: a contagem do card é a mesma que a página mostra ao abrir.
+export async function getPriceBands(): Promise<PriceBand[]> {
+  'use cache';
+  cacheTag('catalog');
+
+  try {
+    const results = await Promise.all(PRICE_RANGES.map(async (range) => {
+      const { products, total } = await fetchCatalogPage({
+        department: null,
+        category: null,
+        sizes: [],
+        brands: [],
+        priceAboveInCents: range.aboveInCents,
+        priceUpToInCents: range.upToInCents,
+        onSale: false,
+        sort: 'best-selling',
+        page: 1,
+        limit: PRICE_BAND_PHOTOS,
+      });
+
+      return { range, total, photos: products.map(({ id, coverUrl }) => ({ id, imageUrl: coverUrl })) };
+    }));
+
+    cacheLife('hours');
+
+    return toPriceBands(results);
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return [];
   }
 }
 

@@ -71,7 +71,7 @@ export function ShippingEstimator({ action, pending, result }: ShippingEstimator
         : null}
       {result?.ok
         ? (
-            <ul aria-label="Opções de frete" className="divide-y divide-paper-line rounded-2xl border border-paper-line">
+            <ul aria-label="Opções de frete" className="divide-y divide-line rounded-tile border border-line">
               {result.data.map((quote) => (
                 <li key={quote.id} className="flex items-center justify-between gap-3 px-4 py-3">
                   <div>

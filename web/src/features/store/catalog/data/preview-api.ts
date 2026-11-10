@@ -4,6 +4,8 @@ import type {
   CatalogPageDto,
   CatalogPageQuery,
   DepartmentDto,
+  FeaturedBrandDto,
+  OutletProductDto,
   ProductDetailDto,
   ProductDto,
   ProductPage,
@@ -12,9 +14,10 @@ import type {
 } from './api';
 
 // PRÉVIA (não commitar): o catálogo de exemplo do design, até as rotas existirem. O queries.ts importa daqui em vez
-// do api.ts. As contagens dos departamentos batem com os produtos abaixo, e os nomes da vitrine vêm da taxonomia.
+// do api.ts. As contagens dos departamentos batem com os produtos abaixo (sem os esgotados), e os nomes da vitrine vêm
+// da taxonomia.
 
-const DEPARTMENTS: DepartmentDto[] = [
+const DEPARTMENTS: Omit<DepartmentDto, 'categories'>[] = [
   { slug: 'streetwear', name: 'Streetwear', productCount: 8, imageUrl: null },
   { slug: 'sneakers', name: 'Sneakers', productCount: 4, imageUrl: null },
   { slug: 'eyewear', name: 'Eyewear', productCount: 4, imageUrl: null },
@@ -35,6 +38,9 @@ const BRANDS = [
 
 type BrandSlug = (typeof BRANDS)[number]['slug'];
 
+// Só a prévia usa: define o estoque e a ordem da relevância dos produtos de exemplo.
+type PreviewTag = 'drop' | 'new' | 'last-units' | 'sold-out';
+
 type Seed = {
   slug: string;
   title: string;
@@ -44,11 +50,13 @@ type Seed = {
   priceInCents: number;
   compareAtPriceInCents?: number;
   rating?: number;
-  tag?: ProductDto['tag'];
+  tag?: PreviewTag;
   coverUrl?: string;
 };
 
-type PreviewProduct = ProductDto & { brand: BrandSlug; department: string; category: string };
+type BaseProductDto = Omit<ProductDto, 'hoverImageUrl' | 'sizeOptions'>;
+
+type PreviewProduct = BaseProductDto & { brand: BrandSlug; department: string; category: string; tag: PreviewTag | null };
 
 // Simula as regras de pagamento da API: até 10x sem juros e 10% de desconto no Pix.
 function product({ slug, brand, compareAtPriceInCents, rating, tag, coverUrl, ...seed }: Seed): PreviewProduct {
@@ -78,29 +86,119 @@ const PRODUCTS = [
   product({ slug: 'jaqueta-coach-norte', title: 'Jaqueta Coach “Norte”', brand: 'norte-sul', department: 'streetwear', category: 'jaquetas', priceInCents: 63990, rating: 4.8, tag: 'last-units' }),
   product({ slug: 'oculos-vidro-02-acetato-preto', title: 'Óculos Vidro 02 Acetato Preto', brand: 'lente-crua', department: 'eyewear', category: 'acetato', priceInCents: 59990, rating: 4.8, tag: 'new' }),
   product({ slug: 'tenis-low-court-couro-branco', title: 'Tênis Low Court Couro Branco', brand: 'kairo', department: 'sneakers', category: 'casual', priceInCents: 64990, rating: 4.7, tag: 'last-units' }),
-  product({ slug: 'bermuda-cargo-asfalto', title: 'Bermuda Cargo “Asfalto”', brand: 'mormaco', department: 'streetwear', category: 'shorts', priceInCents: 25990, compareAtPriceInCents: 32490, rating: 4.6 }),
+  product({ slug: 'bermuda-cargo-asfalto', title: 'Bermuda Cargo “Asfalto”', brand: 'mormaco', department: 'streetwear', category: 'shorts', priceInCents: 25990, compareAtPriceInCents: 32990, rating: 4.6 }),
   product({ slug: 'oculos-recorte-tartaruga', title: 'Óculos Recorte Tartaruga', brand: 'kairo', department: 'eyewear', category: 'solar', priceInCents: 48990, compareAtPriceInCents: 58990, rating: 4.9 }),
   product({ slug: 'calca-wide-leg-grafite', title: 'Calça Wide Leg “Grafite”', brand: 'vandalo', department: 'streetwear', category: 'calcas', priceInCents: 34990, rating: 4.5 }),
   product({ slug: 'tenis-trail-mid-grafite', title: 'Tênis Trail Mid Grafite', brand: 'forte-athletics', department: 'sneakers', category: 'trail', priceInCents: 89990, rating: 4.8, tag: 'sold-out' }),
   product({ slug: 'oculos-shield-lima', title: 'Óculos Shield “Lima”', brand: 'lente-crua', department: 'eyewear', category: 'esportivo', priceInCents: 42990, rating: 4.4 }),
   product({ slug: 'tenis-skate-vulc-preto', title: 'Tênis Skate Vulc “Preto”', brand: 'forte-athletics', department: 'sneakers', category: 'skate', priceInCents: 39990, compareAtPriceInCents: 44990, rating: 4.7 }),
   product({ slug: 'kit-meias-cano-alto', title: 'Kit Meias Cano Alto', brand: 'mormaco', department: 'streetwear', category: 'acessorios', priceInCents: 8990, rating: 4.9 }),
+  product({ slug: 'tenis-skate-pro-suede-areia', title: 'Tênis Skate Pro Suede Areia', brand: 'vandalo', department: 'sneakers', category: 'skate', priceInCents: 44990, rating: 4.8 }),
+  product({ slug: 'oculos-orbita-titanio', title: 'Óculos Órbita Titânio', brand: 'lente-crua', department: 'eyewear', category: 'metal', priceInCents: 129990, rating: 4.7 }),
 ];
 
-function toDto(item: PreviewProduct): ProductDto {
-  const { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, tag, coverUrl } = item;
+// Os quatro primeiros são os do design. Quem não está aqui vem depois, na ordem da vitrine.
+const WEEKLY_RANKING = [
+  'tenis-skate-pro-suede-areia',
+  'oculos-vidro-02-acetato-preto',
+  'camiseta-pesada-galeria',
+  'oculos-orbita-metal-prata',
+  'tenis-runner-03-lima-acida',
+  'moletom-heavyweight-patio',
+  'camiseta-treezy-core-tee',
+  'jaqueta-coach-norte',
+  'tenis-low-court-couro-branco',
+  'oculos-recorte-tartaruga',
+];
 
-  return { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, tag, coverUrl };
+function weeklyPosition({ slug }: PreviewProduct): number {
+  const position = WEEKLY_RANKING.indexOf(slug);
+
+  return position === -1 ? WEEKLY_RANKING.length : position;
+}
+
+function toDto(item: PreviewProduct): BaseProductDto {
+  const { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, coverUrl } = item;
+
+  return { id, slug, title, brandName, priceInCents, compareAtPriceInCents, installments, pixPriceInCents, rating, coverUrl };
+}
+
+function variantIdOf(slug: string, colorId: string, size: string): string {
+  return `${slug}-${colorId}-${size}`.toLowerCase();
+}
+
+// Como a API: os tamanhos da primeira cor, a que tem estoque nos produtos de exemplo.
+function toSummaryDto(item: PreviewProduct): ProductDto {
+  const grid = GRIDS[item.department];
+  const color = grid?.colors[0];
+
+  return {
+    ...toDto(item),
+    hoverImageUrl: GALLERIES[item.slug]?.[1]?.url ?? null,
+    sizeOptions: grid && color
+      ? grid.sizes.map((size, sizeIndex) => ({
+          size,
+          variantId: inStock(item, grid, 0, sizeIndex) ? variantIdOf(item.slug, color.id, size) : null,
+        }))
+      : [],
+  };
+}
+
+function categoryCounts(department: string): DepartmentDto['categories'] {
+  const counts = new Map<string, number>();
+
+  PRODUCTS.filter((item) => item.department === department && item.tag !== 'sold-out').forEach(({ category }) => {
+    counts.set(category, (counts.get(category) ?? 0) + 1);
+  });
+
+  return [...counts].map(([slug, productCount]) => ({ slug, productCount }));
 }
 
 export async function fetchDepartments(): Promise<DepartmentDto[]> {
-  return DEPARTMENTS;
+  return DEPARTMENTS.map((department) => ({ ...department, categories: categoryCounts(department.slug) }));
+}
+
+// As contagens do design.
+const FEATURED_BRANDS: readonly (readonly [BrandSlug, number])[] = [
+  ['mormaco', 3],
+  ['patio-9', 2],
+  ['vandalo', 2],
+  ['kairo', 2],
+  ['lente-crua', 2],
+  ['forte-athletics', 3],
+  ['casa-ocio', 1],
+  ['norte-sul', 1],
+];
+
+export async function fetchFeaturedBrands(limit: number): Promise<FeaturedBrandDto[]> {
+  return FEATURED_BRANDS.slice(0, limit).map(([slug, productCount]) => ({
+    slug,
+    name: BRANDS.find((brand) => brand.slug === slug)?.name ?? slug,
+    productCount,
+    imageUrl: null,
+  }));
 }
 
 export async function fetchNewestProducts({ limit, department }: ProductQuery): Promise<ProductPage> {
   const matching = PRODUCTS.filter((item) => department === undefined || item.department === department);
 
-  return { products: matching.slice(0, limit).map(toDto), total: matching.length };
+  return { products: matching.slice(0, limit).map(toSummaryDto), total: matching.length };
+}
+
+export async function fetchWeeklyBestSellers({ limit, department }: ProductQuery): Promise<ProductPage> {
+  const matching = PRODUCTS
+    .filter((item) => department === undefined || item.department === department)
+    .sort((a, b) => weeklyPosition(a) - weeklyPosition(b));
+
+  return { products: matching.slice(0, limit).map(toSummaryDto), total: matching.length };
+}
+
+export async function fetchOutletProducts(limit: number): Promise<OutletProductDto[]> {
+  return PRODUCTS.filter(isOnSale).sort(SORTS['best-selling']).slice(0, limit).map((item) => ({
+    ...toDto(item),
+    department: { slug: item.department, name: item.department },
+    category: { slug: item.category, name: item.category },
+  }));
 }
 
 type Grid = Pick<ProductDetailDto, 'colors' | 'sizes' | 'sizeChart' | 'composition'> & { description: string };
@@ -112,12 +210,12 @@ const WHITE = { id: 'branco', name: 'Branco', swatch: 'white' } as const;
 const GRIDS: Record<string, Grid> = {
   streetwear: {
     colors: [BLACK, OFF_WHITE],
-    sizes: ['P', 'M', 'G', 'GG', 'XG'],
+    sizes: ['PP', 'P', 'M', 'G', 'GG', 'XGG'],
     composition: ['100% algodão, malha 30.1 penteada', 'Gramatura 240 g/m²', 'Lavar à mão ou na máquina, do avesso'],
     description: 'Modelagem ampla, caimento pesado e acabamento reforçado nas costuras: feita para o uso de todo dia na rua.',
     sizeChart: {
       headers: ['Tamanho', 'Largura (cm)', 'Comprimento (cm)', 'Manga (cm)'],
-      rows: [['P', '53', '70', '21'], ['M', '56', '72', '22'], ['G', '59', '74', '23'], ['GG', '62', '76', '24'], ['XG', '65', '78', '25']],
+      rows: [['PP', '50', '68', '20'], ['P', '53', '70', '21'], ['M', '56', '72', '22'], ['G', '59', '74', '23'], ['GG', '62', '76', '24'], ['XGG', '65', '78', '25']],
     },
   },
   sneakers: {
@@ -132,7 +230,7 @@ const GRIDS: Record<string, Grid> = {
   },
   eyewear: {
     colors: [BLACK],
-    sizes: ['Único'],
+    sizes: ['U'],
     composition: ['Armação em acetato', 'Lentes com proteção UV400', 'Acompanha estojo e flanela'],
     description: 'Lentes com proteção UV400 e armação leve, que não aperta depois de horas na rua.',
     sizeChart: null,
@@ -165,13 +263,13 @@ function reviewSummaryOf(index: number, rating: number | null, department: strin
   return { distribution: shares, fit: department === 'eyewear' ? null : 'true-to-size' };
 }
 
-// Estoque de exemplo: a primeira cor tem tudo, e a segunda esgotou o menor e o maior tamanho.
+// Estoque de exemplo: a primeira cor esgotou o menor e o maior tamanho, e a segunda tem tudo.
 function inStock(seed: PreviewProduct, grid: Grid, colorIndex: number, sizeIndex: number): boolean {
   if (seed.tag === 'sold-out') {
     return false;
   }
 
-  return grid.sizes.length === 1 || colorIndex === 0 || (sizeIndex > 0 && sizeIndex < grid.sizes.length - 1);
+  return grid.sizes.length === 1 || colorIndex === 1 || (sizeIndex > 0 && sizeIndex < grid.sizes.length - 1);
 }
 
 export async function fetchProduct(slug: string): Promise<ProductDetailDto | null> {
@@ -186,7 +284,7 @@ export async function fetchProduct(slug: string): Promise<ProductDetailDto | nul
   const { coverUrl, ...product } = toDto(seed);
   const variants = grid.colors.flatMap((color, colorIndex) =>
     grid.sizes.map((size, sizeIndex) => ({
-      id: `${slug}-${color.id}-${size}`.toLowerCase(),
+      id: variantIdOf(slug, color.id, size),
       colorId: color.id,
       size,
       inStock: inStock(seed, grid, colorIndex, sizeIndex),
@@ -252,7 +350,7 @@ export async function fetchCatalogPage(query: CatalogPageQuery): Promise<Catalog
   const sizeOrder = [...new Set(scoped.flatMap((item) => GRIDS[item.department]?.sizes ?? []))];
 
   return {
-    products: matching.slice((page - 1) * limit, page * limit).map(toDto),
+    products: matching.slice((page - 1) * limit, page * limit).map(toSummaryDto),
     total: matching.length,
     facets: {
       sizes: sizeOrder

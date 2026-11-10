@@ -9,9 +9,11 @@ const archivo = Archivo({
   axes: ['wdth'],
 });
 
+// Sem preload: só o painel usa, e a loja inteira baixaria o arquivo antes da foto do hero.
 const jetbrainsMono = JetBrains_Mono({
   variable: '--font-jetbrains-mono',
   subsets: ['latin'],
+  preload: false,
 });
 
 const permanentMarker = Permanent_Marker({

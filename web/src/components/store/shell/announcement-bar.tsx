@@ -16,10 +16,10 @@ export function AnnouncementBar({ items }: AnnouncementBarProps) {
         <input type="checkbox" data-pause-motion className="accent-brand" />
         Pausar animações
       </label>
-      {/* Cada aviso tem uns 225px: 12 por cópia passam de um monitor de 2560px. */}
+      {/* Cada aviso tem uns 230px: 23 por cópia passam de uma tela de 5120px. */}
       <Marquee
         items={items}
-        minItemsPerCopy={12}
+        minItemsPerCopy={23}
         secondsPerItem={5}
         className="gap-9 pr-9"
         renderItem={(item) => (

@@ -8,6 +8,7 @@ import {
   breakpointTokens,
   colorTokens,
   durationTokens,
+  easeTokens,
   feedbackTones,
   fontTokens,
   heightTokens,
@@ -27,6 +28,7 @@ const NAMESPACES: Record<string, readonly string[]> = {
   shadow: shadowTokens,
   height: heightTokens,
   'transition-duration': durationTokens,
+  ease: easeTokens,
   animate: animationTokens,
   rotate: rotateTokens,
 };

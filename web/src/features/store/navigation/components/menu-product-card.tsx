@@ -15,9 +15,9 @@ export function MenuProductCard({ product }: MenuProductCardProps) {
   return (
     <NavigationMenuLink
       render={<Link href={product.href} />}
-      className="flex w-56 shrink-0 flex-col gap-1 rounded-2xl border border-paper-line p-1.5 pb-3 transition-colors duration-base hover:border-paper-sand xl:w-60"
+      className="flex w-56 shrink-0 flex-col gap-1 rounded-tile border border-line p-1.5 pb-3 transition-colors duration-base hover:border-line-strong xl:w-60"
     >
-      <span className="relative mb-2 block aspect-4/5 overflow-hidden rounded-xl bg-paper-stone">
+      <span className="relative mb-2 block aspect-4/5 overflow-hidden rounded-tile bg-surface-media">
         {product.imageUrl
           ? <Image src={product.imageUrl} alt="" fill sizes="15rem" className="object-cover" />
           : <ImageIcon aria-hidden className="absolute inset-0 m-auto size-6 text-gray-500" />}

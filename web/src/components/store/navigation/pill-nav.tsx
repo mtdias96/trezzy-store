@@ -17,7 +17,7 @@ type PillNavProps = {
 // Mesma cara das abas em pílula (TabsTrigger, components/ui/tabs.tsx), mas cada item é uma página. A classe não sai
 // de lá: o tabs.tsx é 'use client', e uma constante dele chegaria aqui como referência de client, não como texto.
 const pillClass = {
-  idle: 'inline-flex h-ctl-lg shrink-0 items-center rounded-pill border border-paper-line bg-gray-0 px-4 text-body font-semibold whitespace-nowrap text-ink transition-colors duration-base hover:border-ink lg:h-ctl',
+  idle: 'inline-flex h-ctl-lg shrink-0 items-center rounded-pill border border-line bg-gray-0 px-4 text-body font-semibold whitespace-nowrap text-ink transition-colors duration-base hover:border-ink lg:h-ctl',
   active: 'inline-flex h-ctl-lg shrink-0 items-center rounded-pill border border-ink bg-ink px-4 text-body font-semibold whitespace-nowrap text-gray-0 lg:h-ctl',
 } satisfies Record<'idle' | 'active', string>;
 

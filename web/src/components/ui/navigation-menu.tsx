@@ -64,7 +64,7 @@ function NavigationMenuPositioner({ className, ...props }: NavigationMenuPrimiti
         className={cn('z-50 w-(--anchor-width)', className)}
         {...props}
       >
-        <NavigationMenuPrimitive.Popup className="relative mx-2 overflow-hidden rounded-b-block bg-popover text-popover-foreground shadow-pop transition-[opacity,translate] duration-slow ease-out outline-none data-ending-style:-translate-y-2 data-ending-style:opacity-0 data-starting-style:-translate-y-2 data-starting-style:opacity-0 sm:mx-4">
+        <NavigationMenuPrimitive.Popup className="relative mx-2 overflow-hidden rounded-b-tile bg-popover text-popover-foreground shadow-pop transition-[opacity,translate] duration-slow ease-out outline-none data-ending-style:-translate-y-2 data-ending-style:opacity-0 data-starting-style:-translate-y-2 data-starting-style:opacity-0 sm:mx-4">
           <NavigationMenuPrimitive.Viewport className="relative w-full" />
         </NavigationMenuPrimitive.Popup>
       </NavigationMenuPrimitive.Positioner>
