@@ -3,9 +3,10 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { BEST_SELLERS_LIMIT } from '@/features/store/catalog/model/best-sellers';
-import { CATALOG_PAGE_SIZE, type CatalogSort } from '@/features/store/catalog/model/listing';
+import { CATALOG_PAGE_SIZE, type CatalogSort, PRICE_RANGES } from '@/features/store/catalog/model/listing';
 import { NEW_ARRIVALS_LIMIT } from '@/features/store/catalog/model/new-arrivals';
 import { OUTLET_TILES, type OutletCandidate, toOutletShowcase } from '@/features/store/catalog/model/outlet';
+import { PRICE_BAND_PHOTOS, toPriceBands } from '@/features/store/catalog/model/price-bands';
 import { productHref } from '@/features/store/catalog/model/product-detail';
 import { toProductTabs } from '@/features/store/catalog/model/product-tabs';
 import { type CatalogQuery, isSharedQuery } from '@/features/store/catalog/model/scope';
@@ -20,6 +21,7 @@ import type {
   CatalogResults,
   Department,
   OutletShowcase,
+  PriceBand,
   ProductDetail,
   ProductReview,
   ProductSummary,
@@ -184,6 +186,43 @@ export async function getOutletShowcase(): Promise<OutletShowcase | null> {
     cacheLife('minutes');
 
     return null;
+  }
+}
+
+// Uma consulta por faixa, à mesma rota da listagem: a contagem do card é a mesma que a página mostra ao abrir.
+export async function getPriceBands(): Promise<PriceBand[]> {
+  'use cache';
+  cacheTag('catalog');
+
+  try {
+    const results = await Promise.all(PRICE_RANGES.map(async (range) => {
+      const { products, total } = await fetchCatalogPage({
+        department: null,
+        category: null,
+        sizes: [],
+        brands: [],
+        priceAboveInCents: range.aboveInCents,
+        priceUpToInCents: range.upToInCents,
+        onSale: false,
+        sort: 'best-selling',
+        page: 1,
+        limit: PRICE_BAND_PHOTOS,
+      });
+
+      return { range, total, photos: products.map(({ id, coverUrl }) => ({ id, imageUrl: coverUrl })) };
+    }));
+
+    cacheLife('hours');
+
+    return toPriceBands(results);
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return [];
   }
 }
 

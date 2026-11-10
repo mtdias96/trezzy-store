@@ -42,6 +42,12 @@ export const PIECES_SECTION = {
   title: 'Compre por peça',
 };
 
+export const PRICE_BANDS_SECTION = {
+  eyebrow: 'Faixa de preço',
+  title: 'Cabe no bolso',
+  description: 'Parcela em até 10x sem juros ou leva 10% off pagando no PIX.',
+};
+
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 
 export const STORE_PERKS: readonly StorePerk[] = [

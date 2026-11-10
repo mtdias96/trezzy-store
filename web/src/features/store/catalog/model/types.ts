@@ -86,6 +86,19 @@ export type OutletShowcase = {
   topDiscountPercent: number;
 };
 
+export type PriceBandPhoto = {
+  id: string;
+  imageUrl: string | null;
+};
+
+export type PriceBand = {
+  href: Route;
+  caption: string;
+  amount: string;
+  productCount: number;
+  photos: PriceBandPhoto[];
+};
+
 export type ColorSwatch = 'black' | 'white' | 'off-white' | 'heather-gray' | 'green';
 
 export type ProductColor = {
