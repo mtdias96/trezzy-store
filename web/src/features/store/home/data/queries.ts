@@ -4,11 +4,11 @@ import type { Route } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { COLLECTION_TILES, toHomeCollections } from '@/features/store/home/model/collections';
-import type { HomeBanner, HomeCollection, HomeCollections } from '@/features/store/home/model/types';
+import type { HomeBanner, HomeCollection, HomeCollections, HomeEditorial } from '@/features/store/home/model/types';
 import { isRequestFailure } from '@/lib/http';
 
-import type { HomeBannerDto, HomeCollectionDto } from './api';
-import { fetchHomeBanners, fetchHomeCollections } from './api';
+import type { HomeBannerDto, HomeCollectionDto, HomeEditorialDto } from './api';
+import { fetchHomeBanners, fetchHomeCollections, fetchHomeEditorial } from './api';
 
 // O link vem do painel, e o typedRoutes só checa literal: o schema já garante que é um caminho interno.
 function toBanner({ id, imageUrl, imageAlt, href }: HomeBannerDto): HomeBanner {
@@ -50,6 +50,31 @@ export async function getHomeCollections(): Promise<HomeCollections | null> {
     cacheLife('hours');
 
     return toHomeCollections(collections.slice(0, COLLECTION_TILES).map(toCollection));
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return null;
+  }
+}
+
+function toEditorial({ href, ...editorial }: HomeEditorialDto): HomeEditorial {
+  return { ...editorial, href: href as Route };
+}
+
+export async function getHomeEditorial(): Promise<HomeEditorial | null> {
+  'use cache';
+  cacheTag('editorial');
+
+  try {
+    const editorial = await fetchHomeEditorial();
+
+    cacheLife('hours');
+
+    return editorial && toEditorial(editorial);
   } catch (error) {
     if (!isRequestFailure(error)) {
       throw error;

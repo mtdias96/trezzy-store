@@ -14,6 +14,7 @@ import { getNextDrop } from '@/features/store/drops/data/queries';
 import { HeroBanner } from '@/features/store/home/components/hero-banner';
 import { StorePerks } from '@/features/store/home/components/store-perks';
 import { CollectionsContainer } from '@/features/store/home/containers/collections-container';
+import { EditorialContainer } from '@/features/store/home/containers/editorial-container';
 import { getHomeBanners } from '@/features/store/home/data/queries';
 import {
   BEST_SELLERS_SECTION,
@@ -59,6 +60,7 @@ export default async function Page() {
         <DropCalendarContainer {...DROP_CALENDAR_SECTION} />
         <BestSellersContainer {...BEST_SELLERS_SECTION} addToBagAction={addToBag} />
         <PiecesContainer {...PIECES_SECTION} />
+        <EditorialContainer />
       </div>
     </>
   );

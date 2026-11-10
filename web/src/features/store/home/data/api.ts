@@ -5,8 +5,8 @@ import * as z from 'zod';
 import { http } from '@/lib/http';
 import { internalPathSchema } from '@/lib/internal-path';
 
-// Contrato das rotas públicas da home: banners do carrossel e coleções. Ainda não existem na API (web/AGENTS.md,
-// Pendências).
+// Contrato das rotas públicas da home: banners do carrossel, coleções e editorial. Ainda não existem na API
+// (web/AGENTS.md, Pendências).
 
 const bannerSchema = z.object({
   id: z.string(),
@@ -39,4 +39,25 @@ export async function fetchHomeCollections(): Promise<HomeCollectionDto[]> {
   const { collections } = await http('/store/collections', { schema: z.object({ collections: z.array(collectionSchema) }) });
 
   return collections;
+}
+
+const editorialSchema = z.object({
+  badge: z.string(),
+  eyebrow: z.string(),
+  title: z.string(),
+  description: z.string(),
+  highlights: z.array(z.object({ value: z.string(), label: z.string() })),
+  imageUrl: z.url().nullable(),
+  imageAlt: z.string(),
+  linkLabel: z.string(),
+  href: internalPathSchema,
+});
+
+export type HomeEditorialDto = z.infer<typeof editorialSchema>;
+
+// GET /store/editorial → { editorial }, null quando não há editorial no ar
+export async function fetchHomeEditorial(): Promise<HomeEditorialDto | null> {
+  const { editorial } = await http('/store/editorial', { schema: z.object({ editorial: editorialSchema.nullable() }) });
+
+  return editorial;
 }
