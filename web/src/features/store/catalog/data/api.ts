@@ -15,6 +15,8 @@ const departmentSchema = z.object({
   name: z.string(),
   productCount: z.number().int().nonnegative(),
   imageUrl: z.url().nullable(),
+  // Categoria sem produto pode vir com zero ou nem vir.
+  categories: z.array(z.object({ slug: slugSchema, productCount: z.number().int().nonnegative() })),
 });
 
 export type DepartmentDto = z.infer<typeof departmentSchema>;

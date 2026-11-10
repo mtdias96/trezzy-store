@@ -38,6 +38,10 @@ export const BEST_SELLERS_SECTION = {
   title: 'Mais vendidos',
 };
 
+export const PIECES_SECTION = {
+  title: 'Compre por peça',
+};
+
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 
 export const STORE_PERKS: readonly StorePerk[] = [

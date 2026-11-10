@@ -51,7 +51,12 @@ function toDepartments(departments: DepartmentDto[]): Department[] {
           productCount: department.productCount,
           imageUrl: department.imageUrl,
           href: departmentHref(slug),
-          categories: categories.map((category) => ({ name: category.name, href: categoryHref(slug, category.slug) })),
+          categories: categories.map((category) => ({
+            slug: category.slug,
+            name: category.name,
+            href: categoryHref(slug, category.slug),
+            productCount: department.categories.find((item) => item.slug === category.slug)?.productCount ?? 0,
+          })),
         }]
       : [];
   });

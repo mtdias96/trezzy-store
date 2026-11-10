@@ -6,7 +6,23 @@ export type Department = {
   productCount: number;
   imageUrl: string | null;
   href: Route;
-  categories: readonly { name: string; href: Route }[];
+  categories: readonly DepartmentCategory[];
+};
+
+export type DepartmentCategory = {
+  slug: string;
+  name: string;
+  href: Route;
+  productCount: number;
+};
+
+export type PieceIconName = 'sneaker' | 'shirt' | 'hoodie' | 'jacket' | 'pants' | 'shorts' | 'glasses' | 'cap' | 'tag';
+
+export type PieceShortcut = {
+  name: string;
+  icon: PieceIconName;
+  href: Route;
+  productCount: number;
 };
 
 export type ProductSummary = {
