@@ -3,6 +3,7 @@ import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { BEST_SELLERS_LIMIT } from '@/features/store/catalog/model/best-sellers';
+import { BRAND_TILES, brandHref, toBrandShowcase } from '@/features/store/catalog/model/brands';
 import { CATALOG_PAGE_SIZE, type CatalogSort, PRICE_RANGES } from '@/features/store/catalog/model/listing';
 import { NEW_ARRIVALS_LIMIT } from '@/features/store/catalog/model/new-arrivals';
 import { OUTLET_TILES, type OutletCandidate, toOutletShowcase } from '@/features/store/catalog/model/outlet';
@@ -18,6 +19,7 @@ import {
   STORE_DEPARTMENTS,
 } from '@/features/store/catalog/model/taxonomy';
 import type {
+  BrandTile,
   CatalogResults,
   Department,
   OutletShowcase,
@@ -33,6 +35,7 @@ import type { CatalogSortDto, DepartmentDto, OutletProductDto, ProductDetailDto,
 import {
   fetchCatalogPage,
   fetchDepartments,
+  fetchFeaturedBrands,
   fetchNewestProducts,
   fetchOutletProducts,
   fetchProduct,
@@ -178,6 +181,27 @@ export async function getOutletShowcase(): Promise<OutletShowcase | null> {
     cacheLife('hours');
 
     return toOutletShowcase(products.map(toOutletCandidate));
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return null;
+  }
+}
+
+export async function getFeaturedBrands(): Promise<BrandTile[] | null> {
+  'use cache';
+  cacheTag('catalog');
+
+  try {
+    const brands = await fetchFeaturedBrands(BRAND_TILES);
+
+    cacheLife('hours');
+
+    return toBrandShowcase(brands.map((brand) => ({ ...brand, href: brandHref(brand.slug) })));
   } catch (error) {
     if (!isRequestFailure(error)) {
       throw error;

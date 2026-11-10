@@ -48,6 +48,12 @@ export const PRICE_BANDS_SECTION = {
   description: 'Parcela em até 10x sem juros ou leva 10% off pagando no PIX.',
 };
 
+export const BRANDS_SECTION = {
+  eyebrow: 'Curadoria',
+  title: 'Marcas da casa',
+  description: 'Oito marcas independentes, escolhidas a dedo pelo time da loja.',
+};
+
 export const HERO_CAROUSEL_LABEL = 'Destaques';
 
 export const STORE_PERKS: readonly StorePerk[] = [

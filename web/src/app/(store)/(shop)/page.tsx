@@ -4,6 +4,7 @@ import { HeroCarousel, type HeroSlide } from '@/components/store/data-display/he
 import { RibbonDivider } from '@/components/store/layout/ribbon-divider';
 import { addToBag } from '@/features/store/cart/data/actions';
 import { BestSellersContainer } from '@/features/store/catalog/containers/best-sellers-container';
+import { BrandsContainer } from '@/features/store/catalog/containers/brands-container';
 import { DepartmentShowcaseContainer } from '@/features/store/catalog/containers/department-showcase-container';
 import { NewArrivalsContainer } from '@/features/store/catalog/containers/new-arrivals-container';
 import { OutletContainer } from '@/features/store/catalog/containers/outlet-container';
@@ -19,6 +20,7 @@ import { EditorialContainer } from '@/features/store/home/containers/editorial-c
 import { getHomeBanners } from '@/features/store/home/data/queries';
 import {
   BEST_SELLERS_SECTION,
+  BRANDS_SECTION,
   COLLECTIONS_SECTION,
   DEPARTMENTS_HEADING,
   DROP_CALENDAR_SECTION,
@@ -64,6 +66,7 @@ export default async function Page() {
         <PiecesContainer {...PIECES_SECTION} />
         <EditorialContainer />
         <PriceBandsContainer {...PRICE_BANDS_SECTION} />
+        <BrandsContainer {...BRANDS_SECTION} />
       </div>
     </>
   );

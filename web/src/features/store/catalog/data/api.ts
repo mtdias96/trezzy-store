@@ -224,3 +224,21 @@ export async function fetchRecentReviews(slug: string, limit: number): Promise<R
 
   return reviews;
 }
+
+const featuredBrandSchema = z.object({
+  slug: slugSchema,
+  name: z.string(),
+  productCount: countSchema,
+  imageUrl: z.url().nullable(),
+});
+
+export type FeaturedBrandDto = z.infer<typeof featuredBrandSchema>;
+
+// GET /store/brands?featured=true&limit={n} → { brands }, na ordem da curadoria e só marcas com produto
+export async function fetchFeaturedBrands(limit: number): Promise<FeaturedBrandDto[]> {
+  const { brands } = await http(`/store/brands?featured=true&limit=${limit}`, {
+    schema: z.object({ brands: z.array(featuredBrandSchema) }),
+  });
+
+  return brands;
+}

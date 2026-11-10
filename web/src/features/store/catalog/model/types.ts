@@ -86,6 +86,14 @@ export type OutletShowcase = {
   topDiscountPercent: number;
 };
 
+export type BrandTile = {
+  slug: string;
+  name: string;
+  productCount: number;
+  imageUrl: string | null;
+  href: Route;
+};
+
 export type PriceBandPhoto = {
   id: string;
   imageUrl: string | null;
