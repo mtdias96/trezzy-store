@@ -9,7 +9,8 @@ import type { HomeBanner, HomeCollection, HomeCollections, HomeEditorial, Resale
 import { isRequestFailure } from '@/lib/http';
 
 import type { HomeBannerDto, HomeCollectionDto, HomeEditorialDto } from './api';
-import { fetchHomeBanners, fetchHomeCollections, fetchHomeEditorial, fetchResalePanels } from './api';
+// PRÉVIA (não commitar): os banners, as coleções, o editorial e a revenda de exemplo no lugar das rotas.
+import { fetchHomeBanners, fetchHomeCollections, fetchHomeEditorial, fetchResalePanels } from './preview-api';
 
 // O link vem do painel, e o typedRoutes só checa literal: o schema já garante que é um caminho interno.
 function toBanner({ id, imageUrl, imageAlt, href }: HomeBannerDto): HomeBanner {

@@ -27,12 +27,30 @@ type StoreCompany = {
 export const PRIVACY_HREF = pendingRoute('/privacidade');
 
 // Contatos, redes e dados da empresa vêm do dono da loja: sem eles, o rodapé esconde o bloco.
-const CONTACT: StoreContact | null = null;
+// PRÉVIA (não commitar): os valores de exemplo abaixo.
+const CONTACT: StoreContact | null = {
+  whatsapp: { label: '(11) 90000-0000', href: 'https://wa.me/5511900000000?text=Oi%2C%20vim%20pelo%20site%20da%20Trezzy' },
+  email: 'sac@trezzy.com.br',
+  hours: [
+    { days: 'Segunda a sexta', time: '9h às 18h' },
+    { days: 'Sábado', time: '9h às 13h' },
+  ],
+};
 
-const SOCIAL: readonly ExternalLink[] = [];
+// PRÉVIA (não commitar): as contas de exemplo.
+const SOCIAL: readonly ExternalLink[] = [
+  { label: 'Instagram', href: 'https://www.instagram.com/trezzystore' },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@trezzystore' },
+  { label: 'YouTube', href: 'https://www.youtube.com/@trezzystore' },
+];
 
 // Razão social, CNPJ e endereço visíveis: o Decreto 7.962/2013 exige esses dados em toda loja online.
-const COMPANY: StoreCompany | null = null;
+// PRÉVIA (não commitar): a empresa de exemplo.
+const COMPANY: StoreCompany | null = {
+  name: 'Trezzy Comércio de Vestuário Ltda.',
+  cnpj: '00.000.000/0001-00',
+  address: 'Rua Exemplo, 100, São Paulo, SP, 01000-000',
+};
 
 const HELP_LINKS = [
   { label: 'Rastrear pedido', href: pendingRoute('/conta/pedidos') },
