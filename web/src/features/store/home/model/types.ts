@@ -32,6 +32,15 @@ export type HomeEditorial = {
   href: Route;
 };
 
+export type ResalePanel = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  imageUrl: string | null;
+  imageAlt: string;
+};
+
 export type StorePerk = {
   title: string;
   description: string;

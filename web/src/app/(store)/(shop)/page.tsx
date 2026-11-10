@@ -17,6 +17,7 @@ import { HeroBanner } from '@/features/store/home/components/hero-banner';
 import { StorePerks } from '@/features/store/home/components/store-perks';
 import { CollectionsContainer } from '@/features/store/home/containers/collections-container';
 import { EditorialContainer } from '@/features/store/home/containers/editorial-container';
+import { ResaleContainer } from '@/features/store/home/containers/resale-container';
 import { getHomeBanners } from '@/features/store/home/data/queries';
 import {
   BEST_SELLERS_SECTION,
@@ -29,6 +30,7 @@ import {
   OUTLET_SECTION,
   PIECES_SECTION,
   PRICE_BANDS_SECTION,
+  RESALE_SECTION,
   STORE_PERKS,
   STREET_TAGLINE,
 } from '@/features/store/home/model/content';
@@ -67,6 +69,7 @@ export default async function Page() {
         <EditorialContainer />
         <PriceBandsContainer {...PRICE_BANDS_SECTION} />
         <BrandsContainer {...BRANDS_SECTION} />
+        <ResaleContainer {...RESALE_SECTION} />
       </div>
     </>
   );

@@ -1,3 +1,5 @@
+import { pendingRoute } from '@/lib/route';
+
 import type { StorePerk } from './types';
 
 export const STREET_TAGLINE = 'Feito pra rua · Skate · Sneakers · Eyewear';
@@ -52,6 +54,18 @@ export const BRANDS_SECTION = {
   eyebrow: 'Curadoria',
   title: 'Marcas da casa',
   description: 'Oito marcas independentes, escolhidas a dedo pelo time da loja.',
+};
+
+export const RESALE_SECTION = {
+  eyebrow: 'Revenda',
+  titleAccent: 'Seja revendedor',
+  titleRest: 'Trezzy',
+  description: 'Leve as marcas da casa pra sua loja, com preço de atacado, reposição toda semana e o material de campanha de cada drop.',
+  perks: ['Pedido mínimo a partir de 30 peças', 'Preço de atacado e reposição semanal', 'Fotos e material de campanha de cada drop'],
+  primaryLabel: 'Quero revender',
+  primaryHref: pendingRoute('/revenda'),
+  catalogLabel: 'Catálogo atacado',
+  catalogHref: pendingRoute('/revenda/catalogo'),
 };
 
 export const HERO_CAROUSEL_LABEL = 'Destaques';

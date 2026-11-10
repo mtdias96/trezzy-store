@@ -5,8 +5,8 @@ import * as z from 'zod';
 import { http } from '@/lib/http';
 import { internalPathSchema } from '@/lib/internal-path';
 
-// Contrato das rotas públicas da home: banners do carrossel, coleções e editorial. Ainda não existem na API
-// (web/AGENTS.md, Pendências).
+// Contrato das rotas públicas da home: banners do carrossel, coleções, editorial e painéis da revenda. Ainda não
+// existem na API (web/AGENTS.md, Pendências).
 
 const bannerSchema = z.object({
   id: z.string(),
@@ -60,4 +60,22 @@ export async function fetchHomeEditorial(): Promise<HomeEditorialDto | null> {
   const { editorial } = await http('/store/editorial', { schema: z.object({ editorial: editorialSchema.nullable() }) });
 
   return editorial;
+}
+
+const resalePanelSchema = z.object({
+  id: z.string(),
+  eyebrow: z.string(),
+  title: z.string(),
+  description: z.string(),
+  imageUrl: z.url().nullable(),
+  imageAlt: z.string(),
+});
+
+export type ResalePanelDto = z.infer<typeof resalePanelSchema>;
+
+// GET /store/resale-panels → { panels }, na ordem da sanfona
+export async function fetchResalePanels(): Promise<ResalePanelDto[]> {
+  const { panels } = await http('/store/resale-panels', { schema: z.object({ panels: z.array(resalePanelSchema) }) });
+
+  return panels;
 }

@@ -4,11 +4,12 @@ import type { Route } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
 
 import { COLLECTION_TILES, toHomeCollections } from '@/features/store/home/model/collections';
-import type { HomeBanner, HomeCollection, HomeCollections, HomeEditorial } from '@/features/store/home/model/types';
+import { toResalePanels } from '@/features/store/home/model/resale';
+import type { HomeBanner, HomeCollection, HomeCollections, HomeEditorial, ResalePanel } from '@/features/store/home/model/types';
 import { isRequestFailure } from '@/lib/http';
 
 import type { HomeBannerDto, HomeCollectionDto, HomeEditorialDto } from './api';
-import { fetchHomeBanners, fetchHomeCollections, fetchHomeEditorial } from './api';
+import { fetchHomeBanners, fetchHomeCollections, fetchHomeEditorial, fetchResalePanels } from './api';
 
 // O link vem do painel, e o typedRoutes só checa literal: o schema já garante que é um caminho interno.
 function toBanner({ id, imageUrl, imageAlt, href }: HomeBannerDto): HomeBanner {
@@ -75,6 +76,27 @@ export async function getHomeEditorial(): Promise<HomeEditorial | null> {
     cacheLife('hours');
 
     return editorial && toEditorial(editorial);
+  } catch (error) {
+    if (!isRequestFailure(error)) {
+      throw error;
+    }
+
+    cacheLife('minutes');
+
+    return null;
+  }
+}
+
+export async function getResalePanels(): Promise<ResalePanel[] | null> {
+  'use cache';
+  cacheTag('resale');
+
+  try {
+    const panels = await fetchResalePanels();
+
+    cacheLife('hours');
+
+    return toResalePanels(panels);
   } catch (error) {
     if (!isRequestFailure(error)) {
       throw error;

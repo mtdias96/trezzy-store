@@ -457,6 +457,68 @@
   }
 }
 
+/* Sanfona de três painéis: o aberto é 3,2 vezes mais largo. Todo painel tem sempre a largura de aberto, e quem o
+   "fecha" é o vizinho da direita, que desliza por cima: só o translate anima, no compositor, e o texto nunca quebra de
+   linha no meio do movimento. A faixa branca (::before) desenha o vão e os cantos de quem ficou por baixo. */
+@utility accordion {
+  --accordion-closed: calc((100cqi - 1rem) / 5.2);
+  --accordion-opened: calc(var(--accordion-closed) * 3.2);
+  --accordion-second: calc(var(--accordion-opened) + 0.5rem);
+  --accordion-third: calc(var(--accordion-opened) + var(--accordion-closed) + 1rem);
+
+  position: relative;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: var(--radius-tile);
+
+  &[data-open='1'],
+  &[data-open='2'] {
+    --accordion-second: calc(var(--accordion-closed) + 0.5rem);
+  }
+
+  &[data-open='2'] {
+    --accordion-third: calc(var(--accordion-closed) * 2 + 1rem);
+  }
+
+  & > li {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: var(--accordion-opened);
+    transition: translate var(--transition-duration-glide) var(--ease-glide);
+  }
+
+  & > li:nth-child(2) {
+    translate: var(--accordion-second);
+  }
+
+  & > li:nth-child(3) {
+    translate: var(--accordion-third);
+  }
+
+  & > li:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    right: calc(100% - var(--radius-tile));
+    width: calc(0.5rem + var(--radius-tile) * 2);
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 0 100%, transparent calc(var(--radius-tile) - 0.5px), var(--color-gray-0) var(--radius-tile)) top left / var(--radius-tile) var(--radius-tile) no-repeat,
+      radial-gradient(circle at 0 0, transparent calc(var(--radius-tile) - 0.5px), var(--color-gray-0) var(--radius-tile)) bottom left / var(--radius-tile) var(--radius-tile) no-repeat,
+      linear-gradient(var(--color-gray-0), var(--color-gray-0)) right / calc(100% - var(--radius-tile)) 100% no-repeat;
+  }
+}
+
+@utility accordion-closed-width {
+  width: var(--accordion-closed);
+}
+
+/* Painel fechado: a foto recua para o meio dela ficar na faixa visível. */
+@utility accordion-photo-closed {
+  translate: calc(var(--accordion-closed) * -1.1);
+}
+
 /* Painel lateral que acompanha a rolagem logo abaixo do header da loja (h-17, 68px, no lg) e rola por dentro quando
    passa da altura da tela. É utility, e não classes soltas: a altura máxima é um calc, valor arbitrário no lint. */
 @utility sticky-panel {
