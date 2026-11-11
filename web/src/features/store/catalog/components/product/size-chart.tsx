@@ -8,10 +8,10 @@ export function SizeChart({ chart }: SizeChartProps) {
   const [sizeHeader, ...measureHeaders] = chart.headers;
 
   return (
-    <div className="overflow-x-auto rounded-2xl border border-paper-line">
+    <div className="overflow-x-auto rounded-tile border border-line">
       <table className="w-full text-left text-body-sm">
         <caption className="sr-only">Tabela de medidas</caption>
-        <thead className="bg-paper-stone">
+        <thead className="bg-surface">
           <tr>
             <th scope="col" className="px-4 py-3 font-bold text-ink">{sizeHeader}</th>
             {measureHeaders.map((header) => (
@@ -21,7 +21,7 @@ export function SizeChart({ chart }: SizeChartProps) {
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-paper-line">
+        <tbody className="divide-y divide-line">
           {chart.rows.map(([size, ...measures]) => (
             <tr key={size}>
               <th scope="row" className="px-4 py-3 font-bold text-ink">{size}</th>

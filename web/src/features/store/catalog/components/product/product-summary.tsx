@@ -64,7 +64,7 @@ export function ProductSummary({ product }: ProductSummaryProps) {
       {pixPriceInCents === null
         ? null
         : (
-            <p className="flex items-center justify-between gap-3 rounded-2xl bg-success-50 px-4 py-3 text-success-700">
+            <p className="flex items-center justify-between gap-3 rounded-tile bg-success-50 px-4 py-3 text-success-700">
               <span>
                 <span className="block text-body-lg font-extrabold">{`${formatPrice(pixPriceInCents)} no Pix`}</span>
                 <span className="block text-caption">Pagamento à vista, aprovado na hora</span>

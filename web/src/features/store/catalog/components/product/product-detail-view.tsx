@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/store/layout/page-container';
 import { Breadcrumb } from '@/components/store/navigation/breadcrumb';
+import { HOME_CRUMB } from '@/features/store/catalog/model/scope';
 import type { ProductDetail } from '@/features/store/catalog/model/types';
 
 import { ProductGallery } from './product-gallery';
@@ -19,7 +20,7 @@ type ProductDetailViewProps = {
 
 export function ProductDetailView({ product, sizeChart, purchase, shipping, reviews }: ProductDetailViewProps) {
   const trail = [
-    { name: 'Home', href: '/' as const },
+    HOME_CRUMB,
     product.department,
     ...(product.category ? [product.category] : []),
   ];
@@ -27,7 +28,7 @@ export function ProductDetailView({ product, sizeChart, purchase, shipping, revi
   return (
     <PageContainer className="pt-4 pb-16 lg:pt-6 lg:pb-24">
       <Breadcrumb trail={trail} current={product.name} />
-      <div className="mt-4 grid gap-6 lg:mt-6 lg:grid-cols-12 lg:gap-10">
+      <div className="mt-4 grid grid-cols-1 gap-6 lg:mt-6 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-7">
           <ProductGallery images={product.images} />
         </div>

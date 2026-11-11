@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { toNewArrivals } from './new-arrivals';
+import { toProductTabs } from './product-tabs';
 import type { ProductSummary } from './types';
 
 const product = (id: string): ProductSummary => ({
@@ -9,32 +9,33 @@ const product = (id: string): ProductSummary => ({
   brand: 'Pátio 9',
   href: '/',
   imageUrl: null,
+  hoverImageUrl: null,
   priceInCents: 10000,
   compareAtPriceInCents: null,
   installments: null,
   pixPriceInCents: null,
   rating: null,
-  tag: null,
+  sizeOptions: [],
 });
 
-describe('toNewArrivals', () => {
+describe('toProductTabs', () => {
   it('puts "Tudo" first and the departments after, in order', () => {
-    const arrivals = toNewArrivals(3, [product('a'), product('b')], [
+    const result = toProductTabs(3, [product('a'), product('b')], [
       { slug: 'streetwear', name: 'Streetwear', products: [product('a')] },
       { slug: 'sneakers', name: 'Sneakers', products: [product('b')] },
     ]);
 
-    expect(arrivals.tabs.map(({ id, label }) => [id, label])).toEqual([
+    expect(result.tabs.map(({ id, label }) => [id, label])).toEqual([
       ['all', 'Tudo'],
       ['streetwear', 'Streetwear'],
       ['sneakers', 'Sneakers'],
     ]);
-    expect(arrivals.total).toBe(3);
+    expect(result.total).toBe(3);
   });
 
   it('drops tabs without products', () => {
-    const arrivals = toNewArrivals(1, [product('a')], [{ slug: 'eyewear', name: 'Eyewear', products: [] }]);
+    const result = toProductTabs(1, [product('a')], [{ slug: 'eyewear', name: 'Eyewear', products: [] }]);
 
-    expect(arrivals.tabs.map(({ id }) => id)).toEqual(['all']);
+    expect(result.tabs.map(({ id }) => id)).toEqual(['all']);
   });
 });

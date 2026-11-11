@@ -40,10 +40,18 @@ export const colorTokens = [
   'gray-700',
   'gray-800',
   'gray-900',
-  'paper',
-  'paper-sand',
-  'paper-stone',
-  'paper-line',
+  'surface',
+  'surface-media',
+  'line',
+  'divider',
+  'line-strong',
+  'disabled',
+  'on-dark-muted',
+  'on-ink-muted',
+  'on-ink-subtle',
+  'on-ink-line',
+  'numeral',
+  'off-white',
   'success-50',
   'success-500',
   'success-700',
@@ -83,22 +91,39 @@ export const textTokens = [
   'display-md',
   'display-sm',
   'display-xs',
+  'heading',
+  'eyebrow',
+  'title',
+  'feature',
+  'amount',
+  'tile-title',
+  'panel-title',
+  'panel-label',
+  'subtitle',
+  'lead',
+  'tag',
+  'overline',
+  'product-name',
+  'price',
   'body-lg',
   'body',
   'body-sm',
+  'chip',
   'caption',
   'micro',
   'seal',
   'hand',
 ] as const;
 
-export const radiusTokens = ['seal', 'md', 'lg', 'xl', '2xl', '3xl', 'card', 'block', 'pill'] as const;
+export const radiusTokens = ['tag', 'tile', 'seal', 'md', 'lg', 'xl', '2xl', '3xl', 'card', 'pill'] as const;
 
 export const shadowTokens = ['pop', 'modal', 'float', 'hero', 'soft', 'knob', 'focus-brand'] as const;
 
 export const heightTokens = ['ctl-sm', 'ctl', 'ctl-lg', 'field', 'cta'] as const;
 
-export const durationTokens = ['fast', 'base', 'slow'] as const;
+export const durationTokens = ['fast', 'base', 'slow', 'glide'] as const;
+
+export const easeTokens = ['glide'] as const;
 
 export const animationTokens = ['pop', 'appear', 'marquee', 'marquee-reverse', 'shake', 'skeleton'] as const;
 
@@ -117,6 +142,7 @@ export type RadiusToken = (typeof radiusTokens)[number];
 export type ShadowToken = (typeof shadowTokens)[number];
 export type HeightToken = (typeof heightTokens)[number];
 export type DurationToken = (typeof durationTokens)[number];
+export type EaseToken = (typeof easeTokens)[number];
 export type AnimationToken = (typeof animationTokens)[number];
 export type RotateToken = (typeof rotateTokens)[number];
 export type FeedbackTone = (typeof feedbackTones)[number];

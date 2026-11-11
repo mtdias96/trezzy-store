@@ -26,7 +26,7 @@ export function ProductInfoTabs({ product, sizeChart }: ProductInfoTabsProps) {
 
   return (
     <Tabs defaultValue="description">
-      <TabsList aria-label="Informações do produto" activateOnFocus>
+      <TabsList aria-label="Informações do produto" activateOnFocus className="-m-1 scrollbar-none overflow-x-auto p-1">
         {tabs.map(({ id, label }) => (
           <TabsTrigger key={id} value={id}>{label}</TabsTrigger>
         ))}
