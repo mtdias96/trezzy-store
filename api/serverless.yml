@@ -8,9 +8,13 @@ frameworkVersion: '~4.44.0'
 params:
   prod:
     cognitoDeletionProtection: ACTIVE
+    mediaBucketDeletionPolicy: Retain
+    webOrigin: https://trezzy-store-web.vercel.app
   default:
     # Fora de prod o pool pode ser recriado (ex: atributo custom alterado exige um pool novo).
     cognitoDeletionProtection: INACTIVE
+    mediaBucketDeletionPolicy: Delete
+    webOrigin: http://localhost:3000
 
 provider:
   name: aws
@@ -116,3 +120,4 @@ functions:
 
 resources:
   - ${file(./sls/resources/cognito.yml)}
+  - ${file(./sls/resources/media.yml)}

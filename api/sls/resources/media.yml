@@ -1,0 +1,25 @@
+Resources:
+  MediaBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: ${param:mediaBucketDeletionPolicy}
+    UpdateReplacePolicy: ${param:mediaBucketDeletionPolicy}
+    Properties:
+      BucketName: !Sub '${self:service}-${sls:stage}-media-${AWS::AccountId}'
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - PUT
+            AllowedOrigins:
+              - ${param:webOrigin}
+            AllowedHeaders:
+              - Content-Type
+            MaxAge: 3600
+
+Outputs:
+  MediaBucketName:
+    Value: !Ref MediaBucket
