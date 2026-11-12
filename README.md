@@ -84,6 +84,7 @@ pnpm --filter trezzy-api package     # build da Lambda (sem deploy)
 pnpm --filter trezzy-api run deploy  # deploy no stage dev (run deploy:prod para produção); sem o run, o pnpm chama o próprio `pnpm deploy`
 pnpm --filter trezzy-api db:generate # gerar migration (db:migrate aplica)
 pnpm --filter trezzy-api account:admin <email> add   # promove a conta a admin (stage dev; remove para rebaixar)
+pnpm --filter trezzy-api db:seed     # cria as marcas e categorias da loja (pode rodar de novo)
 ```
 
 ## Contribuindo
