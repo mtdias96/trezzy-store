@@ -111,6 +111,40 @@ functions:
             scopes:
               - trezzy/admin
 
+  media:
+    handler: src/main/functions/media.handler
+    # Role própria: só a mídia assina upload e lê o bucket. Não herda os statements do provider.
+    iam:
+      role:
+        statements:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+            Resource: !Sub '${MediaBucket.Arn}/uploads/*'
+          # Sem ListBucket, a leitura de um objeto que não existe responde 403 em vez de 404.
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !GetAtt MediaBucket.Arn
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/media
+          method: post
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+      - httpApi:
+          path: /admin/media/{id}/confirm
+          method: post
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
   # Triggers do UserPool, ligados em sls/resources/cognito.yml (LambdaConfig).
   cognitoPreSignUp:
     handler: src/main/functions/cognito/preSignUp.handler

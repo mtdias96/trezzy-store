@@ -13,6 +13,7 @@ export default defineConfig({
       COGNITO_POOL_ID: 'sa-east-1_test',
       COGNITO_CLIENT_ID: 'test-client-id',
       COGNITO_CLIENT_SECRET: 'test-client-secret',
+      MEDIA_BUCKET_NAME: 'trezzy-api-test-media',
     },
   },
 });
