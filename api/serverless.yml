@@ -105,6 +105,20 @@ functions:
       # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
       - httpApi:
           path: /admin/products
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+      - httpApi:
+          path: /admin/products/{id}
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+      - httpApi:
+          path: /admin/products
           method: post
           authorizer:
             name: cognito

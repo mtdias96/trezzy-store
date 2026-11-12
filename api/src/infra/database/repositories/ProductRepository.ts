@@ -1,12 +1,14 @@
-import { and, eq, inArray, like, ne, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, like, ne, or, sql } from 'drizzle-orm';
 
 import { Injectable } from '@kernel/decorators/Injectable';
 import type { Product } from '@application/entities/Product';
+import type { SizeGrid } from '@application/entities/sizeGrids';
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
 import { DrizzleClient } from '@infra/database/drizzle/DrizzleClient';
 import { isUniqueViolation } from '@infra/database/drizzle/isUniqueViolation';
-import { productMedia, products, productVariants } from '@infra/database/drizzle/schema/catalog';
+import { categories, productMedia, products, productVariants } from '@infra/database/drizzle/schema/catalog';
+import { media } from '@infra/database/drizzle/schema/media';
 
 // O use case valida título, SKU e fotos antes da transação: dois cadastros ao mesmo tempo passam nos dois, e o unique
 // barra o segundo. Sem este mapa, o segundo receberia 500.
@@ -107,4 +109,123 @@ export class ProductRepository {
       throw error;
     }
   }
+
+  // O painel filtra e ordena a lista inteira (sem paginação até a API paginar).
+  async findSummaries(): Promise<ProductRepository.Summary[]> {
+    const rows = await this.drizzle.db
+      .select({
+        id: products.id,
+        title: products.title,
+        status: products.status,
+        brandId: products.brandId,
+        categoryId: products.categoryId,
+        grid: categories.grid,
+        updatedAt: products.updatedAt,
+      })
+      .from(products)
+      .innerJoin(categories, eq(categories.id, products.categoryId))
+      .orderBy(desc(products.updatedAt), desc(products.id));
+
+    const ids = rows.map(({ id }) => id);
+    const [variantsByProduct, covers] = await Promise.all([
+      this.findVariantsByProduct(ids),
+      ids.length === 0
+        ? []
+        : this.drizzle.db
+          .selectDistinctOn([productMedia.productId], { productId: productMedia.productId, key: media.key })
+          .from(productMedia)
+          .innerJoin(media, eq(media.id, productMedia.mediaId))
+          .where(inArray(productMedia.productId, ids))
+          .orderBy(productMedia.productId, asc(productMedia.position)),
+    ]);
+    const coverKeyByProduct = new Map(covers.map(({ productId, key }) => [productId, key]));
+
+    return rows.map((row) => ({
+      ...row,
+      variants: variantsByProduct.get(row.id) ?? [],
+      coverKey: coverKeyByProduct.get(row.id) ?? null,
+    }));
+  }
+
+  async findDetailById(id: string): Promise<ProductRepository.Detail | null> {
+    const [row] = await this.drizzle.db
+      .select({
+        id: products.id,
+        title: products.title,
+        description: products.description,
+        status: products.status,
+        brandId: products.brandId,
+        categoryId: products.categoryId,
+        grid: categories.grid,
+        updatedAt: products.updatedAt,
+      })
+      .from(products)
+      .innerJoin(categories, eq(categories.id, products.categoryId))
+      .where(eq(products.id, id))
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    const [variantsByProduct, gallery] = await Promise.all([
+      this.findVariantsByProduct([row.id]),
+      this.drizzle.db
+        .select({ id: media.id, key: media.key })
+        .from(productMedia)
+        .innerJoin(media, eq(media.id, productMedia.mediaId))
+        .where(eq(productMedia.productId, row.id))
+        .orderBy(asc(productMedia.position)),
+    ]);
+
+    return { ...row, variants: variantsByProduct.get(row.id) ?? [], media: gallery };
+  }
+
+  private async findVariantsByProduct(productIds: readonly string[]): Promise<Map<string, Product.Variant[]>> {
+    const byProduct = new Map<string, Product.Variant[]>();
+
+    if (productIds.length === 0) {
+      return byProduct;
+    }
+
+    const rows = await this.drizzle.db
+      .select({
+        productId: productVariants.productId,
+        id: productVariants.id,
+        size: productVariants.size,
+        color: productVariants.color,
+        sku: productVariants.sku,
+        priceInCents: productVariants.priceInCents,
+        stock: productVariants.stock,
+        active: productVariants.active,
+      })
+      .from(productVariants)
+      .where(inArray(productVariants.productId, [...productIds]));
+
+    for (const { productId, ...variant } of rows) {
+      byProduct.set(productId, [...(byProduct.get(productId) ?? []), variant]);
+    }
+
+    return byProduct;
+  }
+}
+
+export namespace ProductRepository {
+  type Base = {
+    id: string;
+    title: string;
+    status: Product.Status;
+    brandId: string;
+    categoryId: string;
+    grid: SizeGrid;
+    updatedAt: Date;
+    variants: Product.Variant[];
+  };
+
+  export type Summary = Base & { coverKey: string | null };
+
+  export type Detail = Base & {
+    description: string;
+    media: { id: string; key: string }[];
+  };
 }

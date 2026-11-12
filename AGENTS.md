@@ -176,6 +176,7 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 | Segredos | O `DATABASE_URL` e o `COGNITO_CLIENT_SECRET` ainda são variáveis de ambiente. Alvo: SSM lido em runtime. |
 | Limpeza de mídia | Não existe: linhas de `media` sem `uploadedAt`, fotos nunca ligadas a nada e arquivos recusados ficam no banco e no S3. Alvo: Lambda agendada só em prod (pelos `params`) que apaga linha e arquivo; em dev, à mão. |
 | Mídia antes de produção | O upload grava direto em `uploads/`, que o CDN serve: o arquivo fica público antes da confirmação, e a URL de 5 min ainda permite sobrescrever uma foto confirmada. Alvo: enviar para `pending/` (fora do CDN), a confirmação copia para `uploads/`, e uma regra de ciclo de vida expira `pending/`. No mesmo pacote: CORS com mais de uma origem (previews e domínio próprio), versionamento e `aws:SecureTransport` no bucket de prod, o SDK do S3 no bundle da função `media` (hoje vem do runtime, numa versão que os testes não cobrem) e o dono da mídia (`createdBy`). |
+| Lista de produtos do painel | `GET /admin/products` devolve tudo, sem paginação: o painel filtra e ordena no Next. Alvo: cursor por `(updated_at, id)`, com o índice. |
 
 ## Regras para agentes de IA
 
