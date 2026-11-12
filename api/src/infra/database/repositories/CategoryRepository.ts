@@ -18,8 +18,15 @@ export class CategoryRepository {
 
     return category ?? null;
   }
+
+  async findAll(): Promise<CategoryRepository.ListItem[]> {
+    return this.drizzle.db
+      .select({ id: categories.id, name: categories.name, grid: categories.grid, active: categories.active })
+      .from(categories);
+  }
 }
 
 export namespace CategoryRepository {
   export type Category = { id: string; slug: string; grid: SizeGrid };
+  export type ListItem = { id: string; name: string; grid: SizeGrid; active: boolean };
 }

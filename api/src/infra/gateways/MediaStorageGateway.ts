@@ -58,6 +58,10 @@ export class MediaStorageGateway {
     }
   }
 
+  getPublicUrl(key: string): string {
+    return `https://${this.appConfig.storage.cdn.mediaDomainName}/${key}`;
+  }
+
   async deleteObject(key: string): Promise<void> {
     await this.s3Client.client.send(
       new DeleteObjectCommand({ Bucket: this.appConfig.storage.s3.mediaBucket, Key: key }),

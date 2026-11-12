@@ -7,7 +7,10 @@ import { S3Client } from '@infra/clients/s3/S3Client';
 import { MediaStorageGateway } from './MediaStorageGateway';
 
 const appConfig = {
-  storage: { s3: { region: 'sa-east-1', mediaBucket: 'trezzy-api-test-media' } },
+  storage: {
+    s3: { region: 'sa-east-1', mediaBucket: 'trezzy-api-test-media' },
+    cdn: { mediaDomainName: 'd111.cloudfront.net' },
+  },
 } as unknown as AppConfig;
 
 function makeSut() {
@@ -112,5 +115,13 @@ describe('MediaStorageGateway.deleteObject', () => {
     const [command] = send.mock.calls[0]!;
     expect(command).toBeInstanceOf(DeleteObjectCommand);
     expect(command.input).toEqual({ Bucket: 'trezzy-api-test-media', Key: 'uploads/m-1.png' });
+  });
+});
+
+describe('MediaStorageGateway.getPublicUrl', () => {
+  it('serves the key from the media CDN over HTTPS', () => {
+    const { sut } = makeSut();
+
+    expect(sut.getPublicUrl('uploads/m-1.webp')).toBe('https://d111.cloudfront.net/uploads/m-1.webp');
   });
 });

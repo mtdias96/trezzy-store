@@ -1,6 +1,7 @@
 import * as z from 'zod';
 
 import { slugify } from '@shared/utils/slugify';
+import { PRODUCT_MAX_MEDIA } from '@application/entities/Product';
 
 const PG_INTEGER_MAX = 2_147_483_647;
 
@@ -55,6 +56,19 @@ export const createProductSchema = z.object({
         }
 
         combinations.add(`${size}|${color}`);
+      });
+    }),
+  // A ordem é a da galeria: o primeiro é a capa.
+  // Minúsculas: o use case procura cada id no que o Postgres devolve, que vem sempre em minúsculas.
+  mediaIds: z
+    .array(z.uuid().transform((mediaId) => mediaId.toLowerCase()))
+    .max(PRODUCT_MAX_MEDIA)
+    .default([])
+    .superRefine((mediaIds, ctx) => {
+      mediaIds.forEach((mediaId, index) => {
+        if (mediaIds.indexOf(mediaId) !== index) {
+          ctx.addIssue({ code: 'custom', path: [index], message: 'Photo is repeated in this product.' });
+        }
       });
     }),
 });

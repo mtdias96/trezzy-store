@@ -33,6 +33,9 @@ export class AppConfig {
         region: env.REGION,
         mediaBucket: env.MEDIA_BUCKET_NAME,
       },
+      cdn: {
+        mediaDomainName: env.MEDIA_CDN_DOMAIN_NAME,
+      },
     };
   }
 }
@@ -61,6 +64,9 @@ export namespace AppConfig {
     s3: {
       region: string;
       mediaBucket: string;
+    };
+    cdn: {
+      mediaDomainName: string;
     };
   };
 }

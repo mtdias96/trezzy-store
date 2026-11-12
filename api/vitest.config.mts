@@ -14,6 +14,7 @@ export default defineConfig({
       COGNITO_CLIENT_ID: 'test-client-id',
       COGNITO_CLIENT_SECRET: 'test-client-secret',
       MEDIA_BUCKET_NAME: 'trezzy-api-test-media',
+      MEDIA_CDN_DOMAIN_NAME: 'cdn.test',
     },
   },
 });
