@@ -5,6 +5,8 @@ import { ValidationError } from '@application/errors/ValidationError';
 import { type SizeGrid, SIZES_BY_GRID } from './sizeGrids';
 import { generateSku } from './sku';
 
+export const PRODUCT_MAX_MEDIA = 10;
+
 export class Product {
   readonly id: string;
   readonly slug: string;
@@ -15,6 +17,8 @@ export class Product {
   readonly categoryId: string;
   readonly publishedAt: Date | null;
   readonly variants: readonly Product.Variant[];
+  // Ids de `media` na ordem da galeria: o primeiro é a capa.
+  readonly mediaIds: readonly string[];
 
   // Reidrata do banco, sem gerar nada. Produto novo nasce pelo `create`.
   constructor(attr: Product.Attributes) {
@@ -27,6 +31,7 @@ export class Product {
     this.categoryId = attr.categoryId;
     this.publishedAt = attr.publishedAt;
     this.variants = attr.variants;
+    this.mediaIds = attr.mediaIds;
   }
 
   static create({ category, variants, ...attr }: Product.CreateInput): Product {
@@ -36,6 +41,15 @@ export class Product {
         ? []
         : [{ field: `variants.${index}.size`, error: `Size must be one of: ${sizes.join(', ')}.` }],
     );
+
+    // Sem capa, o card da vitrine fica quebrado. Rascunho pode ficar sem foto.
+    if (attr.status === 'active' && attr.mediaIds.length === 0) {
+      issues.push({ field: 'mediaIds', error: 'An active product needs at least one photo.' });
+    }
+
+    if (attr.mediaIds.length > PRODUCT_MAX_MEDIA) {
+      issues.push({ field: 'mediaIds', error: `A product has at most ${PRODUCT_MAX_MEDIA} photos.` });
+    }
 
     if (issues.length > 0) {
       throw new ValidationError(issues);
@@ -81,6 +95,7 @@ export namespace Product {
     categoryId: string;
     publishedAt: Date | null;
     variants: readonly Variant[];
+    mediaIds: readonly string[];
   };
 
   export type CreateInput = {
@@ -91,5 +106,6 @@ export namespace Product {
     brandId: string;
     category: { id: string; slug: string; grid: SizeGrid };
     variants: readonly (Omit<Variant, 'id' | 'sku'> & { sku?: string })[];
+    mediaIds: readonly string[];
   };
 }

@@ -4,6 +4,7 @@ import { Product } from '@application/entities/Product';
 import { ValidationError } from '@application/errors/ValidationError';
 import type { BrandRepository } from '@infra/database/repositories/BrandRepository';
 import type { CategoryRepository } from '@infra/database/repositories/CategoryRepository';
+import type { MediaRepository } from '@infra/database/repositories/MediaRepository';
 import type { ProductRepository } from '@infra/database/repositories/ProductRepository';
 
 import { CreateProductUseCase } from './CreateProductUseCase';
@@ -18,7 +19,10 @@ const input: CreateProductUseCase.Input = {
     { size: 'M', color: 'preto', sku: 'CAM-M-PT', priceInCents: 18990, stock: 10, active: true },
     { size: 'G', color: 'preto', sku: 'CAM-G-PT', priceInCents: 18990, stock: 0, active: true },
   ],
+  mediaIds: ['m-cover', 'm-2'],
 };
+
+const confirmed = (id: string): MediaRepository.Usage => ({ id, uploadedAt: new Date(), inUse: false });
 
 function makeSut() {
   const productRepository = {
@@ -33,13 +37,17 @@ function makeSut() {
   const categoryRepository = {
     findById: vi.fn<CategoryRepository['findById']>().mockResolvedValue({ id: 'category-1', slug: 'camisetas', grid: 'apparel' }),
   };
+  const mediaRepository = {
+    findUsage: vi.fn<MediaRepository['findUsage']>().mockResolvedValue([confirmed('m-cover'), confirmed('m-2')]),
+  };
   const sut = new CreateProductUseCase(
     productRepository as unknown as ProductRepository,
     brandRepository as unknown as BrandRepository,
     categoryRepository as unknown as CategoryRepository,
+    mediaRepository as unknown as MediaRepository,
   );
 
-  return { sut, productRepository, brandRepository, categoryRepository };
+  return { sut, productRepository, brandRepository, categoryRepository, mediaRepository };
 }
 
 describe('CreateProductUseCase', () => {
@@ -125,6 +133,47 @@ describe('CreateProductUseCase', () => {
 
     expect(error).toBeInstanceOf(ValidationError);
     expect((error as ValidationError).issues).toEqual([{ field: 'variants.1.sku', error: 'SKU already in use.' }]);
+    expect(productRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('saves the gallery in the order it was sent', async () => {
+    const { sut, productRepository, mediaRepository } = makeSut();
+
+    await sut.execute(input);
+
+    expect(mediaRepository.findUsage).toHaveBeenCalledWith(['m-cover', 'm-2']);
+    expect(productRepository.create.mock.calls[0]![0].mediaIds).toEqual(['m-cover', 'm-2']);
+  });
+
+  it('points to each photo that is missing, unconfirmed or already in use', async () => {
+    const { sut, productRepository, mediaRepository } = makeSut();
+    mediaRepository.findUsage.mockResolvedValue([
+      { id: 'm-pending', uploadedAt: null, inUse: false },
+      { id: 'm-used', uploadedAt: new Date(), inUse: true },
+      confirmed('m-ok'),
+    ]);
+
+    const error = await sut
+      .execute({ ...input, mediaIds: ['m-ok', 'm-missing', 'm-pending', 'm-used'] })
+      .catch((reason: unknown) => reason);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).issues).toEqual([
+      { field: 'mediaIds.1', error: 'Media not found.' },
+      { field: 'mediaIds.2', error: 'Media upload is not confirmed.' },
+      { field: 'mediaIds.3', error: 'Media is already in use.' },
+    ]);
+    expect(productRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('requires a photo to create an active product', async () => {
+    const { sut, productRepository, mediaRepository } = makeSut();
+    mediaRepository.findUsage.mockResolvedValue([]);
+
+    const error = await sut.execute({ ...input, mediaIds: [] }).catch((reason: unknown) => reason);
+
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).issues.map(({ field }) => field)).toEqual(['mediaIds']);
     expect(productRepository.create).not.toHaveBeenCalled();
   });
 });
