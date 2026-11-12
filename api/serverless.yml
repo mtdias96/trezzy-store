@@ -111,6 +111,30 @@ functions:
             scopes:
               - trezzy/admin
 
+  brands:
+    handler: src/main/functions/brands.handler
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/brands
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
+  categories:
+    handler: src/main/functions/categories.handler
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/categories
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
   media:
     handler: src/main/functions/media.handler
     # Role própria: só a mídia assina upload e lê o bucket. Não herda os statements do provider.

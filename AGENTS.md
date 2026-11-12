@@ -60,7 +60,8 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 - Um controller por rota (`<Ação><Recurso>Controller`). Ele estende `Controller<'public' | 'private', Response>`, declara `protected override readonly routeType` com o mesmo valor do genérico, implementa `protected override async handle()`, valida a entrada, chama **um** use case e devolve `{ statusCode, body }`.
 - Body: `@Schema(schema)`, com o schema em `schemas/<acao>Schema.ts`. O `handle` é tipado com `z.infer` desse schema.
-- O `Response` do namespace do controller é o contrato público da rota (versionado pelo SemVer) e é declarado ali, campo a campo. PROIBIDO `Response = <UseCase>.Output`: o body é montado a partir do retorno do use case (`const { id, email } = …`), para uma mudança interna no use case nunca vazar para a API.
+- O `Response` do namespace do controller é o contrato público da rota (versionado pelo SemVer) e é declarado ali, campo a campo. PROIBIDO `Response = <UseCase>.Output`.
+- Quando o retorno do use case já é exatamente o contrato, ele vai direto no body (`body: { categories }`), convertendo só o que o JSON exige (`Date` → `toISOString()`). Se o use case passar a devolver um campo que a rota não expõe, o body passa a ser montado campo a campo (`const { id, email } = …`) no mesmo commit: o TypeScript não acusa campo a mais, e o `JSON.stringify` o enviaria.
 - OBRIGATÓRIO: desestruturar o body e repassar ao use case **só** os campos que ele usa (`const { email, password } = body`), nunca o body inteiro.
 - Params e query: `this.validate(schema, params)`. PROIBIDO `schema.parse()` direto (um `ZodError` solto vira 500).
 - Autenticação é do API Gateway (JWT authorizer do Cognito). A identidade vem só de `request.accountId`, nunca de body, headers ou query.
