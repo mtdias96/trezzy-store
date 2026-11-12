@@ -4,7 +4,7 @@
 
 E-commerce em monorepo pnpm:
 
-- `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle e Neon.
+- `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle, Neon e S3 + CloudFront (fotos).
 - `web/`: Next.js 16, React 19, Tailwind v4 e shadcn/ui, com deploy na Vercel. Regras em [web/AGENTS.md](web/AGENTS.md).
 
 O backend usa um mini-framework próprio: DI, `Controller`, Use Cases e um adapter Middy. Visão geral no [README](README.md).

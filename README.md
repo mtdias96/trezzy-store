@@ -12,6 +12,7 @@ E-commerce serverless na AWS. O backend roda em Node.js no AWS Lambda, sobre um 
 | API | API Gateway HTTP API v2 · Middy 7 |
 | Infra como código | Serverless Framework v4 (esbuild) |
 | Banco | Neon Postgres · Drizzle ORM |
+| Fotos | Amazon S3 (privado, upload por URL pré-assinada) · CloudFront |
 | Auth | Amazon Cognito (Essentials) + JWT authorizer do API Gateway |
 | Validação | Zod 4 |
 | Qualidade | TypeScript strict · ESLint · Vitest · Husky · commitlint · GitHub Actions |
