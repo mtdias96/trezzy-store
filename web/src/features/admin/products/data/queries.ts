@@ -9,8 +9,7 @@ import type {
 } from '@/features/admin/products/model/types';
 import { requireAdminSession } from '@/features/shared/auth/session/session';
 
-// PRÉVIA (não commitar): o catálogo de exemplo no lugar das rotas da API.
-import { fetchBrands, fetchCategories, fetchProduct, fetchProducts } from './preview-api';
+import { fetchBrands, fetchCategories, fetchProduct, fetchProducts } from './api';
 
 export async function listBrands(): Promise<SelectOption[]> {
   await requireAdminSession();

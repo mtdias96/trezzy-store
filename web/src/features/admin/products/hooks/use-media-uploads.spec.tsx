@@ -56,6 +56,17 @@ describe('useMediaUploads', () => {
     expect(result.current.rejections).toEqual([{ name: 'b.gif', reason: 'formato não aceito (use JPG, PNG ou WEBP)' }]);
   });
 
+  it('refuses the photos beyond 10, counting the ones already in the gallery', () => {
+    const { upload } = controlledUploader();
+    const { result } = renderHook(() => useMediaUploads(upload));
+
+    act(() => result.current.addFiles(Array.from({ length: 8 }, (_, index) => image(`a-${index}.png`))));
+    act(() => result.current.addFiles([image('b-1.png'), image('b-2.png'), image('b-3.png')]));
+
+    expect(result.current.items).toHaveLength(10);
+    expect(result.current.rejections).toEqual([{ name: 'b-3.png', reason: 'passa do limite de 10 fotos' }]);
+  });
+
   it('tracks the progress until the upload finishes', async () => {
     const { upload, pending } = controlledUploader();
     const { result } = renderHook(() => useMediaUploads(upload));
@@ -91,6 +102,33 @@ describe('useMediaUploads', () => {
     expect(result.current.items).toEqual([]);
     expect(pending[0]?.signal.aborted).toBe(true);
     expect(URL.revokeObjectURL).toHaveBeenCalledWith(item?.previewUrl);
+  });
+
+  it('does not count the failed photos in the limit', async () => {
+    const { upload, pending } = controlledUploader();
+    const { result } = renderHook(() => useMediaUploads(upload));
+
+    act(() => result.current.addFiles(Array.from({ length: 10 }, (_, index) => image(`a-${index}.png`))));
+    await act(async () => {
+      pending[0]?.reject();
+    });
+    act(() => result.current.addFiles([image('b.png')]));
+
+    expect(result.current.items).toHaveLength(11);
+    expect(result.current.rejections).toEqual([]);
+  });
+
+  it('clears the gallery, cancelling the uploads and freeing the previews', () => {
+    const { upload, pending } = controlledUploader();
+    const { result } = renderHook(() => useMediaUploads(upload));
+
+    act(() => result.current.addFiles([image('a.png'), image('b.gif', 'image/gif')]));
+    act(() => result.current.clear());
+
+    expect(result.current.items).toEqual([]);
+    expect(result.current.rejections).toEqual([]);
+    expect(pending[0]?.signal.aborted).toBe(true);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:preview-0');
   });
 
   it('moves a photo to the position of another', () => {

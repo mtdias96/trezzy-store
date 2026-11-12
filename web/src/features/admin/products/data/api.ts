@@ -3,12 +3,12 @@ import 'server-only';
 import { cache } from 'react';
 import * as z from 'zod';
 
-import type { MediaUploadInput } from '@/features/admin/products/model/schema';
+import type { MediaUploadInput, ProductCreateInput } from '@/features/admin/products/model/schema';
 import { authorizedHttp } from '@/features/shared/auth/session/authorized-http';
 import { HttpError } from '@/lib/http';
 
 // Contrato das rotas do catálogo no painel: a API responde com estes corpos (schema da api/: catalog.ts e media.ts).
-// Todas exigem o scope de admin; leituras pedem `products:read`, e a mídia, `products:write`.
+// Todas exigem o scope de admin; leituras pedem `products:read`, o cadastro `products:write` e a mídia `media:write`.
 
 const variantSchema = z.object({
   id: z.string(),
@@ -102,4 +102,13 @@ export async function createMediaUpload(input: MediaUploadInput): Promise<{ id: 
 // POST /admin/media/{id}/confirm → 204: a API confere o arquivo no S3 e marca o upload como concluído.
 export async function confirmMediaUpload(id: string): Promise<void> {
   await authorizedHttp(`/admin/media/${encodeURIComponent(id)}/confirm`, { method: 'POST', schema: z.undefined() });
+}
+
+// POST /admin/products → 201 { id }. Erro de validação volta como 400 { error: { code: 'VALIDATION', message: [...] } }.
+export async function createProduct(input: ProductCreateInput): Promise<{ id: string }> {
+  return authorizedHttp('/admin/products', {
+    method: 'POST',
+    body: input,
+    schema: z.object({ id: z.string() }),
+  });
 }
