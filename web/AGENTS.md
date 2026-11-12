@@ -7,7 +7,8 @@
 O Next 16 tem breaking changes: APIs, convenções e estrutura de arquivos podem diferir do seu treinamento. OBRIGATÓRIO ler o guia do assunto em `node_modules/next/dist/docs/` (a documentação da versão instalada) antes de escrever código, e respeitar os avisos de depreciação.
 
 - Stack: Next 16 (App Router, Turbopack, Cache Components, React Compiler), React 19, TypeScript strict, Tailwind v4, shadcn/ui sobre Base UI, zod e Vitest. Deploy na Vercel (seção 12).
-- Previstos, ainda não instalados (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): react-hook-form e Playwright. A regra que depende de um deles vale a partir da instalação.
+- Formulário complexo: react-hook-form com `@hookform/resolvers`, só pelo `lib/form.ts` (seção 7).
+- Previsto, ainda não instalado (ver [Pendências](#pendências-conhecidas-remova-a-linha-ao-resolver)): Playwright. A regra que depende dele vale a partir da instalação.
 
 ## Definition of Done
 
@@ -165,7 +166,7 @@ Imposto pelo `eslint-plugin-boundaries` 🔒. "Da feature" quer dizer da mesma �
 ### Camadas compartilhadas
 
 - `components/ui/`: só o que o shadcn gera. O lint de tokens é mais brando aqui (seção 8).
-- `components/common/`: nossos componentes de apresentação sem domínio, por categoria (`feedback/` com `RouteError` e `PageSkeleton`, `forms/` com `PasswordInput`, `layout/` com os primitivos de página `Screen` e `Section`), com o lint de tokens inteiro.
+- `components/common/`: nossos componentes de apresentação sem domínio, por categoria (`feedback/` com `RouteError` e `PageSkeleton`, `forms/` com `PasswordInput` e o `FormField`, `layout/` com os primitivos de página `Screen` e `Section`), com o lint de tokens inteiro.
 - `components/store/` e `components/admin/`: apresentação de uma área só, por categoria: `shell/` (header, footer, sidebar e logo), `data-display/` (cards e tabelas), `forms/` (campos e cards de formulário)…
 - `hooks/`: hooks de client sem domínio (é o alias `hooks` do `components.json`).
 - `lib/`: utilitários sem domínio (`cn`, `http`, `ActionResult`, formatadores).
@@ -284,7 +285,24 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 
 - Formulário simples (login, busca, newsletter): `<form action>` + `useActionState` + schema zod, sem react-hook-form.
 - Formulário complexo (muitos campos, listas dinâmicas): react-hook-form.
-- `components/ui/form.tsx` é a única fronteira do react-hook-form: PROIBIDO feature importar RHF direto. O arquivo é nosso, montado sobre o `Field` do shadcn, porque o preset `base-nova` não tem o `Form` antigo.
+- Uma porta só 🔒: `lib/form.ts` é o único arquivo que importa `react-hook-form` e `@hookform/resolvers` (o ESLint barra no resto). Ele reexporta os hooks (`useForm`, `useFormContext`, `useFieldArray`, `useWatch`), o `zodResolver` e o `applyFieldErrors`.
+- O schema zod mora em `model/schema.ts` e dá os tipos do formulário: `useForm<z.input<…>, unknown, z.output<…>>({ resolver: zodResolver(schema), defaultValues })`. O componente pega o `control` com `useFormContext<TipoDoFormulário>()`, sempre o tipo do schema, nunca um tipo parcial escrito à mão.
+- Todo campo passa pelo `FormField` (`components/common/forms/form-field.tsx`): ele monta o `Field` do shadcn (label, descrição e erro) e entrega ao `render` o `field` do react-hook-form e os `controlProps` (`id`, `aria-invalid`, `aria-describedby`), que vão no controle. PROIBIDO `register` e `useController` na feature.
+
+  ```tsx
+  <FormField
+    control={control}
+    name="title"
+    label="Título"
+    render={({ field, controlProps }) => <Input {...field} {...controlProps} />}
+  />
+  ```
+
+  - Controle que não é `<input>` liga o valor pelo nome dele: `Select` com `value`/`onValueChange` e o `ref` no `SelectTrigger`, `Switch` com `checked`/`onCheckedChange` e `inputRef`, `MoneyInput` com `value`/`onValueChange`.
+  - Sem `label`, o controle se nomeia sozinho: `aria-label` na célula da tabela, ou um `<label>` em volta (o card do status). Label só para leitor de tela: `hideLabel`.
+  - Número: `onChange={(event) => field.onChange(event.target.valueAsNumber)}`, e campo apagado aparece vazio (`NaN` no formulário, que o schema recusa no envio).
+- Erro de um caminho que não é controle (a lista `variants` vazia, o tamanho fora da grade de uma linha): `FormMessage`, que também lê o `root` onde o `useFieldArray` guarda o erro da lista.
+- Erros da Server Action: os `fieldErrors` usam o mesmo caminho do formulário (`variants.1.sku`) e entram com `applyFieldErrors(form.setError, fieldErrors)`, na função passada ao `useActionState`. A action devolve `{ ok: true }` em vez de chamar `redirect()`: o container limpa o formulário e navega com `router.push`, porque o Next guarda a página escondida (`<Activity>`) e ela voltaria preenchida.
 
 ## 8. Design tokens e UI
 
@@ -337,6 +355,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 - Elemento com papel de interface usa o slot (`bg-primary`, `text-muted-foreground`, `border-border`). O token direto fica para o que não tem slot (`bg-lime`, `bg-status-paid-bg`).
 - Manter `cn()`, `data-slot` e os aliases do `components.json`. A composição de primitivo é pela prop `render` do Base UI, que não tem `asChild`/`Slot`.
 - O `shadcn add` reescreve os componentes de que o novo depende (a sidebar traz o `button` e o `input`), e os nossos têm ajustes: depois de rodar, restaure-os com `git checkout` e confira o diff.
+- `components/ui/field.tsx` (do `shadcn add field`): a descrição e o erro usam `text-body-sm`, e não o `text-sm` gerado, para os textos de campo do painel continuarem com 13px. Regerado pela CLI, o ajuste volta.
 - Sidebar do painel: os slots `--sidebar-*` e as larguras `--sidebar-width*` ficam no `:root`, e não no `[data-area="admin"]`, porque no celular ela abre num Sheet, que o portal renderiza fora do container do painel. Fora do `components/ui`, o estado recolhido se escreve com a variante `sidebar-collapsed:` do `globals.css`.
 - Portais no painel (Dialog, Popover, Sheet…) renderizam no `<body>`, fora do `[data-area="admin"]`, e voltariam às superfícies da loja. O conteúdo do portal leva `data-area="admin"` (ex: `<DialogContent data-area="admin">`).
 - Paleta de comandos: `Dialog` + `Combobox` do shadcn (Base UI) com `inline`, e não o `command` do shadcn, que traz o `cmdk` (sobre o Radix). O campo sem moldura é o `ComboboxChipsInput`: o `ComboboxInput` sempre envolve o campo num `InputGroup`.
@@ -416,7 +435,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | :--- | :--- |
 | Projeto na Vercel | Criar o projeto (Root Directory `web`) e cadastrar o `API_URL` e o `MEDIA_CDN_HOSTNAME`. É um passo manual, feito por quem tem acesso à conta. Depois, trocar o `project.json` local pelo `vercel link`. |
 | Pre-push | O build da Vercel antes do push é regra escrita, sem hook: a barreira obrigatória continua sendo a CI e o preview da Vercel. |
-| Dependências | react-hook-form e Playwright aguardam aprovação. |
+| Dependências | Playwright aguarda aprovação. |
 | Monitoramento | Não há captura de erro nem de Web Vitals no browser: o `RouteError` não reporta nada. Os erros de servidor aparecem nos logs da Vercel. |
 | CSP | Só o `frame-ancestors` por enquanto. A política completa entra junto com o primeiro script de terceiro (pagamento, analytics). |
 | Home | Os banners do carrossel não têm arte para o celular e só aparecem a partir do `lg`. Os departamentos de prévia não têm foto (o card mostra um ícone). A descrição da metadata do layout raiz é provisória. A foto do drop de prévia tem 992px: no desktop retina, o hero pede ~1700px (864px de foto). |
@@ -432,6 +451,7 @@ A API é quem autentica (Cognito) e autoriza (o API Gateway valida o JWT em toda
 | Taxonomia da vitrine | O banco não tem departamento (as categorias são planas, com nome editável no painel), e a árvore da loja mora em `catalog/model/taxonomy.ts`. Enquanto for assim, renomear uma categoria no painel não muda a vitrine. Quando o painel cuidar da árvore, ela vem da API (`GET /store/departments` com as categorias) mantendo os slugs, e a taxonomia vira essa leitura; o `generateStaticParams` passa a precisar de um slug no build (ou de um fallback local), porque a CI não tem API. |
 | Sacola e avisos | A sacola não mostra contagem: ela vem do carrinho, num `<Suspense>` (lê cookie). Os avisos da faixa do topo são fixos em `features/store/announcements` até existir onde editá-los. |
 | Tema escuro | Os tokens não definem tema escuro. O `.dark` do shadcn foi removido, e o `dark:` só vale com a classe `.dark`, que nada aplica. |
+| Edição de produto | A tela de edição abre preenchida, mas o Salvar fica desligado: falta a rota de atualização na API (`PATCH /admin/products/{id}`), com a galeria regravada numa transação. |
 | Seções vazias do painel | Pedidos, estoque, cupons e marcas e categorias são páginas vazias da prévia do sidebar (`components/admin/preview/section-preview.tsx`), com a permissão do Dashboard: saem quando cada seção entrar. |
 | Animações | O design só deu nome e duração: o movimento de `pop`, `appear`, `marquee`, `shake` e `skeleton` no `globals.css` é provisório. |
 | `cn` e tokens | O `cn` só conhece a escala padrão do Tailwind. Ele trata `text-body-sm` como cor e o descarta ao lado de `text-ink` na mesma chamada, e `h-field` não substitui o `h-8`. Até ensinar os tokens ao `cn` em build (`cn/next`; o `cn/config` monta as tabelas no browser e soma ~88 KB), não junte tamanho de texto com token e cor de texto num `cn`, e ajuste o visual dos componentes do `ui` no próprio arquivo, não por `className`. |

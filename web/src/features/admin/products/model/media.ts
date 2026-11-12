@@ -1,6 +1,8 @@
 // Os mesmos limites da tabela `media` da API (content type e tamanho).
 export const MEDIA_ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 export const MEDIA_MAX_BYTES = 10 * 1024 * 1024;
+// O mesmo limite da galeria na API.
+export const PRODUCT_MAX_MEDIA = 10;
 
 export type MediaStatus = 'uploading' | 'done' | 'error';
 

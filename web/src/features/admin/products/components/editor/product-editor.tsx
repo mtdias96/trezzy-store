@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import type { ProductDetail, SelectOption } from '@/features/admin/products/model/types';
-import { summarizeVariants } from '@/features/admin/products/model/variants';
+import type { VariantSummary } from '@/features/admin/products/model/variants';
 
 import { ProductEditorHeader } from './product-editor-header';
 import { ProductEditorView } from './product-editor-view';
@@ -17,41 +17,55 @@ type ProductEditorProps = {
   categories: readonly SelectOption[];
   media: ReactNode;
   variants: ReactNode;
+  summary: VariantSummary;
+  imageCount: number;
+  hasUnsavedChanges: boolean;
+  isSaving: boolean;
+  saveBlockedReason?: string;
+  formError?: string;
 };
 
-// Mesma tela para cadastrar e editar: sem `product`, é um cadastro novo. Mídia e variantes entram por slot, porque
-// são contextos próprios (a mídia, com o container de upload).
-export function ProductEditor({ product, brands, categories, media, variants }: ProductEditorProps) {
-  const summary = summarizeVariants(product?.variants ?? []);
-
+// Mesma tela para cadastrar e editar: sem `product`, é um cadastro novo. Os campos leem o formulário do container;
+// mídia e variantes entram por slot, porque são contextos próprios.
+export function ProductEditor({
+  product,
+  brands,
+  categories,
+  media,
+  variants,
+  summary,
+  imageCount,
+  hasUnsavedChanges,
+  isSaving,
+  saveBlockedReason,
+  formError,
+}: ProductEditorProps) {
   return (
     <ProductEditorView
-      header={
-        product
-          ? <ProductEditorHeader caption="Produtos · editar" title={product.title} status={product.status} />
-          : <ProductEditorHeader caption="Produtos · novo cadastro" title="Novo produto" status="draft" hasUnsavedChanges />
-      }
+      header={(
+        <ProductEditorHeader
+          caption={product ? 'Produtos · editar' : 'Produtos · novo cadastro'}
+          title={product?.title ?? 'Novo produto'}
+          status={product?.status ?? 'draft'}
+          hasUnsavedChanges={hasUnsavedChanges}
+          isSaving={isSaving}
+          saveBlockedReason={saveBlockedReason}
+        />
+      )}
       main={(
         <>
-          <ProductInfoFields defaultTitle={product?.title} defaultDescription={product?.description} />
+          {formError ? <p role="alert" className="rounded-card bg-danger-50 px-5 py-3.5 text-body text-danger-700">{formError}</p> : null}
+          <ProductInfoFields />
           {media}
           {variants}
         </>
       )}
       aside={(
         <>
-          <ProductStatusField
-            defaultActive={product ? product.status === 'active' : true}
-            hint={product ? undefined : 'Será publicado na loja assim que você salvar.'}
-          />
-          <ProductOrganizationFields
-            brands={brands}
-            categories={categories}
-            defaultBrandId={product?.brandId}
-            defaultCategoryId={product?.categoryId}
-          />
-          <ProductPriceField defaultValue={summary.minPriceInCents ?? 0} />
-          <ProductSummary summary={summary} imageCount={product?.media.length ?? 0} />
+          <ProductStatusField hint={product ? undefined : 'Será publicado na loja assim que você salvar.'} />
+          <ProductOrganizationFields brands={brands} categories={categories} />
+          <ProductPriceField />
+          <ProductSummary summary={summary} imageCount={imageCount} />
         </>
       )}
     />

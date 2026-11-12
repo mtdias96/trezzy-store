@@ -6,6 +6,22 @@ import betterTailwindcss from 'eslint-plugin-better-tailwindcss';
 import boundaries from 'eslint-plugin-boundaries';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
 
+const BASE_IMPORT_PATTERNS = [
+  {
+    regex: '^\\.\\./',
+    message: 'Fora da pasta atual, importe pelo alias @/.',
+  },
+  {
+    regex: '^(?!@/styles/globals\\.css$).*\\.css$',
+    message: 'O único CSS do web é o src/styles/globals.css: estilo vai em classe com token.',
+  },
+];
+
+const REACT_HOOK_FORM_IMPORT = {
+  group: ['react-hook-form', '@hookform/*'],
+  message: 'react-hook-form só pelo @/lib/form (web/AGENTS.md, seção 7): campo de formulário usa o FormField.',
+};
+
 // Cor literal em TS/TSX (style, SVG, prop). Cor só existe como token no globals.css.
 const COLOR_LITERAL
   = /#(?:[\dA-Fa-f]{3,4}|[\dA-Fa-f]{6}|[\dA-Fa-f]{8})\b|\b(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch)\(/.source;
@@ -276,21 +292,14 @@ const eslintConfig = defineConfig([
           message: 'style só para valor calculado em runtime. Valor fixo vai em classe com token.',
         },
       ],
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              regex: '^\\.\\./',
-              message: 'Fora da pasta atual, importe pelo alias @/.',
-            },
-            {
-              regex: '^(?!@/styles/globals\\.css$).*\\.css$',
-              message: 'O único CSS do web é o src/styles/globals.css: estilo vai em classe com token.',
-            },
-          ],
-        },
-      ],
+      'no-restricted-imports': ['error', { patterns: [...BASE_IMPORT_PATTERNS, REACT_HOOK_FORM_IMPORT] }],
+    },
+  },
+  {
+    // A porta única do react-hook-form (seção 7): só ela importa o pacote e o resolver.
+    files: ['src/lib/form.ts'],
+    rules: {
+      'no-restricted-imports': ['error', { patterns: BASE_IMPORT_PATTERNS }],
     },
   },
   {

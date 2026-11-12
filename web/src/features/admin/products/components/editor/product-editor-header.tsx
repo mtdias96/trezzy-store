@@ -21,9 +21,19 @@ type ProductEditorHeaderProps = {
   title: string;
   status: ProductStatus;
   hasUnsavedChanges?: boolean;
+  isSaving?: boolean;
+  // Com motivo, o Salvar fica desligado e o motivo aparece no lugar do aviso de alterações.
+  saveBlockedReason?: string;
 };
 
-export function ProductEditorHeader({ caption, title, status, hasUnsavedChanges = false }: ProductEditorHeaderProps) {
+export function ProductEditorHeader({
+  caption,
+  title,
+  status,
+  hasUnsavedChanges = false,
+  isSaving = false,
+  saveBlockedReason,
+}: ProductEditorHeaderProps) {
   const tone = statusTone[status];
 
   return (
@@ -51,7 +61,10 @@ export function ProductEditorHeader({ caption, title, status, hasUnsavedChanges 
           </div>
         </div>
         <div className="flex w-full items-center justify-end gap-3 sm:w-auto">
-          {hasUnsavedChanges
+          {saveBlockedReason
+            ? <p className="mr-auto text-body-sm text-muted-foreground sm:mr-0">{saveBlockedReason}</p>
+            : null}
+          {hasUnsavedChanges && !saveBlockedReason
             ? (
                 <p
                   className="
@@ -65,11 +78,18 @@ export function ProductEditorHeader({ caption, title, status, hasUnsavedChanges 
                 </p>
               )
             : null}
-          <Button variant="outline" shape="pill" size="lg" className="font-semibold">
+          <Button variant="outline" shape="pill" size="lg" className="font-semibold" nativeButton={false} render={<Link href="/admin/produtos" />}>
             Descartar
           </Button>
-          <Button variant="accent" shape="pill" size="lg" className="font-semibold">
-            Salvar
+          <Button
+            type="submit"
+            variant="accent"
+            shape="pill"
+            size="lg"
+            className="font-semibold"
+            disabled={isSaving || saveBlockedReason !== undefined}
+          >
+            {isSaving ? 'Salvando…' : 'Salvar'}
             <Kbd className="h-6 rounded-md px-1.5">⌘S</Kbd>
           </Button>
         </div>
