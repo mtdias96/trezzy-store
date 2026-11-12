@@ -72,6 +72,7 @@ jobs:
     env:
       # Valor fictício: o build só valida o formato. A URL real fica nas variáveis da Vercel.
       API_URL: https://api.example.test
+      MEDIA_CDN_HOSTNAME: cdn.example.test
 
     steps:
       - name: Checkout repository

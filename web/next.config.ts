@@ -1,5 +1,12 @@
 import type { NextConfig } from 'next';
 
+// O domínio do CDN das fotos muda por stage (saída MediaCDNDomainName da api). O next.config não lê o src/config/.
+const mediaCdnHostname = process.env.MEDIA_CDN_HOSTNAME;
+
+if (!mediaCdnHostname) {
+  throw new Error('MEDIA_CDN_HOSTNAME não definido: veja o .env.example.');
+}
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   // O <Link> pré-carrega o App Shell da rota, um por rota e não um por link. Sem a opção, o Next usa false e avisa.
@@ -7,6 +14,10 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   reactCompiler: true,
   poweredByHeader: false,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [{ protocol: 'https', hostname: mediaCdnHostname, pathname: '/uploads/**' }],
+  },
   turbopack: {
     rules: {
       '*.css': {

@@ -8,7 +8,7 @@ import { authorizedHttp } from '@/features/shared/auth/session/authorized-http';
 import { HttpError } from '@/lib/http';
 
 // Contrato das rotas do catálogo no painel: a API responde com estes corpos (schema da api/: catalog.ts e media.ts).
-// Todas exigem o scope de admin; leituras pedem `products:read`, e a mídia, `products:write`.
+// Todas exigem o scope de admin; leituras pedem `products:read`, o cadastro `products:write` e a mídia `media:write`.
 
 const variantSchema = z.object({
   id: z.string(),
