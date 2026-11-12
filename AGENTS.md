@@ -4,7 +4,7 @@
 
 E-commerce em monorepo pnpm:
 
-- `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle e Neon.
+- `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle, Neon e S3 + CloudFront (fotos).
 - `web/`: Next.js 16, React 19, Tailwind v4 e shadcn/ui, com deploy na Vercel. Regras em [web/AGENTS.md](web/AGENTS.md).
 
 O backend usa um mini-framework próprio: DI, `Controller`, Use Cases e um adapter Middy. Visão geral no [README](README.md).
@@ -173,6 +173,8 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 | `Content-Type` | PROIBIDO definir `Content-Type` no retorno do controller: o serializer pula a serialização do body. |
 | Config do health | O `HealthUseCase` lê `process.env` (exceção temporária no lint). Não copie. |
 | Segredos | O `DATABASE_URL` e o `COGNITO_CLIENT_SECRET` ainda são variáveis de ambiente. Alvo: SSM lido em runtime. |
+| Limpeza de mídia | Não existe: linhas de `media` sem `uploadedAt`, fotos nunca ligadas a nada e arquivos recusados ficam no banco e no S3. Alvo: Lambda agendada só em prod (pelos `params`) que apaga linha e arquivo; em dev, à mão. |
+| Mídia antes de produção | O upload grava direto em `uploads/`, que o CDN serve: o arquivo fica público antes da confirmação, e a URL de 5 min ainda permite sobrescrever uma foto confirmada. Alvo: enviar para `pending/` (fora do CDN), a confirmação copia para `uploads/`, e uma regra de ciclo de vida expira `pending/`. No mesmo pacote: CORS com mais de uma origem (previews e domínio próprio), versionamento e `aws:SecureTransport` no bucket de prod, o SDK do S3 no bundle da função `media` (hoje vem do runtime, numa versão que os testes não cobrem) e o dono da mídia (`createdBy`). |
 
 ## Regras para agentes de IA
 
