@@ -4,7 +4,7 @@
 
 E-commerce em monorepo pnpm:
 
-- `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle e Neon.
+- `api/`: Node.js 24, AWS Lambda, HTTP API v2, Serverless v4, Middy, Drizzle, Neon e S3 + CloudFront (fotos).
 - `web/`: Next.js 16, React 19, Tailwind v4 e shadcn/ui, com deploy na Vercel. Regras em [web/AGENTS.md](web/AGENTS.md).
 
 O backend usa um mini-framework próprio: DI, `Controller`, Use Cases e um adapter Middy. Visão geral no [README](README.md).
@@ -60,7 +60,8 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 
 - Um controller por rota (`<Ação><Recurso>Controller`). Ele estende `Controller<'public' | 'private', Response>`, declara `protected override readonly routeType` com o mesmo valor do genérico, implementa `protected override async handle()`, valida a entrada, chama **um** use case e devolve `{ statusCode, body }`.
 - Body: `@Schema(schema)`, com o schema em `schemas/<acao>Schema.ts`. O `handle` é tipado com `z.infer` desse schema.
-- O `Response` do namespace do controller é o contrato público da rota (versionado pelo SemVer) e é declarado ali, campo a campo. PROIBIDO `Response = <UseCase>.Output`: o body é montado a partir do retorno do use case (`const { id, email } = …`), para uma mudança interna no use case nunca vazar para a API.
+- O `Response` do namespace do controller é o contrato público da rota (versionado pelo SemVer) e é declarado ali, campo a campo. PROIBIDO `Response = <UseCase>.Output`.
+- Quando o retorno do use case já é exatamente o contrato, ele vai direto no body (`body: { categories }`), convertendo só o que o JSON exige (`Date` → `toISOString()`). Se o use case passar a devolver um campo que a rota não expõe, o body passa a ser montado campo a campo (`const { id, email } = …`) no mesmo commit: o TypeScript não acusa campo a mais, e o `JSON.stringify` o enviaria.
 - OBRIGATÓRIO: desestruturar o body e repassar ao use case **só** os campos que ele usa (`const { email, password } = body`), nunca o body inteiro.
 - Params e query: `this.validate(schema, params)`. PROIBIDO `schema.parse()` direto (um `ZodError` solto vira 500).
 - Autenticação é do API Gateway (JWT authorizer do Cognito). A identidade vem só de `request.accountId`, nunca de body, headers ou query.
@@ -173,6 +174,9 @@ pnpm --filter trezzy-api package   # requer login no Serverless e DATABASE_URL n
 | `Content-Type` | PROIBIDO definir `Content-Type` no retorno do controller: o serializer pula a serialização do body. |
 | Config do health | O `HealthUseCase` lê `process.env` (exceção temporária no lint). Não copie. |
 | Segredos | O `DATABASE_URL` e o `COGNITO_CLIENT_SECRET` ainda são variáveis de ambiente. Alvo: SSM lido em runtime. |
+| Limpeza de mídia | Não existe: linhas de `media` sem `uploadedAt`, fotos nunca ligadas a nada e arquivos recusados ficam no banco e no S3. Alvo: Lambda agendada só em prod (pelos `params`) que apaga linha e arquivo; em dev, à mão. |
+| Mídia antes de produção | O upload grava direto em `uploads/`, que o CDN serve: o arquivo fica público antes da confirmação, e a URL de 5 min ainda permite sobrescrever uma foto confirmada. Alvo: enviar para `pending/` (fora do CDN), a confirmação copia para `uploads/`, e uma regra de ciclo de vida expira `pending/`. No mesmo pacote: CORS com mais de uma origem (previews e domínio próprio), versionamento e `aws:SecureTransport` no bucket de prod, o SDK do S3 no bundle da função `media` (hoje vem do runtime, numa versão que os testes não cobrem) e o dono da mídia (`createdBy`). |
+| Lista de produtos do painel | `GET /admin/products` devolve tudo, sem paginação: o painel filtra e ordena no Next. Alvo: cursor por `(updated_at, id)`, com o índice. |
 
 ## Regras para agentes de IA
 

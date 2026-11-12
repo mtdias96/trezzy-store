@@ -115,5 +115,6 @@ export const productMedia = pgTable('product_media', {
 }, (t) => [
   // Uma posição por produto; também serve a busca da galeria em ordem e a FK para products.
   unique('product_media_position_unique').on(t.productId, t.position),
-  check('product_media_position_check', sql`${t.position} >= 0`),
+  // Até 10 fotos por produto: o mesmo limite que a API valida.
+  check('product_media_position_check', sql`${t.position} >= 0 and ${t.position} < 10`),
 ]);

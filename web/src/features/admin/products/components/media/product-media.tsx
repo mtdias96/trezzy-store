@@ -28,6 +28,7 @@ type ProductMediaProps = {
   onFiles: (files: File[]) => void;
   onRemove: (id: string) => void;
   onReorder: (activeId: string, overId: string) => void;
+  errors?: readonly string[];
 };
 
 const screenReaderInstructions: ScreenReaderInstructions = {
@@ -36,7 +37,7 @@ const screenReaderInstructions: ScreenReaderInstructions = {
     + 'novo para soltar, ou Esc para cancelar.',
 };
 
-export function ProductMedia({ items, rejections, onFiles, onRemove, onReorder }: ProductMediaProps) {
+export function ProductMedia({ items, rejections, onFiles, onRemove, onReorder, errors = [] }: ProductMediaProps) {
   // Sem id fixo, o DndContext numera os próprios ids por contador, e o servidor e o browser divergem na hidratação.
   const dndId = useId();
   const sensors = useSensors(
@@ -66,6 +67,13 @@ export function ProductMedia({ items, rejections, onFiles, onRemove, onReorder }
   return (
     <FormCard title="Mídia" meta={formatImageCount(items.length)}>
       <MediaDropzone onFiles={onFiles} />
+      {errors.length > 0
+        ? (
+            <ul role="alert" className="flex flex-col gap-1 text-body-sm text-danger-600">
+              {errors.map((error) => <li key={error}>{error}</li>)}
+            </ul>
+          )
+        : null}
       {rejections.length > 0
         ? (
             <ul role="alert" className="flex flex-col gap-1 text-body-sm text-danger-600">

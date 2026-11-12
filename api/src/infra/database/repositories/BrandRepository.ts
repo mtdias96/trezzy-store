@@ -17,8 +17,15 @@ export class BrandRepository {
 
     return brand ?? null;
   }
+
+  async findAll(): Promise<BrandRepository.ListItem[]> {
+    return this.drizzle.db
+      .select({ id: brands.id, name: brands.name, active: brands.active })
+      .from(brands);
+  }
 }
 
 export namespace BrandRepository {
   export type Brand = { id: string };
+  export type ListItem = { id: string; name: string; active: boolean };
 }

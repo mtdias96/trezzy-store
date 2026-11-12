@@ -8,9 +8,13 @@ frameworkVersion: '~4.44.0'
 params:
   prod:
     cognitoDeletionProtection: ACTIVE
+    mediaBucketDeletionPolicy: Retain
+    webOrigin: https://trezzy-store-web.vercel.app
   default:
     # Fora de prod o pool pode ser recriado (ex: atributo custom alterado exige um pool novo).
     cognitoDeletionProtection: INACTIVE
+    mediaBucketDeletionPolicy: Delete
+    webOrigin: http://localhost:3000
 
 provider:
   name: aws
@@ -101,6 +105,78 @@ functions:
       # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
       - httpApi:
           path: /admin/products
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+      - httpApi:
+          path: /admin/products/{id}
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+      - httpApi:
+          path: /admin/products
+          method: post
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
+  brands:
+    handler: src/main/functions/brands.handler
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/brands
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
+  categories:
+    handler: src/main/functions/categories.handler
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/categories
+          method: get
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+
+  media:
+    handler: src/main/functions/media.handler
+    # Role própria: só a mídia assina upload e lê o bucket. Não herda os statements do provider.
+    iam:
+      role:
+        statements:
+          - Effect: Allow
+            Action:
+              - s3:PutObject
+              - s3:GetObject
+              - s3:DeleteObject
+            Resource: !Sub '${MediaBucket.Arn}/uploads/*'
+          # Sem ListBucket, a leitura de um objeto que não existe responde 403 em vez de 404.
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource: !GetAtt MediaBucket.Arn
+    events:
+      # Rota de admin: o API Gateway exige o scope de admin; o adapter ainda confere a permissão.
+      - httpApi:
+          path: /admin/media
+          method: post
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
+      - httpApi:
+          path: /admin/media/{id}/confirm
           method: post
           authorizer:
             name: cognito
@@ -116,3 +192,4 @@ functions:
 
 resources:
   - ${file(./sls/resources/cognito.yml)}
+  - ${file(./sls/resources/media.yml)}

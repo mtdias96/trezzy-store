@@ -1,0 +1,2 @@
+ALTER TABLE "product_media" DROP CONSTRAINT "product_media_position_check";--> statement-breakpoint
+ALTER TABLE "product_media" ADD CONSTRAINT "product_media_position_check" CHECK ("product_media"."position" >= 0 and "product_media"."position" < 10);

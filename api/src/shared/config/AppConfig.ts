@@ -6,6 +6,7 @@ import { env } from './env';
 export class AppConfig {
   readonly db: AppConfig.Database;
   readonly auth: AppConfig.Auth;
+  readonly storage: AppConfig.Storage;
 
   constructor() {
     this.db = {
@@ -24,6 +25,16 @@ export class AppConfig {
         pool: {
           id: env.COGNITO_POOL_ID,
         },
+      },
+    };
+
+    this.storage = {
+      s3: {
+        region: env.REGION,
+        mediaBucket: env.MEDIA_BUCKET_NAME,
+      },
+      cdn: {
+        mediaDomainName: env.MEDIA_CDN_DOMAIN_NAME,
       },
     };
   }
@@ -46,6 +57,16 @@ export namespace AppConfig {
       pool: {
         id: string;
       };
+    };
+  };
+
+  export type Storage = {
+    s3: {
+      region: string;
+      mediaBucket: string;
+    };
+    cdn: {
+      mediaDomainName: string;
     };
   };
 }

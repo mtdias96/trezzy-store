@@ -17,7 +17,7 @@ export class CreateProductController extends Controller<'private', CreateProduct
   protected override async handle({
     body,
   }: Controller.Request<'private', CreateProductBody>): Promise<Controller.Response<CreateProductController.Response>> {
-    const { title, description, status, brandId, categoryId, variants } = body;
+    const { title, description, status, brandId, categoryId, variants, mediaIds } = body;
 
     const { id } = await this.createProductUseCase.execute({
       title,
@@ -33,6 +33,7 @@ export class CreateProductController extends Controller<'private', CreateProduct
         stock,
         active,
       })),
+      mediaIds,
     });
 
     return { statusCode: 201, body: { id } };

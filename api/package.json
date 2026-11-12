@@ -1,6 +1,6 @@
 {
   "name": "trezzy-api",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -18,6 +18,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
+    "db:seed": "node --env-file-if-exists=.env scripts/seedCatalog.mjs",
     "account:admin": "node scripts/accountAdmin.mjs"
   },
   "devDependencies": {
@@ -38,6 +39,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "^3.1154.0",
+    "@aws-sdk/client-s3": "^3.1166.0",
+    "@aws-sdk/s3-request-presigner": "^3.1166.0",
     "@middy/core": "^7.9.2",
     "@middy/http-json-body-parser": "^7.9.2",
     "@middy/http-response-serializer": "^7.9.2",

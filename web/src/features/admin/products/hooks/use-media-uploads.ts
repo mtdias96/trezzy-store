@@ -5,6 +5,7 @@ import {
   type MediaRejection,
   type MediaUploader,
   moveMedia,
+  PRODUCT_MAX_MEDIA,
   updateMedia,
   validateMediaFile,
 } from '@/features/admin/products/model/media';
@@ -41,7 +42,9 @@ export function useMediaUploads(upload: MediaUploader, initialItems: readonly Me
     const rejected: MediaRejection[] = [];
 
     for (const file of files) {
-      const reason = validateMediaFile(file);
+      const reason = items.filter(({ status }) => status !== 'error').length + added.length >= PRODUCT_MAX_MEDIA
+        ? `passa do limite de ${PRODUCT_MAX_MEDIA} fotos`
+        : validateMediaFile(file);
 
       if (reason) {
         rejected.push({ name: file.name, reason });
@@ -73,9 +76,20 @@ export function useMediaUploads(upload: MediaUploader, initialItems: readonly Me
     setItems((current) => current.filter((item) => item.id !== id));
   }
 
+  function clear() {
+    for (const { controller, previewUrl } of uploads.current.values()) {
+      controller.abort();
+      URL.revokeObjectURL(previewUrl);
+    }
+
+    uploads.current.clear();
+    setItems([]);
+    setRejections([]);
+  }
+
   function reorder(activeId: string, overId: string) {
     setItems((current) => moveMedia(current, activeId, overId));
   }
 
-  return { items, rejections, addFiles, remove, reorder };
+  return { items, rejections, addFiles, remove, reorder, clear };
 }
