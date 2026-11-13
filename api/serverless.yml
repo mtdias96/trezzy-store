@@ -149,6 +149,14 @@ functions:
             scopes:
               - trezzy/admin
 
+  # Vitrine: rotas públicas, sem authorizer.
+  store:
+    handler: src/main/functions/store.handler
+    events:
+      - httpApi:
+          path: /store/categories
+          method: get
+
   media:
     handler: src/main/functions/media.handler
     # Role própria: só a mídia assina upload e lê o bucket. Não herda os statements do provider.
