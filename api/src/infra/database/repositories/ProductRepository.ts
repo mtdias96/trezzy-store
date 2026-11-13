@@ -262,6 +262,41 @@ export class ProductRepository {
     };
   }
 
+  // Só o produto que a vitrine mostra, com as variantes ativas.
+  async findStorefrontBySlug(slug: string): Promise<ProductRepository.StorefrontDetail | null> {
+    const [row] = await this.drizzle.db
+      .select({
+        id: products.id,
+        slug: products.slug,
+        title: products.title,
+        description: products.description,
+        brandName: brands.name,
+        categorySlug: categories.slug,
+        grid: categories.grid,
+        priceInCents: storefrontPrice,
+      })
+      .from(products)
+      .innerJoin(brands, eq(brands.id, products.brandId))
+      .innerJoin(categories, eq(categories.id, products.categoryId))
+      .where(and(eq(products.slug, slug), storefrontVisible))
+      .limit(1);
+
+    if (!row) {
+      return null;
+    }
+
+    const [variantsByProduct, mediaKeysByProduct] = await Promise.all([
+      this.findVariantsByProduct([row.id]),
+      this.findMediaKeysByProduct([row.id]),
+    ]);
+
+    return {
+      ...row,
+      variants: (variantsByProduct.get(row.id) ?? []).filter(({ active }) => active),
+      mediaKeys: mediaKeysByProduct.get(row.id) ?? [],
+    };
+  }
+
   private storefrontWhere(
     { categorySlugs, brandSlugs, sizes, priceAboveInCents, priceUpToInCents }: ProductRepository.StorefrontQuery,
     ignore?: 'sizes' | 'brands',
@@ -371,6 +406,11 @@ export namespace ProductRepository {
     variants: Product.Variant[];
     // Na ordem da galeria.
     mediaKeys: string[];
+  };
+
+  export type StorefrontDetail = StorefrontItem & {
+    description: string;
+    categorySlug: string;
   };
 
   export type StorefrontPage = {

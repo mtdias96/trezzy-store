@@ -159,6 +159,9 @@ functions:
       - httpApi:
           path: /store/products
           method: get
+      - httpApi:
+          path: /store/products/{slug}
+          method: get
 
   media:
     handler: src/main/functions/media.handler
