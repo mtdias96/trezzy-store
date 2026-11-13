@@ -1,14 +1,24 @@
-import { and, asc, desc, eq, inArray, like, ne, or, sql } from 'drizzle-orm';
+import { and, asc, count, countDistinct, desc, eq, gt, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
 import { Injectable } from '@kernel/decorators/Injectable';
 import type { Product } from '@application/entities/Product';
 import type { SizeGrid } from '@application/entities/sizeGrids';
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
+import { storefrontVisible } from '@infra/database/drizzle/conditions/storefrontVisible';
 import { DrizzleClient } from '@infra/database/drizzle/DrizzleClient';
 import { isUniqueViolation } from '@infra/database/drizzle/isUniqueViolation';
-import { categories, productMedia, products, productVariants } from '@infra/database/drizzle/schema/catalog';
+import { brands, categories, productMedia, products, productVariants } from '@infra/database/drizzle/schema/catalog';
 import { media } from '@infra/database/drizzle/schema/media';
+
+// Preço do card: a variante ativa mais barata. O storefrontVisible garante que ela existe.
+const storefrontPrice = sql<number>`(select min(${productVariants.priceInCents}) from ${productVariants} where ${productVariants.productId} = ${products.id} and ${productVariants.active})`;
+
+const STOREFRONT_ORDER = {
+  newest: [desc(products.publishedAt), desc(products.id)],
+  'price-asc': [asc(storefrontPrice), desc(products.publishedAt), desc(products.id)],
+  'price-desc': [desc(storefrontPrice), desc(products.publishedAt), desc(products.id)],
+} satisfies Record<ProductRepository.StorefrontOrder, SQL[]>;
 
 // O use case valida título, SKU e fotos antes da transação: dois cadastros ao mesmo tempo passam nos dois, e o unique
 // barra o segundo. Sem este mapa, o segundo receberia 500.
@@ -181,6 +191,115 @@ export class ProductRepository {
     return { ...row, variants: variantsByProduct.get(row.id) ?? [], media: gallery };
   }
 
+  // Página da listagem da vitrine com o total e os facets. Cada facet ignora o próprio filtro: marcar uma marca não
+  // zera as outras.
+  async findStorefrontPage(query: ProductRepository.StorefrontQuery): Promise<ProductRepository.StorefrontPage> {
+    const { order, page, limit } = query;
+
+    const [rows, [totalRow], sizeFacet, brandCounts, activeBrands] = await Promise.all([
+      this.drizzle.db
+        .select({
+          id: products.id,
+          slug: products.slug,
+          title: products.title,
+          brandName: brands.name,
+          grid: categories.grid,
+          priceInCents: storefrontPrice,
+        })
+        .from(products)
+        .innerJoin(brands, eq(brands.id, products.brandId))
+        .innerJoin(categories, eq(categories.id, products.categoryId))
+        .where(this.storefrontWhere(query))
+        .orderBy(...STOREFRONT_ORDER[order])
+        .limit(limit)
+        .offset((page - 1) * limit),
+      this.drizzle.db
+        .select({ total: count() })
+        .from(products)
+        .innerJoin(brands, eq(brands.id, products.brandId))
+        .innerJoin(categories, eq(categories.id, products.categoryId))
+        .where(this.storefrontWhere(query)),
+      this.drizzle.db
+        .select({ value: productVariants.size, count: countDistinct(products.id) })
+        .from(products)
+        .innerJoin(brands, eq(brands.id, products.brandId))
+        .innerJoin(categories, eq(categories.id, products.categoryId))
+        .innerJoin(productVariants, and(
+          eq(productVariants.productId, products.id),
+          eq(productVariants.active, true),
+          gt(productVariants.stock, 0),
+        ))
+        .where(this.storefrontWhere(query, 'sizes'))
+        .groupBy(productVariants.size),
+      this.drizzle.db
+        .select({ brandId: products.brandId, count: count() })
+        .from(products)
+        .innerJoin(brands, eq(brands.id, products.brandId))
+        .innerJoin(categories, eq(categories.id, products.categoryId))
+        .where(this.storefrontWhere(query, 'brands'))
+        .groupBy(products.brandId),
+      this.drizzle.db.select({ id: brands.id, slug: brands.slug, name: brands.name }).from(brands).where(eq(brands.active, true)),
+    ]);
+
+    const ids = rows.map(({ id }) => id);
+    const [variantsByProduct, mediaKeysByProduct] = await Promise.all([
+      this.findVariantsByProduct(ids),
+      this.findMediaKeysByProduct(ids),
+    ]);
+    const countByBrand = new Map(brandCounts.map(({ brandId, count: total }) => [brandId, total]));
+
+    return {
+      products: rows.map((row) => ({
+        ...row,
+        variants: variantsByProduct.get(row.id) ?? [],
+        mediaKeys: mediaKeysByProduct.get(row.id) ?? [],
+      })),
+      total: totalRow?.total ?? 0,
+      facets: {
+        sizes: sizeFacet,
+        brands: activeBrands.map(({ id, slug, name }) => ({ slug, name, count: countByBrand.get(id) ?? 0 })),
+      },
+    };
+  }
+
+  private storefrontWhere(
+    { categorySlugs, brandSlugs, sizes, priceAboveInCents, priceUpToInCents }: ProductRepository.StorefrontQuery,
+    ignore?: 'sizes' | 'brands',
+  ) {
+    return and(
+      storefrontVisible,
+      categorySlugs.length > 0 ? inArray(categories.slug, categorySlugs) : undefined,
+      ignore !== 'brands' && brandSlugs.length > 0 ? inArray(brands.slug, brandSlugs) : undefined,
+      ignore !== 'sizes' && sizes.length > 0
+        ? sql`exists (select 1 from ${productVariants} where ${productVariants.productId} = ${products.id} and ${productVariants.active} and ${productVariants.stock} > 0 and ${inArray(productVariants.size, sizes)})`
+        : undefined,
+      priceAboveInCents !== null ? sql`${storefrontPrice} > ${priceAboveInCents}` : undefined,
+      priceUpToInCents !== null ? sql`${storefrontPrice} <= ${priceUpToInCents}` : undefined,
+    );
+  }
+
+  // Chaves das fotos de cada produto, na ordem da galeria (a primeira é a capa).
+  private async findMediaKeysByProduct(productIds: readonly string[]): Promise<Map<string, string[]>> {
+    const byProduct = new Map<string, string[]>();
+
+    if (productIds.length === 0) {
+      return byProduct;
+    }
+
+    const rows = await this.drizzle.db
+      .select({ productId: productMedia.productId, key: media.key })
+      .from(productMedia)
+      .innerJoin(media, eq(media.id, productMedia.mediaId))
+      .where(inArray(productMedia.productId, [...productIds]))
+      .orderBy(productMedia.productId, asc(productMedia.position));
+
+    for (const { productId, key } of rows) {
+      byProduct.set(productId, [...(byProduct.get(productId) ?? []), key]);
+    }
+
+    return byProduct;
+  }
+
   private async findVariantsByProduct(productIds: readonly string[]): Promise<Map<string, Product.Variant[]>> {
     const byProduct = new Map<string, Product.Variant[]>();
 
@@ -227,5 +346,39 @@ export namespace ProductRepository {
   export type Detail = Base & {
     description: string;
     media: { id: string; key: string }[];
+  };
+
+  export type StorefrontOrder = 'newest' | 'price-asc' | 'price-desc';
+
+  export type StorefrontQuery = {
+    categorySlugs: string[];
+    brandSlugs: string[];
+    sizes: string[];
+    priceAboveInCents: number | null;
+    priceUpToInCents: number | null;
+    order: StorefrontOrder;
+    page: number;
+    limit: number;
+  };
+
+  export type StorefrontItem = {
+    id: string;
+    slug: string;
+    title: string;
+    brandName: string;
+    grid: SizeGrid;
+    priceInCents: number;
+    variants: Product.Variant[];
+    // Na ordem da galeria.
+    mediaKeys: string[];
+  };
+
+  export type StorefrontPage = {
+    products: StorefrontItem[];
+    total: number;
+    facets: {
+      sizes: { value: string; count: number }[];
+      brands: { slug: string; name: string; count: number }[];
+    };
   };
 }

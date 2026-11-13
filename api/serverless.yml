@@ -156,6 +156,9 @@ functions:
       - httpApi:
           path: /store/categories
           method: get
+      - httpApi:
+          path: /store/products
+          method: get
 
   media:
     handler: src/main/functions/media.handler
