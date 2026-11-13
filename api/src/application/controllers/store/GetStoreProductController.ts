@@ -37,9 +37,9 @@ export namespace GetStoreProductController {
     pixPriceInCents: number;
     // Na ordem da galeria: a primeira é a capa.
     imageUrls: string[];
-    // A cor que a página abre selecionada: a primeira com estoque. '' = produto sem cor.
-    defaultColor: string | null;
-    // Só as ativas, por cor e na ordem da grade.
+    // Os tamanhos das variantes ativas, na ordem da grade.
+    sizes: string[];
+    // Só as ativas, por cor e na ordem da grade. color '' = variante sem cor.
     variants: { id: string; color: string; size: string; inStock: boolean }[];
   };
 

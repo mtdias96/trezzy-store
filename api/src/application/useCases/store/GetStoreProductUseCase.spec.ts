@@ -25,7 +25,7 @@ const detail: ProductRepository.StorefrontDetail = {
   categorySlug: 'tenis',
   grid: 'num',
   priceInCents: 58_700,
-  variants: [variant('b-41', '41', 'branco', 0), variant('p-40', '40', 'preto', 2), variant('b-40', '40', 'branco', 0)],
+  variants: [variant('b-41', '41', 'branco', 0), variant('p-40', '40', 'preto', 2), variant('b-38', '38', 'branco', 0)],
   mediaKeys: ['uploads/a.webp', 'uploads/b.webp'],
 };
 
@@ -40,7 +40,7 @@ function makeSut(product: ProductRepository.StorefrontDetail | null) {
 }
 
 describe('GetStoreProductUseCase', () => {
-  it('returns the gallery, the pricing and the variants by color in grid order, without the stock count', async () => {
+  it('returns the gallery, the pricing, the sizes in grid order and the variants by color, without the stock count', async () => {
     const sut = makeSut(detail);
 
     await expect(sut.execute({ slug: 'old-skool' })).resolves.toEqual({
@@ -54,9 +54,9 @@ describe('GetStoreProductUseCase', () => {
       installments: { count: 10, valueInCents: 5_870 },
       pixPriceInCents: 52_830,
       imageUrls: ['https://cdn.test/uploads/a.webp', 'https://cdn.test/uploads/b.webp'],
-      defaultColor: 'preto',
+      sizes: ['38', '40', '41'],
       variants: [
-        { id: 'b-40', color: 'branco', size: '40', inStock: false },
+        { id: 'b-38', color: 'branco', size: '38', inStock: false },
         { id: 'b-41', color: 'branco', size: '41', inStock: false },
         { id: 'p-40', color: 'preto', size: '40', inStock: true },
       ],

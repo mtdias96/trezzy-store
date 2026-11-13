@@ -16,7 +16,7 @@ const product: GetStoreProductUseCase.Output = {
   installments: { count: 10, valueInCents: 5_870 },
   pixPriceInCents: 52_830,
   imageUrls: [],
-  defaultColor: '',
+  sizes: ['40'],
   variants: [{ id: 'v-1', color: '', size: '40', inStock: true }],
 };
 

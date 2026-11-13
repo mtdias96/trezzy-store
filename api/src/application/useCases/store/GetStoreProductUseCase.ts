@@ -1,6 +1,6 @@
 import { Injectable } from '@kernel/decorators/Injectable';
 import { sortVariants } from '@application/entities/sizeGrids';
-import { defaultColor, type Storefront, storePricing } from '@application/entities/storefront';
+import { compareSizes, type Storefront, storePricing } from '@application/entities/storefront';
 import { ApplicationError } from '@application/errors/ApplicationError';
 import { ErrorCode } from '@application/errors/ErrorCode';
 import { ProductRepository } from '@infra/database/repositories/ProductRepository';
@@ -23,6 +23,7 @@ export class GetStoreProductUseCase {
 
     const { id, slug, title, description, brandName, categorySlug, grid, priceInCents, variants, mediaKeys } = product;
     const imageUrls = mediaKeys.map((key) => this.mediaStorageGateway.getPublicUrl(key));
+    const sizes = [...new Set(variants.map(({ size }) => size))].sort(compareSizes);
     const storeVariants = sortVariants(grid, variants).map(({ id: variantId, color, size, stock }) => ({
       id: variantId,
       color,
@@ -40,7 +41,7 @@ export class GetStoreProductUseCase {
       priceInCents,
       ...storePricing(priceInCents),
       imageUrls,
-      defaultColor: defaultColor(grid, variants),
+      sizes,
       variants: storeVariants,
     };
   }
@@ -60,7 +61,7 @@ export namespace GetStoreProductUseCase {
     categorySlug: string;
     priceInCents: number;
     imageUrls: string[];
-    defaultColor: string | null;
+    sizes: string[];
     variants: { id: string; color: string; size: string; inStock: boolean }[];
   };
 }
