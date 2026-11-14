@@ -31,6 +31,16 @@ export namespace GetProductController {
     status: 'draft' | 'active' | 'inactive' | 'archived';
     brandId: string;
     categoryId: string;
+    // Nome comercial da cor no seletor da loja.
+    colorName: string | null;
+    // As outras cores do mesmo modelo, sem o próprio produto.
+    colorways: {
+      id: string;
+      title: string;
+      colorName: string | null;
+      status: 'draft' | 'active' | 'inactive' | 'archived';
+      coverUrl: string | null;
+    }[];
     variants: VariantResponse[];
     media: { id: string; url: string }[];
     updatedAt: string;

@@ -17,7 +17,7 @@ export class CreateProductController extends Controller<'private', CreateProduct
   protected override async handle({
     body,
   }: Controller.Request<'private', CreateProductBody>): Promise<Controller.Response<CreateProductController.Response>> {
-    const { title, description, status, brandId, categoryId, variants, mediaIds } = body;
+    const { title, description, status, brandId, categoryId, colorName, familyOf, variants, mediaIds } = body;
 
     const { id } = await this.createProductUseCase.execute({
       title,
@@ -25,6 +25,8 @@ export class CreateProductController extends Controller<'private', CreateProduct
       status,
       brandId,
       categoryId,
+      colorName,
+      familyOf,
       variants: variants.map(({ size, color, sku, priceInCents, stock, active }) => ({
         size,
         color,

@@ -55,9 +55,19 @@ describe('CreateProductController', () => {
       status: 'draft',
       brandId: BRAND_ID,
       categoryId: CATEGORY_ID,
+      colorName: null,
+      familyOf: null,
       variants: [{ size: 'M', color: 'preto', sku: 'CAM-M-PT', priceInCents: 18990, stock: 0, active: true }],
       mediaIds: [],
     });
+  });
+
+  it('passes the color name trimmed and the model to link, with its id in lowercase', async () => {
+    const { sut, createProductUseCase } = makeSut();
+
+    await sut.execute(request({ ...body, colorName: ' Reflective Black ', familyOf: MEDIA_ID_1.toUpperCase() }));
+
+    expect(createProductUseCase.execute.mock.calls[0]![0]).toMatchObject({ colorName: 'Reflective Black', familyOf: MEDIA_ID_1 });
   });
 
   it('passes the photos in the order they were sent', async () => {

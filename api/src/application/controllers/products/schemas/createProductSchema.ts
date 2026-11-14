@@ -5,6 +5,9 @@ import { PRODUCT_MAX_MEDIA } from '@application/entities/Product';
 
 const PG_INTEGER_MAX = 2_147_483_647;
 
+// Nome comercial da cor no seletor da loja ("Reflective Black").
+export const colorNameSchema = z.string().trim().min(1).max(60).nullable().default(null);
+
 // Normaliza antes de validar: os checks de `product_variants` recusam outro formato com 500.
 const variantSchema = z.object({
   size: z.string().trim().toUpperCase().min(1).max(10),
@@ -34,6 +37,9 @@ export const createProductSchema = z.object({
   status: z.enum(['draft', 'active']).default('draft'),
   brandId: z.uuid(),
   categoryId: z.uuid(),
+  colorName: colorNameSchema,
+  // Um produto da mesma marca e categoria: o novo entra na família de cores dele.
+  familyOf: z.uuid().transform((productId) => productId.toLowerCase()).nullable().default(null),
   variants: z
     .array(variantSchema)
     .min(1)

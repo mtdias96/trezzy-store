@@ -2,9 +2,11 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { Product } from '@application/entities/Product';
 import { ValidationError } from '@application/errors/ValidationError';
+import type { DrizzleClient } from '@infra/database/drizzle/DrizzleClient';
 import type { BrandRepository } from '@infra/database/repositories/BrandRepository';
 import type { CategoryRepository } from '@infra/database/repositories/CategoryRepository';
 import type { MediaRepository } from '@infra/database/repositories/MediaRepository';
+import type { ProductFamilyRepository } from '@infra/database/repositories/ProductFamilyRepository';
 import type { ProductRepository } from '@infra/database/repositories/ProductRepository';
 
 import { CreateProductUseCase } from './CreateProductUseCase';
@@ -15,6 +17,8 @@ const input: CreateProductUseCase.Input = {
   status: 'active',
   brandId: 'brand-1',
   categoryId: 'category-1',
+  colorName: null,
+  familyOf: null,
   variants: [
     { size: 'M', color: 'preto', sku: 'CAM-M-PT', priceInCents: 18990, stock: 10, active: true },
     { size: 'G', color: 'preto', sku: 'CAM-G-PT', priceInCents: 18990, stock: 0, active: true },
@@ -30,7 +34,13 @@ function makeSut() {
     findSlugsStartingWith: vi.fn<ProductRepository['findSlugsStartingWith']>().mockResolvedValue([]),
     existsWithTitle: vi.fn<ProductRepository['existsWithTitle']>().mockResolvedValue(false),
     create: vi.fn<ProductRepository['create']>().mockResolvedValue(),
+    findColorway: vi.fn<ProductRepository['findColorway']>().mockResolvedValue(null),
+    findFamilyMembers: vi.fn<ProductRepository['findFamilyMembers']>().mockResolvedValue([]),
+    setColorway: vi.fn<ProductRepository['setColorway']>().mockResolvedValue(),
   };
+  const productFamilyRepository = { create: vi.fn<ProductFamilyRepository['create']>().mockResolvedValue() };
+  const tx = {} as DrizzleClient.Transaction;
+  const drizzle = { transaction: vi.fn((callback: (transaction: DrizzleClient.Transaction) => Promise<void>) => callback(tx)) };
   const brandRepository = {
     findById: vi.fn<BrandRepository['findById']>().mockResolvedValue({ id: 'brand-1' }),
   };
@@ -45,9 +55,11 @@ function makeSut() {
     brandRepository as unknown as BrandRepository,
     categoryRepository as unknown as CategoryRepository,
     mediaRepository as unknown as MediaRepository,
+    productFamilyRepository as unknown as ProductFamilyRepository,
+    drizzle as unknown as DrizzleClient,
   );
 
-  return { sut, productRepository, brandRepository, categoryRepository, mediaRepository };
+  return { sut, productRepository, brandRepository, categoryRepository, mediaRepository, productFamilyRepository, tx };
 }
 
 describe('CreateProductUseCase', () => {
@@ -175,5 +187,53 @@ describe('CreateProductUseCase', () => {
     expect(error).toBeInstanceOf(ValidationError);
     expect((error as ValidationError).issues.map(({ field }) => field)).toEqual(['mediaIds']);
     expect(productRepository.create).not.toHaveBeenCalled();
+  });
+
+  describe('another color of a model', () => {
+    const origin = { id: 'p-grey', brandId: 'brand-1', categoryId: 'category-1', familyId: null, colorName: '2 Tone Grey' };
+    const linked = { ...input, colorName: 'Reflective Black', familyOf: 'p-grey' };
+
+    it('creates the family with the origin product, in the same transaction as the new one', async () => {
+      const { sut, productRepository, productFamilyRepository, tx } = makeSut();
+      productRepository.findColorway.mockResolvedValue(origin);
+
+      await sut.execute(linked);
+
+      const [product, createTx] = productRepository.create.mock.calls[0]!;
+      const [familyId] = productFamilyRepository.create.mock.calls[0]!;
+      expect(product).toMatchObject({ familyId, colorName: 'Reflective Black' });
+      expect(createTx).toBe(tx);
+      expect(productRepository.setColorway).toHaveBeenCalledWith('p-grey', { familyId, colorName: '2 Tone Grey' }, tx);
+    });
+
+    it('joins the family the origin product already has', async () => {
+      const { sut, productRepository, productFamilyRepository } = makeSut();
+      productRepository.findColorway.mockResolvedValue({ ...origin, familyId: 'family-1' });
+      productRepository.findFamilyMembers.mockResolvedValue([
+        { id: 'p-grey', title: 'Old Skool', colorName: '2 Tone Grey', status: 'active', coverKey: null },
+      ]);
+
+      await sut.execute(linked);
+
+      expect(productRepository.create.mock.calls[0]![0].familyId).toBe('family-1');
+      expect(productFamilyRepository.create).not.toHaveBeenCalled();
+      expect(productRepository.setColorway).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['a product of another category', { ...origin, categoryId: 'category-2' }, linked, 'familyOf'],
+      ['an origin without a color name', { ...origin, colorName: null }, linked, 'familyOf'],
+      ['a missing color name', origin, { ...linked, colorName: null }, 'colorName'],
+      ['the color name of the origin', origin, { ...linked, colorName: '2 tone grey' }, 'colorName'],
+    ])('rejects %s before writing anything', async (_case, found, request, field) => {
+      const { sut, productRepository } = makeSut();
+      productRepository.findColorway.mockResolvedValue(found);
+
+      const error = await sut.execute(request).catch((caught: unknown) => caught);
+
+      expect(error).toBeInstanceOf(ValidationError);
+      expect((error as ValidationError).issues.map((issue) => issue.field)).toEqual([field]);
+      expect(productRepository.create).not.toHaveBeenCalled();
+    });
   });
 });

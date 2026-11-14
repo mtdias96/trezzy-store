@@ -13,6 +13,8 @@ const input: Product.CreateInput = {
   status: 'draft',
   brandId: 'brand-1',
   category: { id: 'category-1', slug: 'camisetas', grid: 'apparel' },
+  familyId: null,
+  colorName: null,
   variants: [variant],
   mediaIds: [],
 };

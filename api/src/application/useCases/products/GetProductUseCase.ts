@@ -20,7 +20,11 @@ export class GetProductUseCase {
       throw new ApplicationError(ErrorCode.NOT_FOUND, 'Product not found.');
     }
 
-    const { id, title, description, status, brandId, categoryId, grid, variants, media, updatedAt } = product;
+    const { id, title, description, status, brandId, categoryId, grid, familyId, colorName, variants, media, updatedAt } = product;
+    const members = familyId ? await this.productRepository.findFamilyMembers(familyId) : [];
+    const colorways = members
+      .filter((member) => member.id !== id)
+      .map(({ coverKey, ...member }) => ({ ...member, coverUrl: coverKey ? this.mediaStorageGateway.getPublicUrl(coverKey) : null }));
 
     return {
       id,
@@ -29,6 +33,8 @@ export class GetProductUseCase {
       status,
       brandId,
       categoryId,
+      colorName,
+      colorways,
       variants: sortVariants(grid, variants),
       media: media.map(({ id: mediaId, key }) => ({ id: mediaId, url: this.mediaStorageGateway.getPublicUrl(key) })),
       updatedAt,
@@ -48,8 +54,19 @@ export namespace GetProductUseCase {
     status: Product.Status;
     brandId: string;
     categoryId: string;
+    colorName: string | null;
+    // As outras cores da família, sem o próprio produto.
+    colorways: Colorway[];
     variants: Product.Variant[];
     media: { id: string; url: string }[];
     updatedAt: Date;
+  };
+
+  export type Colorway = {
+    id: string;
+    title: string;
+    colorName: string | null;
+    status: Product.Status;
+    coverUrl: string | null;
   };
 }

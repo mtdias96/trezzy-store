@@ -16,6 +16,9 @@ export class Product {
   readonly brandId: string;
   readonly categoryId: string;
   readonly publishedAt: Date | null;
+  // Cores do mesmo modelo (ADR-018). null: produto sem outras cores.
+  readonly familyId: string | null;
+  readonly colorName: string | null;
   readonly variants: readonly Product.Variant[];
   // Ids de `media` na ordem da galeria: o primeiro é a capa.
   readonly mediaIds: readonly string[];
@@ -30,6 +33,8 @@ export class Product {
     this.brandId = attr.brandId;
     this.categoryId = attr.categoryId;
     this.publishedAt = attr.publishedAt;
+    this.familyId = attr.familyId;
+    this.colorName = attr.colorName;
     this.variants = attr.variants;
     this.mediaIds = attr.mediaIds;
   }
@@ -94,6 +99,8 @@ export namespace Product {
     brandId: string;
     categoryId: string;
     publishedAt: Date | null;
+    familyId: string | null;
+    colorName: string | null;
     variants: readonly Variant[];
     mediaIds: readonly string[];
   };
@@ -105,6 +112,8 @@ export namespace Product {
     status: 'draft' | 'active';
     brandId: string;
     category: { id: string; slug: string; grid: SizeGrid };
+    familyId: string | null;
+    colorName: string | null;
     variants: readonly (Omit<Variant, 'id' | 'sku'> & { sku?: string })[];
     mediaIds: readonly string[];
   };

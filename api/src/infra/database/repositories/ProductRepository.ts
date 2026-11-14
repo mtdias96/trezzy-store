@@ -1,6 +1,7 @@
 import { and, asc, count, countDistinct, desc, eq, gt, inArray, like, ne, or, type SQL, sql } from 'drizzle-orm';
 
 import { Injectable } from '@kernel/decorators/Injectable';
+import type { ColorwayProduct } from '@application/entities/colorway';
 import type { Product } from '@application/entities/Product';
 import type { SizeGrid } from '@application/entities/sizeGrids';
 import { ApplicationError } from '@application/errors/ApplicationError';
@@ -26,7 +27,14 @@ const CONCURRENT_CONFLICTS = [
   { name: 'products_slug_unique', message: 'A product with this title was just created.' },
   { name: 'product_variants_sku_unique', message: 'SKU already in use.' },
   { name: 'product_media_pkey', message: 'A photo is already in use by another product.' },
+  { name: 'products_family_color_unique', message: 'Another color of this model already has this name.' },
 ] as const;
+
+function toConflict(error: unknown): unknown {
+  const constraint = CONCURRENT_CONFLICTS.find(({ name }) => isUniqueViolation(error, name));
+
+  return constraint ? new ApplicationError(ErrorCode.CONFLICT, constraint.message) : error;
+}
 
 @Injectable()
 export class ProductRepository {
@@ -87,6 +95,8 @@ export class ProductRepository {
         brandId: product.brandId,
         categoryId: product.categoryId,
         publishedAt: product.publishedAt,
+        familyId: product.familyId,
+        colorName: product.colorName,
       });
 
       if (product.variants.length > 0) {
@@ -110,13 +120,44 @@ export class ProductRepository {
         );
       }
     } catch (error) {
-      const constraint = CONCURRENT_CONFLICTS.find(({ name }) => isUniqueViolation(error, name));
+      throw toConflict(error);
+    }
+  }
 
-      if (constraint) {
-        throw new ApplicationError(ErrorCode.CONFLICT, constraint.message);
-      }
+  async findColorway(id: string): Promise<ColorwayProduct | null> {
+    const [row] = await this.drizzle.db
+      .select({
+        id: products.id,
+        brandId: products.brandId,
+        categoryId: products.categoryId,
+        familyId: products.familyId,
+        colorName: products.colorName,
+      })
+      .from(products)
+      .where(eq(products.id, id))
+      .limit(1);
 
-      throw error;
+    return row ?? null;
+  }
+
+  // As cores da família, com a capa, em ordem alfabética do nome da cor.
+  async findFamilyMembers(familyId: string): Promise<ProductRepository.FamilyMember[]> {
+    const rows = await this.drizzle.db
+      .select({ id: products.id, title: products.title, colorName: products.colorName, status: products.status })
+      .from(products)
+      .where(eq(products.familyId, familyId));
+    const covers = await this.findMediaKeysByProduct(rows.map(({ id }) => id));
+
+    return rows
+      .map((row) => ({ ...row, coverKey: covers.get(row.id)?.[0] ?? null }))
+      .sort((a, b) => (a.colorName ?? '').localeCompare(b.colorName ?? '', 'pt-BR'));
+  }
+
+  async setColorway(id: string, { familyId, colorName }: ProductRepository.Colorway, tx: DrizzleClient.Transaction): Promise<void> {
+    try {
+      await tx.update(products).set({ familyId, colorName, updatedAt: new Date() }).where(eq(products.id, id));
+    } catch (error) {
+      throw toConflict(error);
     }
   }
 
@@ -167,6 +208,8 @@ export class ProductRepository {
         brandId: products.brandId,
         categoryId: products.categoryId,
         grid: categories.grid,
+        familyId: products.familyId,
+        colorName: products.colorName,
         updatedAt: products.updatedAt,
       })
       .from(products)
@@ -380,7 +423,22 @@ export namespace ProductRepository {
 
   export type Detail = Base & {
     description: string;
+    familyId: string | null;
+    colorName: string | null;
     media: { id: string; key: string }[];
+  };
+
+  export type FamilyMember = {
+    id: string;
+    title: string;
+    colorName: string | null;
+    status: Product.Status;
+    coverKey: string | null;
+  };
+
+  export type Colorway = {
+    familyId: string | null;
+    colorName: string | null;
   };
 
   export type StorefrontOrder = 'newest' | 'price-asc' | 'price-desc';

@@ -124,6 +124,13 @@ functions:
             name: cognito
             scopes:
               - trezzy/admin
+      - httpApi:
+          path: /admin/products/{id}/colorway
+          method: put
+          authorizer:
+            name: cognito
+            scopes:
+              - trezzy/admin
 
   brands:
     handler: src/main/functions/brands.handler

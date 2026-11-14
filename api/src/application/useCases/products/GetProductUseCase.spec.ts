@@ -26,13 +26,18 @@ const detail: ProductRepository.Detail = {
   brandId: 'brand-1',
   categoryId: 'category-1',
   grid: 'num',
+  familyId: null,
+  colorName: null,
   updatedAt: new Date('2026-11-12T12:00:00Z'),
   variants: [variant('42'), variant('38')],
   media: [{ id: 'm-cover', key: 'uploads/m-cover.webp' }, { id: 'm-2', key: 'uploads/m-2.jpg' }],
 };
 
 function makeSut(product: ProductRepository.Detail | null) {
-  const productRepository = { findDetailById: vi.fn<ProductRepository['findDetailById']>().mockResolvedValue(product) };
+  const productRepository = {
+    findDetailById: vi.fn<ProductRepository['findDetailById']>().mockResolvedValue(product),
+    findFamilyMembers: vi.fn<ProductRepository['findFamilyMembers']>().mockResolvedValue([]),
+  };
   const mediaStorageGateway = {
     getPublicUrl: vi.fn<MediaStorageGateway['getPublicUrl']>((key) => `https://cdn.test/${key}`),
   };
@@ -45,6 +50,21 @@ function makeSut(product: ProductRepository.Detail | null) {
 }
 
 describe('GetProductUseCase', () => {
+  it('lists the other colors of the family with their cover, without the product itself', async () => {
+    const { sut, productRepository } = makeSut({ ...detail, familyId: 'family-1', colorName: 'Reflective Black' });
+    productRepository.findFamilyMembers.mockResolvedValue([
+      { id: 'p-grey', title: 'Old Skool Grey', colorName: '2 Tone Grey', status: 'active', coverKey: 'uploads/grey.webp' },
+      { id: 'p-1', title: 'Tênis Dunk Low', colorName: 'Reflective Black', status: 'active', coverKey: null },
+    ]);
+
+    const product = await sut.execute({ productId: 'p-1' });
+
+    expect(product.colorName).toBe('Reflective Black');
+    expect(product.colorways).toEqual([
+      { id: 'p-grey', title: 'Old Skool Grey', colorName: '2 Tone Grey', status: 'active', coverUrl: 'https://cdn.test/uploads/grey.webp' },
+    ]);
+  });
+
   it('returns the gallery in order with CDN URLs and the variants sorted by the grid', async () => {
     const { sut, productRepository } = makeSut(detail);
 
