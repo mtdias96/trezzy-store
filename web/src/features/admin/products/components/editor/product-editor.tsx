@@ -17,6 +17,7 @@ type ProductEditorProps = {
   categories: readonly SelectOption[];
   media: ReactNode;
   variants: ReactNode;
+  colorway: ReactNode;
   summary: VariantSummary;
   imageCount: number;
   hasUnsavedChanges: boolean;
@@ -26,13 +27,14 @@ type ProductEditorProps = {
 };
 
 // Mesma tela para cadastrar e editar: sem `product`, é um cadastro novo. Os campos leem o formulário do container;
-// mídia e variantes entram por slot, porque são contextos próprios.
+// mídia, variantes e cores entram por slot, porque são contextos próprios.
 export function ProductEditor({
   product,
   brands,
   categories,
   media,
   variants,
+  colorway,
   summary,
   imageCount,
   hasUnsavedChanges,
@@ -64,6 +66,7 @@ export function ProductEditor({
         <>
           <ProductStatusField hint={product ? undefined : 'Será publicado na loja assim que você salvar.'} />
           <ProductOrganizationFields brands={brands} categories={categories} />
+          {colorway}
           <ProductPriceField />
           <ProductSummary summary={summary} imageCount={imageCount} />
         </>

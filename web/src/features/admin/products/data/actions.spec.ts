@@ -3,11 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HttpError } from '@/lib/http';
 
-import { createProduct, finishMediaUpload, startMediaUpload } from './actions';
-import { confirmMediaUpload, createMediaUpload, createProduct as createProductRequest } from './api';
+import { createProduct, finishMediaUpload, setColorway, startMediaUpload } from './actions';
+import { confirmMediaUpload, createMediaUpload, createProduct as createProductRequest, setProductColorway } from './api';
 
 vi.mock('@/config/env', () => ({ env: { API_URL: 'https://api.test' } }));
-vi.mock('./api', () => ({ createMediaUpload: vi.fn(), confirmMediaUpload: vi.fn(), createProduct: vi.fn() }));
+vi.mock('./api', () => ({ createMediaUpload: vi.fn(), confirmMediaUpload: vi.fn(), createProduct: vi.fn(), setProductColorway: vi.fn() }));
 vi.mock('next/cache', () => ({ revalidateTag: vi.fn() }));
 vi.mock('@/features/shared/auth/session/session', () => ({ requireAdminSession: vi.fn() }));
 
@@ -56,6 +56,8 @@ describe('createProduct', () => {
     status: 'active',
     brandId: '0d9c3c8e-2f1a-4b6e-9a7d-1c2b3a4d5e6f',
     categoryId: '7a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d',
+    colorName: null,
+    familyOf: null,
     variants: [{ size: 'P', color: 'preto', priceInCents: 15990, stock: 2, active: true }],
     mediaIds: ['3f2b8c1d-4e5a-4b6c-9d7e-8f9a0b1c2d3e'],
   };
@@ -140,5 +142,43 @@ describe('createProduct', () => {
       ok: false,
       error: 'Não foi possível salvar agora. Tente de novo em instantes.',
     });
+  });
+});
+
+describe('setColorway', () => {
+  const PRODUCT_ID = '8f2e6a55-053c-4dff-bad6-6273abf947c5';
+  const MODEL_ID = 'c185e409-c8b4-4a67-8631-fbec13410d30';
+
+  beforeEach(() => {
+    vi.mocked(setProductColorway).mockReset();
+    vi.mocked(revalidateTag).mockReset();
+  });
+
+  it('links the colors and invalidates the storefront catalog, where each color page lists the others', async () => {
+    vi.mocked(setProductColorway).mockResolvedValue();
+
+    await expect(setColorway(PRODUCT_ID, { colorName: 'Reflective Black', familyOf: MODEL_ID })).resolves.toEqual({ ok: true, data: undefined });
+    expect(setProductColorway).toHaveBeenCalledWith(PRODUCT_ID, { colorName: 'Reflective Black', familyOf: MODEL_ID });
+    expect(revalidateTag).toHaveBeenCalledWith('catalog', 'max');
+  });
+
+  it('asks for the color name before calling the API', async () => {
+    await expect(setColorway(PRODUCT_ID, { colorName: null, familyOf: MODEL_ID })).resolves.toMatchObject({
+      ok: false,
+      fieldErrors: { colorName: [expect.stringContaining('nome da cor')] },
+    });
+    expect(setProductColorway).not.toHaveBeenCalled();
+  });
+
+  it('translates the API refusal to the same field', async () => {
+    vi.mocked(setProductColorway).mockRejectedValue(new HttpError(400, {
+      error: { code: 'VALIDATION', message: [{ field: 'familyOf', error: 'Must be a product of the same brand and category.' }] },
+    }));
+
+    await expect(setColorway(PRODUCT_ID, { colorName: 'Black', familyOf: MODEL_ID })).resolves.toMatchObject({
+      ok: false,
+      fieldErrors: { familyOf: ['Escolha um produto da mesma marca e categoria.'] },
+    });
+    expect(revalidateTag).not.toHaveBeenCalled();
   });
 });

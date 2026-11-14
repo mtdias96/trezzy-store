@@ -1,31 +1,43 @@
 'use client';
 
-import { startTransition, useActionState, useEffect, useRef, useState } from 'react';
+import { startTransition, useActionState, useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { ProductColorwayFields } from '@/features/admin/products/components/colorway/product-colorway-fields';
 import { ProductEditor } from '@/features/admin/products/components/editor/product-editor';
 import { ProductMedia } from '@/features/admin/products/components/media/product-media';
 import { ProductVariantsFields } from '@/features/admin/products/components/variants/product-variants-fields';
-import { createProduct } from '@/features/admin/products/data/actions';
+import { createProduct, setColorway } from '@/features/admin/products/data/actions';
 import { uploadProductImage } from '@/features/admin/products/data/upload';
 import { useMediaUploads } from '@/features/admin/products/hooks/use-media-uploads';
+import { colorCopyDefaults } from '@/features/admin/products/model/colorway';
 import type { MediaItem } from '@/features/admin/products/model/media';
 import {
   type ProductCreateInput,
   type ProductFormInput,
   productFormSchema,
   type ProductFormValues,
+  toColorwayInput,
   toProductCreateInput,
 } from '@/features/admin/products/model/schema';
-import type { CategoryOption, ProductDetail, ProductMediaFile, SelectOption } from '@/features/admin/products/model/types';
+import type {
+  CategoryOption,
+  ColorwayCandidate,
+  ProductDetail,
+  ProductMediaFile,
+  SelectOption,
+} from '@/features/admin/products/model/types';
 import { SIZES_BY_GRID, summarizeVariants, variantsOutsideGrid } from '@/features/admin/products/model/variants';
 import type { ActionResult } from '@/lib/action-result';
 import { applyFieldErrors, Form, useForm, useWatch, zodResolver } from '@/lib/form';
 
 type ProductFormContainerProps = {
   product?: ProductDetail;
+  // "Cadastrar outra cor": o cadastro novo abre preenchido com o produto de origem e já ligado a ele.
+  modelOf?: ProductDetail;
   brands: readonly SelectOption[];
   categories: readonly CategoryOption[];
+  colorwayCandidates: readonly ColorwayCandidate[];
 };
 
 function toMediaItem({ id, url }: ProductMediaFile): MediaItem {
@@ -41,6 +53,9 @@ function toFormDefaults(product?: ProductDetail): ProductFormInput {
     active: product ? product.status === 'active' : true,
     brandId: product?.brandId ?? '',
     categoryId: product?.categoryId ?? '',
+    colorName: product?.colorName ?? '',
+    // Qualquer cor da família serve: ligar a ela mantém o produto onde está.
+    familyOf: product?.colorways[0]?.id ?? '',
     basePriceInCents: prices.length > 0 ? Math.min(...prices) : 0,
     variants: product?.variants.map(({ size, color, sku, priceInCents, stock, active }) => ({
       size,
@@ -77,11 +92,13 @@ function mediaErrors(
   });
 }
 
-export function ProductFormContainer({ product, brands, categories }: ProductFormContainerProps) {
+export function ProductFormContainer({ product, modelOf, brands, categories, colorwayCandidates }: ProductFormContainerProps) {
   const form = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: toFormDefaults(product),
+    defaultValues: !product && modelOf ? colorCopyDefaults(modelOf) : toFormDefaults(product),
   });
+  const [colorwayResult, setColorwayResult] = useState<ActionResult | null>(null);
+  const [isSavingColorway, startColorwaySave] = useTransition();
   const { items, rejections, addFiles, remove, reorder, clear } = useMediaUploads(
     uploadProductImage,
     (product?.media ?? []).map(toMediaItem),
@@ -158,6 +175,29 @@ export function ProductFormContainer({ product, brands, categories }: ProductFor
 
   const isSaveBlocked = saveBlockedReason !== undefined || isSaving;
 
+  function saveColorway(productId: string) {
+    startColorwaySave(async () => {
+      if (!(await form.trigger(['colorName', 'familyOf']))) {
+        return;
+      }
+
+      const values = form.getValues();
+      const result = await setColorway(productId, toColorwayInput(values));
+
+      setColorwayResult(result);
+
+      if (result.ok) {
+        form.resetField('colorName', { defaultValue: values.colorName });
+        form.resetField('familyOf', { defaultValue: values.familyOf });
+        router.refresh();
+
+        return;
+      }
+
+      applyFieldErrors(form.setError, result.fieldErrors ?? {});
+    });
+  }
+
   // O botão anuncia ⌘S: o atalho salva com os mesmos bloqueios do botão, e não abre o "Salvar página" do navegador.
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -194,7 +234,21 @@ export function ProductFormContainer({ product, brands, categories }: ProductFor
               errors={failure ? mediaErrors(failure.fieldErrors ?? {}, sentMediaIds, items) : []}
             />
           )}
-          variants={<ProductVariantsFields categories={categories} defaultSizeGrid={product?.sizeGrid ?? 'one'} />}
+          variants={<ProductVariantsFields categories={categories} defaultSizeGrid={product?.sizeGrid ?? modelOf?.sizeGrid ?? 'one'} />}
+          colorway={(
+            <ProductColorwayFields
+              candidates={colorwayCandidates}
+              editing={product
+                ? {
+                    productId: product.id,
+                    colorways: product.colorways,
+                    isSaving: isSavingColorway,
+                    error: colorwayResult && !colorwayResult.ok ? colorwayResult.error : undefined,
+                    onSave: () => saveColorway(product.id),
+                  }
+                : undefined}
+            />
+          )}
           summary={summarizeVariants(variants)}
           imageCount={items.filter(({ status }) => status === 'done').length}
           hasUnsavedChanges={form.formState.isDirty}

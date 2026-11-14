@@ -3,6 +3,7 @@ import 'server-only';
 import { toProductListItem } from '@/features/admin/products/model/list';
 import type {
   CategoryOption,
+  ColorwayCandidate,
   ProductDetail,
   ProductListItem,
   SelectOption,
@@ -42,4 +43,10 @@ export async function getProduct(id: string): Promise<ProductDetail | null> {
   }
 
   return { ...product, sizeGrid: categories.find(({ value }) => value === product.categoryId)?.grid ?? 'one' };
+}
+
+export async function listColorwayCandidates(): Promise<ColorwayCandidate[]> {
+  await requireAdminSession();
+
+  return (await fetchProducts()).map(({ id, title, colorName, brandId, categoryId }) => ({ id, title, colorName, brandId, categoryId }));
 }

@@ -28,12 +28,20 @@ const skuSchema = z
   .max(64, 'Use até 64 caracteres.')
   .regex(/^([A-Z0-9]+(-[A-Z0-9]+)*)?$/, 'Use letras, números e hífens.');
 
+const colorNameSchema = z.string().trim().max(60, 'Use até 60 caracteres.');
+const COLOR_NAME_REQUIRED = 'Informe o nome da cor: ele aparece no seletor da loja.';
+
+const namedWhenLinked = ({ colorName, familyOf }: { colorName: string; familyOf: string }) => familyOf === '' || colorName !== '';
+
 export const productFormSchema = z.object({
   title: z.string().trim().min(1, 'Informe o título.').max(120, 'Use até 120 caracteres.').refine(hasLetterOrNumber, TITLE_NEEDS_TEXT),
   description: z.string().trim().max(5000, 'Use até 5.000 caracteres.'),
   active: z.boolean(),
   brandId: z.string().min(1, 'Escolha a marca.'),
   categoryId: z.string().min(1, 'Escolha a categoria.'),
+  colorName: colorNameSchema,
+  // Id de um produto da mesma marca e categoria, ou '' para produto sem outras cores.
+  familyOf: z.string(),
   basePriceInCents: z.number().int().nonnegative(),
   variants: z
     .array(z.object({
@@ -46,7 +54,7 @@ export const productFormSchema = z.object({
     }))
     .min(1, 'Gere pelo menos uma variante.')
     .max(100, 'Use até 100 variantes.'),
-});
+}).refine(namedWhenLinked, { path: ['colorName'], message: COLOR_NAME_REQUIRED });
 
 export type ProductFormInput = z.input<typeof productFormSchema>;
 export type ProductFormValues = z.output<typeof productFormSchema>;
@@ -59,6 +67,8 @@ export const productCreateSchema = z
     status: z.enum(['draft', 'active']),
     brandId: z.uuid('Escolha a marca.'),
     categoryId: z.uuid('Escolha a categoria.'),
+    colorName: colorNameSchema.min(1).nullable(),
+    familyOf: z.uuid().nullable(),
     variants: z
       .array(z.object({
         size: z.string().min(1).max(10),
@@ -75,7 +85,8 @@ export const productCreateSchema = z
   .refine(({ status, mediaIds }) => status !== 'active' || mediaIds.length > 0, {
     path: ['mediaIds'],
     message: 'Produto ativo precisa de pelo menos uma foto.',
-  });
+  })
+  .refine(({ colorName, familyOf }) => familyOf === null || colorName !== null, { path: ['colorName'], message: COLOR_NAME_REQUIRED });
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
 
@@ -86,6 +97,8 @@ export function toProductCreateInput(values: ProductFormValues, mediaIds: readon
     status: values.active ? 'active' : 'draft',
     brandId: values.brandId,
     categoryId: values.categoryId,
+    colorName: values.colorName === '' ? null : values.colorName,
+    familyOf: values.familyOf === '' ? null : values.familyOf,
     variants: values.variants.map(({ size, color, sku, priceInCents, stock, active }) => ({
       size,
       color,
@@ -96,4 +109,19 @@ export function toProductCreateInput(values: ProductFormValues, mediaIds: readon
     })),
     mediaIds: [...mediaIds],
   };
+}
+
+// O corpo do PUT /admin/products/{id}/colorway.
+export const colorwaySchema = z
+  .object({
+    colorName: colorNameSchema.min(1).nullable(),
+    // null: o produto sai da família (ou continua sem uma).
+    familyOf: z.uuid().nullable(),
+  })
+  .refine(({ colorName, familyOf }) => familyOf === null || colorName !== null, { path: ['colorName'], message: COLOR_NAME_REQUIRED });
+
+export type ColorwayInput = z.infer<typeof colorwaySchema>;
+
+export function toColorwayInput({ colorName, familyOf }: Pick<ProductFormValues, 'colorName' | 'familyOf'>): ColorwayInput {
+  return { colorName: colorName === '' ? null : colorName, familyOf: familyOf === '' ? null : familyOf };
 }

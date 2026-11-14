@@ -20,6 +20,8 @@ const summary = {
   status: 'active',
   brandId: 'b1',
   categoryId: 'c1',
+  familyId: null,
+  colorName: null,
   coverUrl: null,
   variants: [variant],
   updatedAt: '2026-10-26T21:30:00-03:00',
@@ -44,11 +46,18 @@ describe('catalog API contract', () => {
   });
 
   it('reads one product, with description and gallery', async () => {
-    const product = { ...summary, coverUrl: undefined, description: '<p>Moletom</p>', media: [{ id: 'm1', url: 'https://cdn.trezzy.com/m1.webp' }] };
+    const product = {
+      ...summary,
+      coverUrl: undefined,
+      familyId: undefined,
+      description: '<p>Moletom</p>',
+      media: [{ id: 'm1', url: 'https://cdn.trezzy.com/m1.webp' }],
+      colorways: [{ id: 'p2', title: 'Stock Logo Crew', colorName: 'Preto', status: 'active', coverUrl: null }],
+    };
 
     respondWith({ product });
 
-    await expect(fetchProduct('p1')).resolves.toMatchObject({ id: 'p1', media: [{ id: 'm1' }] });
+    await expect(fetchProduct('p1')).resolves.toMatchObject({ id: 'p1', media: [{ id: 'm1' }], colorways: [{ id: 'p2', colorName: 'Preto' }] });
     expect(authorizedHttp).toHaveBeenCalledWith('/admin/products/p1', expect.anything());
   });
 

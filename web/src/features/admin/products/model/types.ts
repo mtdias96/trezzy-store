@@ -33,9 +33,28 @@ export type ProductDetail = {
   brandId: string;
   categoryId: string;
   sizeGrid: SizeGridId;
+  colorName: string | null;
+  // As outras cores do mesmo modelo, sem o próprio produto.
+  colorways: readonly ProductColorway[];
   media: readonly ProductMediaFile[];
   variants: readonly ProductVariant[];
   updatedAt: string;
+};
+
+export type ProductColorway = {
+  id: string;
+  title: string;
+  colorName: string | null;
+  status: ProductStatus;
+  coverUrl: string | null;
+};
+
+export type ColorwayCandidate = {
+  id: string;
+  title: string;
+  colorName: string | null;
+  brandId: string;
+  categoryId: string;
 };
 
 // O produto na lista: sem descrição e sem galeria, só com a capa.

@@ -3,7 +3,7 @@ import 'server-only';
 import { cache } from 'react';
 import * as z from 'zod';
 
-import type { MediaUploadInput, ProductCreateInput } from '@/features/admin/products/model/schema';
+import type { ColorwayInput, MediaUploadInput, ProductCreateInput } from '@/features/admin/products/model/schema';
 import { authorizedHttp } from '@/features/shared/auth/session/authorized-http';
 import { HttpError } from '@/lib/http';
 
@@ -20,20 +20,32 @@ const variantSchema = z.object({
   active: z.boolean(),
 });
 
+const statusSchema = z.enum(['draft', 'active', 'inactive', 'archived']);
+
 const productSummarySchema = z.object({
   id: z.string(),
   title: z.string(),
-  status: z.enum(['draft', 'active', 'inactive', 'archived']),
+  status: statusSchema,
   brandId: z.string(),
   categoryId: z.string(),
+  // Produtos com o mesmo familyId são cores do mesmo modelo.
+  familyId: z.string().nullable(),
+  colorName: z.string().nullable(),
   coverUrl: z.url().nullable(),
   variants: z.array(variantSchema),
   updatedAt: z.iso.datetime({ offset: true }),
 });
 
-const productSchema = productSummarySchema.omit({ coverUrl: true }).extend({
+const productSchema = productSummarySchema.omit({ coverUrl: true, familyId: true }).extend({
   description: z.string(),
   media: z.array(z.object({ id: z.string(), url: z.url() })),
+  colorways: z.array(z.object({
+    id: z.string(),
+    title: z.string(),
+    colorName: z.string().nullable(),
+    status: statusSchema,
+    coverUrl: z.url().nullable(),
+  })),
 });
 
 const brandSchema = z.object({ id: z.string(), name: z.string(), active: z.boolean() });
@@ -111,4 +123,9 @@ export async function createProduct(input: ProductCreateInput): Promise<{ id: st
     body: input,
     schema: z.object({ id: z.string() }),
   });
+}
+
+// PUT /admin/products/{id}/colorway { colorName, familyOf } → 204: nomeia a cor e liga, mantém ou desliga a família.
+export async function setProductColorway(id: string, input: ColorwayInput): Promise<void> {
+  await authorizedHttp(`/admin/products/${encodeURIComponent(id)}/colorway`, { method: 'PUT', body: input, schema: z.undefined() });
 }

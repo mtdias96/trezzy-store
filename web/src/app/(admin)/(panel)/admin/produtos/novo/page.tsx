@@ -8,10 +8,10 @@ export const metadata: Metadata = {
   title: 'Novo produto',
 };
 
-export default function Page() {
+export default function Page({ searchParams }: PageProps<'/admin/produtos/novo'>) {
   return (
     <Suspense fallback={<PageSkeleton />}>
-      <ProductNewContainer />
+      <ProductNewContainer searchParams={searchParams} />
     </Suspense>
   );
 }
