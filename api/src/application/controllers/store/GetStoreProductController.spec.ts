@@ -18,6 +18,8 @@ const product: GetStoreProductUseCase.Output = {
   imageUrls: [],
   sizes: ['40'],
   variants: [{ id: 'v-1', color: '', size: '40', inStock: true }],
+  colorName: null,
+  colorways: [],
 };
 
 function makeSut() {

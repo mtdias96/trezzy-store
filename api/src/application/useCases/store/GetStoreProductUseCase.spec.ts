@@ -24,13 +24,18 @@ const detail: ProductRepository.StorefrontDetail = {
   brandName: 'Vans',
   categorySlug: 'tenis',
   grid: 'num',
+  familyId: null,
+  colorName: null,
   priceInCents: 58_700,
   variants: [variant('b-41', '41', 'branco', 0), variant('p-40', '40', 'preto', 2), variant('b-38', '38', 'branco', 0)],
   mediaKeys: ['uploads/a.webp', 'uploads/b.webp'],
 };
 
-function makeSut(product: ProductRepository.StorefrontDetail | null) {
-  const productRepository = { findStorefrontBySlug: vi.fn<ProductRepository['findStorefrontBySlug']>().mockResolvedValue(product) };
+function makeSut(product: ProductRepository.StorefrontDetail | null, colorways: ProductRepository.StorefrontColorway[] = []) {
+  const productRepository = {
+    findStorefrontBySlug: vi.fn<ProductRepository['findStorefrontBySlug']>().mockResolvedValue(product),
+    findStorefrontColorways: vi.fn<ProductRepository['findStorefrontColorways']>().mockResolvedValue(colorways),
+  };
   const mediaStorageGateway = { getPublicUrl: (key: string) => `https://cdn.test/${key}` };
 
   return new GetStoreProductUseCase(
@@ -60,6 +65,8 @@ describe('GetStoreProductUseCase', () => {
         { id: 'b-41', color: 'branco', size: '41', inStock: false },
         { id: 'p-40', color: 'preto', size: '40', inStock: true },
       ],
+      colorName: null,
+      colorways: [],
     });
   });
 
@@ -67,5 +74,20 @@ describe('GetStoreProductUseCase', () => {
     const sut = makeSut(null);
 
     await expect(sut.execute({ slug: 'rascunho' })).rejects.toMatchObject({ code: ErrorCode.NOT_FOUND });
+  });
+
+  it('lists the colors of the model in alphabetical order, marking the current one', async () => {
+    const sut = makeSut({ ...detail, familyId: 'family-1', colorName: 'Reflective Black' }, [
+      { slug: 'old-skool', colorName: 'Reflective Black', coverKey: 'uploads/black.webp', inStock: true },
+      { slug: 'old-skool-grey', colorName: '2 Tone Grey', coverKey: null, inStock: false },
+    ]);
+
+    const product = await sut.execute({ slug: 'old-skool' });
+
+    expect(product.colorName).toBe('Reflective Black');
+    expect(product.colorways).toEqual([
+      { slug: 'old-skool-grey', colorName: '2 Tone Grey', coverUrl: null, inStock: false, current: false },
+      { slug: 'old-skool', colorName: 'Reflective Black', coverUrl: 'https://cdn.test/uploads/black.webp', inStock: true, current: true },
+    ]);
   });
 });

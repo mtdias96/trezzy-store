@@ -316,6 +316,8 @@ export class ProductRepository {
         brandName: brands.name,
         categorySlug: categories.slug,
         grid: categories.grid,
+        familyId: products.familyId,
+        colorName: products.colorName,
         priceInCents: storefrontPrice,
       })
       .from(products)
@@ -338,6 +340,24 @@ export class ProductRepository {
       variants: (variantsByProduct.get(row.id) ?? []).filter(({ active }) => active),
       mediaKeys: mediaKeysByProduct.get(row.id) ?? [],
     };
+  }
+
+  // As cores da família que a vitrine mostra, com a capa e se alguma variante tem estoque.
+  async findStorefrontColorways(familyId: string): Promise<ProductRepository.StorefrontColorway[]> {
+    const rows = await this.drizzle.db
+      .select({
+        id: products.id,
+        slug: products.slug,
+        colorName: products.colorName,
+        inStock: sql<boolean>`exists (select 1 from ${productVariants} where ${productVariants.productId} = ${products.id} and ${productVariants.active} and ${productVariants.stock} > 0)`,
+      })
+      .from(products)
+      .innerJoin(brands, eq(brands.id, products.brandId))
+      .innerJoin(categories, eq(categories.id, products.categoryId))
+      .where(and(eq(products.familyId, familyId), storefrontVisible));
+    const covers = await this.findMediaKeysByProduct(rows.map(({ id }) => id));
+
+    return rows.map(({ id, ...row }) => ({ ...row, coverKey: covers.get(id)?.[0] ?? null }));
   }
 
   private storefrontWhere(
@@ -469,6 +489,15 @@ export namespace ProductRepository {
   export type StorefrontDetail = StorefrontItem & {
     description: string;
     categorySlug: string;
+    familyId: string | null;
+    colorName: string | null;
+  };
+
+  export type StorefrontColorway = {
+    slug: string;
+    colorName: string | null;
+    coverKey: string | null;
+    inStock: boolean;
   };
 
   export type StorefrontPage = {

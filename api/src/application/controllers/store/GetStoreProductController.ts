@@ -41,6 +41,16 @@ export namespace GetStoreProductController {
     sizes: string[];
     // Só as ativas, por cor e na ordem da grade. color '' = variante sem cor.
     variants: { id: string; color: string; size: string; inStock: boolean }[];
+    // Nome comercial da cor ("Reflective Black"). null: produto sem outras cores.
+    colorName: string | null;
+    // As cores do mesmo modelo que a vitrine mostra, a atual incluída, em ordem alfabética. Vazio: produto sem família.
+    colorways: {
+      slug: string;
+      colorName: string;
+      coverUrl: string | null;
+      inStock: boolean;
+      current: boolean;
+    }[];
   };
 
   export type Response = {
