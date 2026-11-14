@@ -33,6 +33,8 @@ export type MenuDepartment = {
   label: string;
   href: Route;
   categories: readonly NavLink[];
+  // As categorias do banco do departamento: os destaques do painel saem delas.
+  categorySlugs: readonly string[];
   shortcuts: readonly NavLink[];
 };
 

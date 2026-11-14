@@ -22,10 +22,10 @@ export async function fetchNextDrop(): Promise<DropDto | null> {
 }
 
 const CALENDAR: CalendarDropDto[] = [
-  { number: 7, brand: 'Forte Athletics', title: 'Runner 03 “Lima Ácida”', startsAt: '2026-11-13T19:00:00-03:00', priceInCents: 119990, priceIsFrom: false, imageUrl: null, href: '/produtos/tenis-runner-03-lima-acida', status: 'upcoming', quantity: 400, unit: 'pair' },
+  { number: 7, brand: 'Forte Athletics', title: 'Runner 03 “Lima Ácida”', startsAt: '2026-11-13T19:00:00-03:00', priceInCents: 119990, priceIsFrom: false, imageUrl: null, href: '/produtos', status: 'upcoming', quantity: 400, unit: 'pair' },
   { number: 8, brand: 'Pátio 9 × Vândalo', title: 'Cápsula Pátio 9 × Vândalo', startsAt: '2026-11-27T19:00:00-03:00', priceInCents: 24990, priceIsFrom: true, imageUrl: null, href: '/produtos', status: 'upcoming', quantity: 12, unit: 'piece' },
-  { number: 6, brand: 'Lente Crua', title: 'Órbita Metal Prata', startsAt: '2026-10-30T19:00:00-03:00', priceInCents: 109990, priceIsFrom: false, imageUrl: null, href: '/produtos/oculos-orbita-metal-prata', status: 'available', remaining: 38 },
-  { number: 5, brand: 'KAIRO', title: 'Low Court “Giz”', startsAt: '2026-10-16T19:00:00-03:00', priceInCents: 89990, priceIsFrom: false, imageUrl: null, href: '/produtos/tenis-low-court-couro-branco', status: 'sold-out', soldOutAfterMinutes: 6 },
+  { number: 6, brand: 'Lente Crua', title: 'Órbita Metal Prata', startsAt: '2026-10-30T19:00:00-03:00', priceInCents: 109990, priceIsFrom: false, imageUrl: null, href: '/produtos', status: 'available', remaining: 38 },
+  { number: 5, brand: 'KAIRO', title: 'Low Court “Giz”', startsAt: '2026-10-16T19:00:00-03:00', priceInCents: 89990, priceIsFrom: false, imageUrl: null, href: '/produtos', status: 'sold-out', soldOutAfterMinutes: 6 },
 ];
 
 export async function fetchDropCalendar(limit: number): Promise<CalendarDropDto[]> {

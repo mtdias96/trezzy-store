@@ -58,6 +58,34 @@ export function findCategory(department: TaxonomyDepartment, slug: string): Taxo
   return department.categories.find((category) => category.slug === slug);
 }
 
+// As categorias do banco que a página do departamento lista: as subcategorias, ou ele mesmo quando não tem nenhuma.
+export function departmentCategorySlugs({ slug, categories }: TaxonomyDepartment): string[] {
+  return categories.length > 0 ? categories.map((category) => category.slug) : [slug];
+}
+
+export type TaxonomyPlace = {
+  department: TaxonomyDepartment;
+  // null: a categoria do banco é o departamento inteiro (Tênis).
+  category: TaxonomyCategory | null;
+};
+
+// Onde uma categoria do banco fica na vitrine. undefined: a vitrine não mostra a categoria (Shapes & Skate).
+export function findCategoryPlace(categorySlug: string): TaxonomyPlace | undefined {
+  for (const department of STORE_DEPARTMENTS) {
+    const category = findCategory(department, categorySlug);
+
+    if (category) {
+      return { department, category };
+    }
+
+    if (department.categories.length === 0 && department.slug === categorySlug) {
+      return { department, category: null };
+    }
+  }
+
+  return undefined;
+}
+
 const MENU_SHORTCUTS = ['novidades', 'mais-vendidos'] as const satisfies readonly CatalogSort[];
 
 export type DepartmentLinks = {
@@ -65,21 +93,26 @@ export type DepartmentLinks = {
   label: string;
   href: Route;
   categories: { label: string; href: Route }[];
+  // As categorias do banco do departamento: o menu busca os destaques por elas.
+  categorySlugs: string[];
   shortcuts: { label: string; href: Route }[];
 };
 
 // O menu é outra feature: o layout entrega estes links a ela, e o header muda junto com o catálogo.
 export function departmentLinks(departments: readonly TaxonomyDepartment[] = STORE_DEPARTMENTS): DepartmentLinks[] {
-  return departments.map(({ slug, name, categories }) => ({
-    id: slug,
-    label: name,
-    href: departmentHref(slug),
-    categories: categories.map((category) => ({ label: category.name, href: categoryHref(slug, category.slug) })),
-    shortcuts: [
-      ...MENU_SHORTCUTS.map((ordem) => ({
+  return departments.map((department) => {
+    const { slug, name, categories } = department;
+
+    return {
+      id: slug,
+      label: name,
+      href: departmentHref(slug),
+      categories: categories.map((category) => ({ label: category.name, href: categoryHref(slug, category.slug) })),
+      categorySlugs: departmentCategorySlugs(department),
+      shortcuts: MENU_SHORTCUTS.map((ordem) => ({
         label: SORT_LABELS[ordem],
         href: serializeCatalogFilters(departmentHref(slug), { ordem }) as Route,
       })),
-    ],
-  }));
+    };
+  });
 }

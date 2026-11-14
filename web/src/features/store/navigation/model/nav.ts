@@ -53,10 +53,6 @@ export function storeNav(departments: readonly MenuDepartment[]): NavEntry[] {
   ];
 }
 
-export function departmentIds(nav: readonly NavEntry[]): string[] {
-  return nav.flatMap((entry) => (entry.kind === 'department' ? [entry.id] : []));
-}
-
 export function toStoreMenu(
   nav: readonly NavEntry[],
   featured: Partial<Record<string, readonly FeaturedProduct[]>>,

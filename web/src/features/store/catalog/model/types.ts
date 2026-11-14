@@ -1,5 +1,7 @@
 import type { Route } from 'next';
 
+import type { ColorSwatch } from '@/lib/color';
+
 export type Department = {
   slug: string;
   name: string;
@@ -107,12 +109,11 @@ export type PriceBand = {
   photos: PriceBandPhoto[];
 };
 
-export type ColorSwatch = 'black' | 'white' | 'off-white' | 'heather-gray' | 'green';
-
 export type ProductColor = {
   id: string;
   name: string;
-  swatch: ColorSwatch;
+  // null: cor fora das amostras do design, que aparece com a amostra neutra.
+  swatch: ColorSwatch | null;
 };
 
 export type ProductVariant = {

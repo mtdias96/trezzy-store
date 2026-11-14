@@ -4,30 +4,38 @@ import * as z from 'zod';
 
 import { http, HttpError } from '@/lib/http';
 
-// Contrato das rotas públicas do catálogo da vitrine. Ainda não existem na API (web/AGENTS.md, Pendências).
+// Contrato das rotas públicas do catálogo da vitrine (`/store/*` na API). A API não conhece departamento: a vitrine
+// pede pelas categorias do banco, que a taxonomia (model/taxonomy.ts) agrupa.
 
 // Vira parte da URL (/roupas, /produtos/moletom-patio): só minúsculas, números e hífen.
 const slugSchema = z.string().regex(/^[a-z0-9-]+$/);
+const countSchema = z.number().int().nonnegative();
+const centsSchema = z.number().int().positive();
 
-// O name vem do painel, mas a vitrine mostra o de model/taxonomy.ts até a árvore da loja vir da API.
-const departmentSchema = z.object({
+// O HTTP API junta parâmetros repetidos com vírgula, e a API lê a lista assim.
+function setList(query: URLSearchParams, name: string, values: readonly string[]) {
+  if (values.length > 0) {
+    query.set(name, values.join(','));
+  }
+}
+
+const categorySchema = z.object({
   slug: slugSchema,
-  name: z.string(),
-  productCount: z.number().int().nonnegative(),
-  imageUrl: z.url().nullable(),
-  // Categoria sem produto pode vir com zero ou nem vir.
-  categories: z.array(z.object({ slug: slugSchema, productCount: z.number().int().nonnegative() })),
+  // Produtos que a vitrine mostra. Categoria sem produto vem com zero.
+  productCount: countSchema,
+  // Capa do produto mais novo da categoria.
+  coverUrl: z.url().nullable(),
 });
 
-export type DepartmentDto = z.infer<typeof departmentSchema>;
+export type CategoryDto = z.infer<typeof categorySchema>;
 
-// GET /store/departments → { departments }, na ordem da vitrine
-export async function fetchDepartments(): Promise<DepartmentDto[]> {
-  const { departments } = await http('/store/departments', {
-    schema: z.object({ departments: z.array(departmentSchema) }),
+// GET /store/categories → { categories }: as categorias ativas do banco, sem nome (o nome é da taxonomia)
+export async function fetchCategories(): Promise<CategoryDto[]> {
+  const { categories } = await http('/store/categories', {
+    schema: z.object({ categories: z.array(categorySchema) }),
   });
 
-  return departments;
+  return categories;
 }
 
 const productSchema = z.object({
@@ -35,11 +43,10 @@ const productSchema = z.object({
   slug: slugSchema,
   title: z.string(),
   brandName: z.string(),
-  priceInCents: z.number().int().positive(),
-  compareAtPriceInCents: z.number().int().positive().nullable(),
-  installments: z.object({ count: z.number().int().positive(), valueInCents: z.number().int().positive() }).nullable(),
-  pixPriceInCents: z.number().int().positive().nullable(),
-  rating: z.number().min(0).max(5).nullable(),
+  // A variante ativa mais barata.
+  priceInCents: centsSchema,
+  installments: z.object({ count: z.number().int().positive(), valueInCents: centsSchema }),
+  pixPriceInCents: centsSchema,
   coverUrl: z.url().nullable(),
   // A segunda foto da galeria, que entra no lugar da capa no hover do card. null: produto com uma foto só.
   hoverImageUrl: z.url().nullable(),
@@ -52,7 +59,8 @@ export type ProductDto = z.infer<typeof productSchema>;
 
 export type ProductQuery = {
   limit: number;
-  department?: string;
+  // Sem categorias: a loja inteira.
+  categories?: readonly string[];
 };
 
 export type ProductPage = {
@@ -60,48 +68,27 @@ export type ProductPage = {
   total: number;
 };
 
-async function fetchProductPage(ordering: Record<string, string>, { limit, department }: ProductQuery): Promise<ProductPage> {
-  const query = new URLSearchParams({ ...ordering, limit: String(limit) });
+const productPageSchema = z.object({ products: z.array(productSchema), total: countSchema });
 
-  if (department) {
-    query.set('department', department);
-  }
+async function fetchProductPage(sort: CatalogSortDto, { limit, categories = [] }: ProductQuery): Promise<ProductPage> {
+  const query = new URLSearchParams({ sort, limit: String(limit) });
 
-  return http(`/store/products?${query.toString()}`, {
-    schema: z.object({ products: z.array(productSchema), total: z.number().int().nonnegative() }),
-  });
+  setList(query, 'category', categories);
+
+  return http(`/store/products?${query.toString()}`, { schema: productPageSchema });
 }
 
-// GET /store/products?sort=newest&limit={n}[&department={slug}] → { products, total }
+// GET /store/products?sort=newest&limit={n}[&category={slugs}] → { products, total }
 export async function fetchNewestProducts(query: ProductQuery): Promise<ProductPage> {
-  return fetchProductPage({ sort: 'newest' }, query);
+  return fetchProductPage('newest', query);
 }
 
-// GET /store/products?sort=best-selling&period=week&limit={n}[&department={slug}] → { products, total }
-// Do mais vendido na semana para o menos: a posição na lista é o número do ranking na home.
-export async function fetchWeeklyBestSellers(query: ProductQuery): Promise<ProductPage> {
-  return fetchProductPage({ sort: 'best-selling', period: 'week' }, query);
+// GET /store/products?sort=best-selling&limit={n}[&category={slugs}] → { products, total }
+// Do mais vendido para o menos: a posição na lista é o número do ranking na home. Sem pedidos ainda, a API ordena
+// como os mais novos.
+export async function fetchBestSellers(query: ProductQuery): Promise<ProductPage> {
+  return fetchProductPage('best-selling', query);
 }
-
-const catalogRefSchema = z.object({ slug: slugSchema, name: z.string() });
-
-const outletProductSchema = productSchema
-  .pick({ id: true, slug: true, title: true, priceInCents: true, compareAtPriceInCents: true, coverUrl: true })
-  .extend({ department: catalogRefSchema, category: catalogRefSchema.nullable() });
-
-export type OutletProductDto = z.infer<typeof outletProductSchema>;
-
-// GET /store/products?onSale=true&sort=best-selling&limit={n} → { products }
-export async function fetchOutletProducts(limit: number): Promise<OutletProductDto[]> {
-  const query = new URLSearchParams({ onSale: 'true', sort: 'best-selling', limit: String(limit) });
-  const { products } = await http(`/store/products?${query.toString()}`, {
-    schema: z.object({ products: z.array(outletProductSchema) }),
-  });
-
-  return products;
-}
-
-const countSchema = z.number().int().nonnegative();
 
 const catalogPageSchema = z.object({
   products: z.array(productSchema),
@@ -119,10 +106,10 @@ export type CatalogPageDto = z.infer<typeof catalogPageSchema>;
 export type CatalogSortDto = 'relevance' | 'newest' | 'best-selling' | 'price-asc' | 'price-desc';
 
 export type CatalogPageQuery = {
-  department: string | null;
-  category: string | null;
-  sizes: string[];
-  brands: string[];
+  // Sem categorias: a loja inteira.
+  categories: readonly string[];
+  sizes: readonly string[];
+  brands: readonly string[];
   priceAboveInCents: number | null;
   priceUpToInCents: number | null;
   sort: CatalogSortDto;
@@ -130,21 +117,17 @@ export type CatalogPageQuery = {
   limit: number;
 };
 
-// GET /store/products?department=&category=&size=M&size=G&brand=&priceAboveInCents=&priceUpToInCents=
-//   &sort=relevance&page=1&limit=24 → { products, total, facets: { sizes, brands } }
+// GET /store/products?category=&size=M,G&brand=&priceAboveInCents=&priceUpToInCents=&sort=relevance&page=1&limit=24
+//   → { products, total, facets: { sizes, brands } }
 // Preço: acima de priceAboveInCents (exclusivo) e até priceUpToInCents (inclusivo). As contagens de cada filtro
 // ignoram o próprio filtro: marcar uma marca não zera as outras.
 export async function fetchCatalogPage(params: CatalogPageQuery): Promise<CatalogPageDto> {
-  const { department, category, sizes, brands, priceAboveInCents, priceUpToInCents, sort, page, limit } = params;
+  const { categories, sizes, brands, priceAboveInCents, priceUpToInCents, sort, page, limit } = params;
   const query = new URLSearchParams({ sort, page: String(page), limit: String(limit) });
 
-  if (department) {
-    query.set('department', department);
-  }
-
-  if (category) {
-    query.set('category', category);
-  }
+  setList(query, 'category', categories);
+  setList(query, 'size', sizes);
+  setList(query, 'brand', brands);
 
   if (priceAboveInCents !== null) {
     query.set('priceAboveInCents', String(priceAboveInCents));
@@ -154,33 +137,32 @@ export async function fetchCatalogPage(params: CatalogPageQuery): Promise<Catalo
     query.set('priceUpToInCents', String(priceUpToInCents));
   }
 
-  sizes.forEach((size) => query.append('size', size));
-  brands.forEach((brand) => query.append('brand', brand));
-
   return http(`/store/products?${query.toString()}`, { schema: catalogPageSchema });
 }
 
-const productDetailSchema = productSchema.omit({ coverUrl: true, hoverImageUrl: true, sizeOptions: true }).extend({
-  description: z.array(z.string()),
-  composition: z.array(z.string()),
-  reviewCount: z.number().int().nonnegative(),
-  reviewSummary: z.object({
-    // Quantas avaliações com 5, 4, 3, 2 e 1 estrela, nessa ordem.
-    distribution: z.tuple([z.number().int(), z.number().int(), z.number().int(), z.number().int(), z.number().int()]),
-    fit: z.enum(['small', 'true-to-size', 'large']).nullable(),
-  }),
-  department: catalogRefSchema,
-  category: catalogRefSchema.nullable(),
-  images: z.array(z.object({ url: z.url(), alt: z.string() })),
-  colors: z.array(z.object({ id: z.string(), name: z.string(), swatch: z.enum(['black', 'white', 'off-white', 'heather-gray', 'green']) })),
+const productDetailSchema = z.object({
+  id: z.string(),
+  slug: slugSchema,
+  title: z.string(),
+  // Texto puro, com parágrafos separados por linha em branco.
+  description: z.string(),
+  brandName: z.string(),
+  // A categoria do banco: a taxonomia diz em que departamento ela fica.
+  categorySlug: slugSchema,
+  priceInCents: centsSchema,
+  installments: z.object({ count: z.number().int().positive(), valueInCents: centsSchema }),
+  pixPriceInCents: centsSchema,
+  // Na ordem da galeria: a primeira é a capa.
+  imageUrls: z.array(z.url()),
+  // Os tamanhos das variantes ativas, na ordem da grade.
   sizes: z.array(z.string()),
-  variants: z.array(z.object({ id: z.string(), colorId: z.string(), size: z.string(), inStock: z.boolean() })),
-  sizeChart: z.object({ headers: z.array(z.string()), rows: z.array(z.array(z.string())) }).nullable(),
+  // Só as ativas, por cor e na ordem da grade. color '' = variante sem cor.
+  variants: z.array(z.object({ id: z.string(), color: z.string(), size: z.string(), inStock: z.boolean() })),
 });
 
 export type ProductDetailDto = z.infer<typeof productDetailSchema>;
 
-// GET /store/products/{slug} → { product }, ou 404
+// GET /store/products/{slug} → { product }, ou 404 (inclusive rascunho, inativo e arquivado)
 export async function fetchProduct(slug: string): Promise<ProductDetailDto | null> {
   try {
     const { product } = await http(`/store/products/${encodeURIComponent(slug)}`, {
@@ -211,7 +193,8 @@ const reviewSchema = z.object({
 
 export type ReviewDto = z.infer<typeof reviewSchema>;
 
-// GET /store/products/{slug}/reviews?limit={n} → { reviews }, das mais novas para as mais antigas
+// GET /store/products/{slug}/reviews?limit={n} → { reviews }, das mais novas para as mais antigas. Ainda não existe na
+// API: a página só a chama quando o produto tem avaliação, e hoje nenhum tem.
 export async function fetchRecentReviews(slug: string, limit: number): Promise<ReviewDto[]> {
   const { reviews } = await http(`/store/products/${encodeURIComponent(slug)}/reviews?limit=${limit}`, {
     schema: z.object({ reviews: z.array(reviewSchema) }),
@@ -220,19 +203,21 @@ export async function fetchRecentReviews(slug: string, limit: number): Promise<R
   return reviews;
 }
 
-const featuredBrandSchema = z.object({
+const brandSchema = z.object({
   slug: slugSchema,
   name: z.string(),
   productCount: countSchema,
+  // O logo da marca.
   imageUrl: z.url().nullable(),
 });
 
-export type FeaturedBrandDto = z.infer<typeof featuredBrandSchema>;
+export type BrandDto = z.infer<typeof brandSchema>;
 
-// GET /store/brands?featured=true&limit={n} → { brands }, na ordem da curadoria e só marcas com produto
-export async function fetchFeaturedBrands(limit: number): Promise<FeaturedBrandDto[]> {
-  const { brands } = await http(`/store/brands?featured=true&limit=${limit}`, {
-    schema: z.object({ brands: z.array(featuredBrandSchema) }),
+// GET /store/brands?limit={n} → { brands }: só marcas com produto, da que tem mais para a que tem menos (sem curadoria
+// no painel ainda)
+export async function fetchBrands(limit: number): Promise<BrandDto[]> {
+  const { brands } = await http(`/store/brands?limit=${limit}`, {
+    schema: z.object({ brands: z.array(brandSchema) }),
   });
 
   return brands;

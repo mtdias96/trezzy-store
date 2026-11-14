@@ -1,15 +1,13 @@
 import 'server-only';
 
+import type { Route } from 'next';
 import { cacheLife, cacheTag } from 'next/cache';
 
-import { departmentIds, storeNav, toStoreMenu } from '@/features/store/navigation/model/nav';
+import { storeNav, toStoreMenu } from '@/features/store/navigation/model/nav';
 import type { FeaturedProduct, MenuDepartment, StoreMenu } from '@/features/store/navigation/model/types';
 import { isRequestFailure } from '@/lib/http';
-import { pendingRoute } from '@/lib/route';
 
-import type { FeaturedProductDto } from './api';
-// PRÉVIA (não commitar): os dados de exemplo no lugar das rotas da vitrine.
-import { fetchFeaturedProducts } from './preview-api';
+import { type FeaturedProductDto, fetchFeaturedProducts } from './api';
 
 const FEATURED_PER_DEPARTMENT = 2;
 
@@ -27,7 +25,8 @@ async function orUndefined<T>(request: Promise<T>): Promise<T | undefined> {
 }
 
 function toFeaturedProduct({ id, slug, title, brandName, priceInCents, coverUrl }: FeaturedProductDto): FeaturedProduct {
-  return { id, name: title, brand: brandName, priceInCents, href: pendingRoute(`/produtos/${slug}`), imageUrl: coverUrl };
+  // O typedRoutes não prova o formato do slug numa string qualquer; o schema da API só aceita minúsculas e hífen.
+  return { id, name: title, brand: brandName, priceInCents, href: `/produtos/${slug}` as Route, imageUrl: coverUrl };
 }
 
 // Conteúdo público, igual para todo visitante: entra no shell estático. Com falha, a entrada vale pouco, para o
@@ -36,9 +35,10 @@ export async function getStoreMenu(departments: readonly MenuDepartment[]): Prom
   'use cache';
   cacheTag('catalog');
 
-  const nav = storeNav(departments);
-  const ids = departmentIds(nav);
-  const featured = await Promise.all(ids.map((id) => orUndefined(fetchFeaturedProducts(id, FEATURED_PER_DEPARTMENT))));
+  // Só os departamentos do catálogo têm destaques: o painel de Marcas abre sem produtos.
+  const featured = await Promise.all(
+    departments.map(({ categorySlugs }) => orUndefined(fetchFeaturedProducts(categorySlugs, FEATURED_PER_DEPARTMENT))),
+  );
 
   if (featured.includes(undefined)) {
     cacheLife('minutes');
@@ -46,5 +46,8 @@ export async function getStoreMenu(departments: readonly MenuDepartment[]): Prom
     cacheLife('hours');
   }
 
-  return toStoreMenu(nav, Object.fromEntries(ids.map((id, index) => [id, (featured[index] ?? []).map(toFeaturedProduct)])));
+  return toStoreMenu(
+    storeNav(departments),
+    Object.fromEntries(departments.map(({ id }, index) => [id, (featured[index] ?? []).map(toFeaturedProduct)])),
+  );
 }

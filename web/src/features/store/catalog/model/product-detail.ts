@@ -10,7 +10,7 @@ export function productHref(slug: string): Route {
   return `/produtos/${slug}` as Route;
 }
 
-export function sizeOptions({ sizes, variants }: ProductDetail, colorId: string | null): SizeOption[] {
+export function sizeOptions({ sizes, variants }: ProductDetail, colorId: string): SizeOption[] {
   return sizes.map((size) => {
     const variant = variants.find((item) => item.colorId === colorId && item.size === size && item.inStock);
 
@@ -18,10 +18,11 @@ export function sizeOptions({ sizes, variants }: ProductDetail, colorId: string 
   });
 }
 
-export function initialColorId({ colors, variants }: ProductDetail): string | null {
+// Produto sem cor: as variantes têm a cor '', como a API guarda, e a página não mostra a escolha de cor.
+export function initialColorId({ colors, variants }: ProductDetail): string {
   const inStock = colors.find(({ id }) => variants.some((variant) => variant.colorId === id && variant.inStock));
 
-  return (inStock ?? colors[0])?.id ?? null;
+  return (inStock ?? colors[0])?.id ?? '';
 }
 
 export function isSoldOut({ variants }: ProductDetail): boolean {

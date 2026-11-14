@@ -9,6 +9,11 @@ export function matchesSearch(text: string, query: string): boolean {
   return normalize(query).split(/\s+/).filter(Boolean).every((term) => haystack.includes(term));
 }
 
+// Parágrafos separados por linha em branco, como o painel grava a descrição.
+export function paragraphs(text: string): string[] {
+  return text.split(/\n\s*\n/).map((paragraph) => paragraph.trim()).filter((paragraph) => paragraph !== '');
+}
+
 export function words(text: string): string[] {
   return text.split(/\s+/).filter(Boolean);
 }

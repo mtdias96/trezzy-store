@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { matchesSearch, twoDigits, words } from './text';
+import { matchesSearch, paragraphs, twoDigits, words } from './text';
 
 describe('matchesSearch', () => {
   it('ignores accents and case', () => {
@@ -17,6 +17,12 @@ describe('matchesSearch', () => {
 
   it('matches everything for an empty query', () => {
     expect(matchesSearch('Dunk Low Pro', '   ')).toBe(true);
+  });
+});
+
+describe('paragraphs', () => {
+  it('splits on blank lines, even with spaces in them, and drops empty paragraphs', () => {
+    expect(paragraphs('Primeiro.\nAinda o primeiro.\n \nSegundo.\n\n\n')).toEqual(['Primeiro.\nAinda o primeiro.', 'Segundo.']);
   });
 });
 

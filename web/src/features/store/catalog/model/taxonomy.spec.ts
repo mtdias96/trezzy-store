@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { departmentLinks, findCategory, findDepartment, STORE_DEPARTMENTS } from './taxonomy';
+import {
+  departmentCategorySlugs,
+  departmentLinks,
+  findCategory,
+  findCategoryPlace,
+  findDepartment,
+  STORE_DEPARTMENTS,
+} from './taxonomy';
 
 // Páginas fixas da loja na raiz: um departamento com um desses slugs ficaria escondido atrás delas.
 const STORE_PAGES = [
@@ -59,6 +66,25 @@ describe('findDepartment and findCategory', () => {
   });
 });
 
+describe('departmentCategorySlugs', () => {
+  it('lists the subcategories, or the department itself when it has none', () => {
+    expect(departmentCategorySlugs({ slug: 'roupas', name: 'Roupas', categories: [{ slug: 'camisetas', name: 'Camisetas' }] })).toEqual(['camisetas']);
+    expect(departmentCategorySlugs({ slug: 'tenis', name: 'Tênis', categories: [] })).toEqual(['tenis']);
+  });
+});
+
+describe('findCategoryPlace', () => {
+  it('finds the department of a database category, as a subcategory or as the whole department', () => {
+    expect(findCategoryPlace('camisetas')).toMatchObject({ department: { slug: 'roupas' }, category: { slug: 'camisetas' } });
+    expect(findCategoryPlace('tenis')).toMatchObject({ department: { slug: 'tenis' }, category: null });
+  });
+
+  it('does not place a category the store does not show, nor a department that has subcategories', () => {
+    expect(findCategoryPlace('shapes-skate')).toBeUndefined();
+    expect(findCategoryPlace('roupas')).toBeUndefined();
+  });
+});
+
 describe('departmentLinks', () => {
   const tree = [{ slug: 'oculos', name: 'Óculos', categories: [{ slug: 'solar', name: 'Sol' }] }];
 
@@ -69,6 +95,7 @@ describe('departmentLinks', () => {
         label: 'Óculos',
         href: '/oculos',
         categories: [{ label: 'Sol', href: '/oculos/solar' }],
+        categorySlugs: ['solar'],
         shortcuts: [
           { label: 'Novidades', href: '/oculos?ordem=novidades' },
           { label: 'Mais vendidos', href: '/oculos?ordem=mais-vendidos' },

@@ -1,7 +1,7 @@
 import type { Route } from 'next';
 import { describe, expect, it } from 'vitest';
 
-import { departmentIds, storeNav, toStoreMenu } from './nav';
+import { storeNav, toStoreMenu } from './nav';
 import type { FeaturedProduct, MenuDepartment } from './types';
 
 // O Route sem genérico só aceita rota estática: a dinâmica (/[department]) passa como literal só no <Link>.
@@ -18,20 +18,22 @@ const product: FeaturedProduct = {
 
 const departments: MenuDepartment[] = [
   {
-    id: 'streetwear',
-    label: 'Streetwear',
-    href: route('/streetwear'),
-    categories: [{ label: 'Camisetas', href: route('/streetwear/camisetas') }],
+    id: 'roupas',
+    label: 'Roupas',
+    href: route('/roupas'),
+    categories: [{ label: 'Camisetas', href: route('/roupas/camisetas') }],
+    categorySlugs: ['camisetas'],
     shortcuts: [
-      { label: 'Novidades', href: route('/streetwear?ordem=novidades') },
-      { label: 'Outlet', href: route('/streetwear?promocao=true') },
+      { label: 'Novidades', href: route('/roupas?ordem=novidades') },
+      { label: 'Mais vendidos', href: route('/roupas?ordem=mais-vendidos') },
     ],
   },
   {
-    id: 'sneakers',
-    label: 'Sneakers',
-    href: route('/sneakers'),
-    categories: [{ label: 'Skate', href: route('/sneakers/skate') }],
+    id: 'acessorios',
+    label: 'Acessórios',
+    href: route('/acessorios'),
+    categories: [{ label: 'Bonés', href: route('/acessorios/bones') }],
+    categorySlugs: ['bones'],
     shortcuts: [],
   },
 ];
@@ -40,8 +42,8 @@ describe('storeNav', () => {
   it('places the catalog departments between Novidades and Marcas, in the order received', () => {
     expect(storeNav(departments).map(({ label }) => label)).toEqual([
       'Novidades',
-      'Streetwear',
-      'Sneakers',
+      'Roupas',
+      'Acessórios',
       'Marcas',
       'Drops',
       'Outlet',
@@ -49,19 +51,19 @@ describe('storeNav', () => {
   });
 
   it('builds each panel from the catalog links, with the department name in "see all"', () => {
-    const streetwear = storeNav(departments).find((entry) => entry.kind === 'department' && entry.id === 'streetwear');
+    const clothing = storeNav(departments).find((entry) => entry.kind === 'department' && entry.id === 'roupas');
 
-    expect(streetwear).toMatchObject({
-      allLabel: 'Ver tudo em Streetwear',
+    expect(clothing).toMatchObject({
+      allLabel: 'Ver tudo em Roupas',
       sections: [
-        { title: 'Categorias', links: [{ label: 'Camisetas', href: route('/streetwear/camisetas') }] },
-        { title: 'Destaques', links: [{ label: 'Novidades' }, { label: 'Outlet', href: '/streetwear?promocao=true' }] },
+        { title: 'Categorias', links: [{ label: 'Camisetas', href: route('/roupas/camisetas') }] },
+        { title: 'Destaques', links: [{ label: 'Novidades' }, { label: 'Mais vendidos', href: '/roupas?ordem=mais-vendidos' }] },
       ],
     });
   });
 
   it('drops an empty section, as a department without subcategories has no "Categorias"', () => {
-    const shoes: MenuDepartment = { id: 'tenis', label: 'Tênis', href: route('/tenis'), categories: [], shortcuts: [] };
+    const shoes: MenuDepartment = { id: 'tenis', label: 'Tênis', href: route('/tenis'), categories: [], categorySlugs: ['tenis'], shortcuts: [] };
     const [, entry] = storeNav([shoes]);
 
     expect(entry).toMatchObject({ id: 'tenis', sections: [] });
@@ -78,18 +80,12 @@ describe('storeNav', () => {
   });
 });
 
-describe('departmentIds', () => {
-  it('lists the panels in header order, brands included', () => {
-    expect(departmentIds(storeNav(departments))).toEqual(['streetwear', 'sneakers', 'brands']);
-  });
-});
-
 describe('toStoreMenu', () => {
   it('attaches the featured products to their department', () => {
-    const menu = toStoreMenu(storeNav(departments), { streetwear: [product] });
-    const streetwear = menu.entries.find((entry) => entry.kind === 'department' && entry.id === 'streetwear');
+    const menu = toStoreMenu(storeNav(departments), { roupas: [product] });
+    const clothing = menu.entries.find((entry) => entry.kind === 'department' && entry.id === 'roupas');
 
-    expect(streetwear).toMatchObject({ featured: [product] });
+    expect(clothing).toMatchObject({ featured: [product] });
   });
 
   it('opens a department without featured products when there are none', () => {
