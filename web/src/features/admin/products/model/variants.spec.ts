@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ProductVariant } from './types';
-import { colorSuggestionOf, generateVariants, normalizeColor, summarizeVariants, variantsOutsideGrid } from './variants';
+import { generateVariants, normalizeColor, summarizeVariants, variantsOutsideGrid } from './variants';
 
 function variant(stock: number, priceInCents = 10000, active = true): ProductVariant {
   return { id: `v${stock}-${priceInCents}`, size: 'M', color: 'preto', sku: 'SKU', priceInCents, stock, active };
@@ -40,16 +40,6 @@ describe('summarizeVariants', () => {
 
   it('has no price without variants', () => {
     expect(summarizeVariants([])).toMatchObject({ count: 0, stockLevel: 'out', minPriceInCents: null });
-  });
-});
-
-describe('colorSuggestionOf', () => {
-  it('finds the swatch by the lowercase color the API stores', () => {
-    expect(colorSuggestionOf('cinza mescla')?.swatch).toBe('heather-gray');
-  });
-
-  it('has no swatch for a color outside the suggestions', () => {
-    expect(colorSuggestionOf('roxo')).toBeUndefined();
   });
 });
 

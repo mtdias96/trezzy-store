@@ -3,14 +3,14 @@
 import { Trash2Icon } from 'lucide-react';
 
 import { MoneyInput } from '@/components/admin/forms/money-input';
+import { ColorSwatch } from '@/components/common/data-display/color-swatch';
 import { FormField, FormMessage } from '@/components/common/forms/form-field';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import type { ProductFormInput } from '@/features/admin/products/model/schema';
-import { colorSuggestionOf, type VariantDraft } from '@/features/admin/products/model/variants';
+import type { VariantDraft } from '@/features/admin/products/model/variants';
+import { colorSuggestionOf } from '@/lib/color';
 import { useFormContext } from '@/lib/form';
-
-import { ColorSwatch } from './color-swatch';
 
 type VariantField = Pick<VariantDraft, 'size' | 'color'> & { id: string };
 

@@ -2,9 +2,10 @@
 
 import { type ReactNode, startTransition, type SubmitEvent, useRef, useState } from 'react';
 
+import { ColorSwatch } from '@/components/common/data-display/color-swatch';
 import { FavoriteButton } from '@/components/store/data-display/favorite-button';
 import { initialColorId, isSoldOut, sizeOptions } from '@/features/store/catalog/model/product-detail';
-import type { ColorSwatch, ProductDetail } from '@/features/store/catalog/model/types';
+import type { ProductDetail } from '@/features/store/catalog/model/types';
 import type { ActionResult } from '@/lib/action-result';
 import { sizeLabel } from '@/lib/size';
 
@@ -17,14 +18,6 @@ type PurchaseFormProps = {
   pending: boolean;
   result: ActionResult | null;
 };
-
-const swatchClass = {
-  black: 'bg-ink',
-  white: 'border border-gray-300 bg-gray-0',
-  'off-white': 'border border-gray-300 bg-off-white',
-  'heather-gray': 'bg-gray-400',
-  green: 'bg-success-700',
-} satisfies Record<ColorSwatch, string>;
 
 // Classes inteiras por estado, sem cn: ele descartaria o text-body ao lado da cor do texto.
 const submitClass = {
@@ -100,7 +93,7 @@ export function PurchaseForm({ product, sizeChart, action, pending, result }: Pu
                       aria-hidden
                       className="flex size-10 items-center justify-center rounded-pill border-2 border-transparent transition-colors duration-base peer-checked:border-ink peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brand"
                     >
-                      <span className={`size-7 rounded-pill ${swatchClass[swatch]}`} />
+                      <ColorSwatch swatch={swatch} size="lg" />
                     </span>
                   </label>
                 ))}

@@ -58,21 +58,6 @@ export function normalizeColor(color: string): string {
   return color.trim().toLowerCase();
 }
 
-export type ColorSwatch = 'black' | 'white' | 'off-white' | 'heather-gray' | 'green';
-
-export type ColorSuggestion = {
-  label: string;
-  swatch: ColorSwatch;
-};
-
-export const COLOR_SUGGESTIONS: readonly ColorSuggestion[] = [
-  { label: 'Preto', swatch: 'black' },
-  { label: 'Branco', swatch: 'white' },
-  { label: 'Off-white', swatch: 'off-white' },
-  { label: 'Cinza mescla', swatch: 'heather-gray' },
-  { label: 'Verde', swatch: 'green' },
-];
-
 // Variante ativa com até 3 unidades acende o "Baixo" do produto, mesmo com o total alto.
 export const LOW_STOCK_UNITS = 3;
 
@@ -114,9 +99,4 @@ export function summarizeVariants(variants: readonly Pick<ProductVariant, 'activ
     minPriceInCents: prices.length > 0 ? Math.min(...prices) : null,
     maxPriceInCents: prices.length > 0 ? Math.max(...prices) : null,
   };
-}
-
-// A API guarda a cor em minúsculas ("cinza mescla"): a amostra vem da sugestão de mesmo nome.
-export function colorSuggestionOf(color: string): ColorSuggestion | undefined {
-  return COLOR_SUGGESTIONS.find(({ label }) => label.toLowerCase() === color);
 }

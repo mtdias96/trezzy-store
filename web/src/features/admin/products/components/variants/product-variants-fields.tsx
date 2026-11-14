@@ -4,6 +4,7 @@ import { type KeyboardEvent, useState } from 'react';
 import { PlusIcon, XIcon, ZapIcon } from 'lucide-react';
 
 import { FormCard } from '@/components/admin/forms/form-card';
+import { ColorSwatch } from '@/components/common/data-display/color-swatch';
 import { FormMessage } from '@/components/common/forms/form-field';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,17 +13,15 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import type { ProductFormInput } from '@/features/admin/products/model/schema';
 import type { CategoryOption } from '@/features/admin/products/model/types';
 import {
-  COLOR_SUGGESTIONS,
-  colorSuggestionOf,
   generateVariants,
   normalizeColor,
   SIZE_GRIDS,
   type SizeGridId,
   SIZES_BY_GRID,
 } from '@/features/admin/products/model/variants';
+import { COLOR_SUGGESTIONS, colorSuggestionOf } from '@/lib/color';
 import { useFieldArray, useFormContext, useWatch } from '@/lib/form';
 
-import { ColorSwatch } from './color-swatch';
 import { VariantsTable } from './variants-table';
 
 type ProductVariantsFieldsProps = {
