@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { initialColorId, isSoldOut, metaDescription, productJsonLd, sizeOptions } from './product-detail';
+import { colorwayPicker, initialColorId, isSoldOut, metaDescription, productJsonLd, showsColorChoice, sizeOptions } from './product-detail';
 import type { ProductDetail } from './types';
 
 const product: ProductDetail = {
@@ -36,6 +36,8 @@ const product: ProductDetail = {
     { id: 'branco-m', colorId: 'branco', size: 'M', inStock: false },
   ],
   sizeChart: null,
+  colorName: null,
+  colorways: [],
 };
 
 describe('sizeOptions', () => {
@@ -55,6 +57,32 @@ describe('initialColorId', () => {
 
   it('falls back to the first color when everything sold out', () => {
     expect(initialColorId({ ...product, variants: [] })).toBe('preto');
+  });
+});
+
+describe('colorwayPicker and showsColorChoice', () => {
+  const colorway = (name: string, current = false) => ({ name, href: '/' as const, imageUrl: null, inStock: true, current });
+  const single = { ...product, colors: [{ id: 'preto', name: 'Preto', swatch: 'black' as const }] };
+
+  it('shows the model picker with another visible color, and then hides the single variant color', () => {
+    const linked = { ...single, colorName: 'Reflective Black', colorways: [colorway('2 Tone Grey'), colorway('Reflective Black', true)] };
+
+    expect(colorwayPicker(linked)).toEqual({ colorName: 'Reflective Black', colorways: linked.colorways });
+    expect(showsColorChoice(linked)).toBe(false);
+  });
+
+  it('has no picker with the current color alone, keeping the variant color', () => {
+    const alone = { ...single, colorName: 'Reflective Black', colorways: [colorway('Reflective Black', true)] };
+
+    expect(colorwayPicker(alone)).toBeNull();
+    expect(showsColorChoice(alone)).toBe(true);
+  });
+
+  it('keeps the choice between variant colors, with or without the model picker', () => {
+    const linked = { ...product, colorName: 'Preto', colorways: [colorway('Preto', true), colorway('Branco')] };
+
+    expect(showsColorChoice(product)).toBe(true);
+    expect(showsColorChoice(linked)).toBe(true);
   });
 });
 

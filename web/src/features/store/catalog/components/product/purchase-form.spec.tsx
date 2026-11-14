@@ -34,6 +34,8 @@ const product: ProductDetail = {
     { id: 'branco-p', colorId: 'branco', size: 'P', inStock: true },
   ],
   sizeChart: null,
+  colorName: null,
+  colorways: [],
 };
 
 function renderForm(action = vi.fn()) {

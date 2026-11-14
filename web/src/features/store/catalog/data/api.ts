@@ -158,6 +158,16 @@ const productDetailSchema = z.object({
   sizes: z.array(z.string()),
   // Só as ativas, por cor e na ordem da grade. color '' = variante sem cor.
   variants: z.array(z.object({ id: z.string(), color: z.string(), size: z.string(), inStock: z.boolean() })),
+  // Nome comercial da cor ("Reflective Black"). null: produto sem outras cores.
+  colorName: z.string().nullable(),
+  // As cores do mesmo modelo que a vitrine mostra, a atual incluída, em ordem alfabética. Vazio: sem outras cores.
+  colorways: z.array(z.object({
+    slug: slugSchema,
+    colorName: z.string(),
+    coverUrl: z.url().nullable(),
+    inStock: z.boolean(),
+    current: z.boolean(),
+  })),
 });
 
 export type ProductDetailDto = z.infer<typeof productDetailSchema>;

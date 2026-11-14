@@ -1,6 +1,6 @@
 import type { Route } from 'next';
 
-import type { ProductDetail, SizeOption } from './types';
+import type { ProductColorway, ProductDetail, SizeOption } from './types';
 
 const META_DESCRIPTION_LENGTH = 160;
 
@@ -23,6 +23,16 @@ export function initialColorId({ colors, variants }: ProductDetail): string {
   const inStock = colors.find(({ id }) => variants.some((variant) => variant.colorId === id && variant.inStock));
 
   return (inStock ?? colors[0])?.id ?? '';
+}
+
+// O seletor de cores do modelo: só com outra cor visível na vitrine e com o nome da cor deste produto.
+export function colorwayPicker({ colorName, colorways }: ProductDetail): { colorName: string; colorways: ProductColorway[] } | null {
+  return colorName !== null && colorways.length > 1 ? { colorName, colorways } : null;
+}
+
+// Com o seletor do modelo, a cor já aparece nele: a escolha entre as cores das variantes só fica quando há mais de uma.
+export function showsColorChoice(product: ProductDetail): boolean {
+  return product.colors.length > 1 || (product.colors.length === 1 && colorwayPicker(product) === null);
 }
 
 export function isSoldOut({ variants }: ProductDetail): boolean {

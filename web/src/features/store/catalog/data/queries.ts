@@ -238,7 +238,7 @@ export async function getPriceBands(): Promise<PriceBand[]> {
 // Nomes da taxonomia na trilha. Produto de uma categoria que a vitrine não mostra responde como inexistente. Sem
 // avaliações, composição e tabela de medidas na API, a página sai sem essas partes.
 function toProductDetail(product: ProductDetailDto): ProductDetail | null {
-  const { id, slug, title, description, brandName, categorySlug, imageUrls, sizes, variants, ...prices } = product;
+  const { id, slug, title, description, brandName, categorySlug, imageUrls, sizes, variants, colorName, colorways, ...prices } = product;
   const place = findCategoryPlace(categorySlug);
 
   if (!place) {
@@ -268,6 +268,14 @@ function toProductDetail(product: ProductDetailDto): ProductDetail | null {
     sizes,
     variants: variants.map(({ id: variantId, color, size, inStock }) => ({ id: variantId, colorId: color, size, inStock })),
     sizeChart: null,
+    colorName,
+    colorways: colorways.map(({ slug: colorwaySlug, colorName: name, coverUrl, inStock, current }) => ({
+      name,
+      href: productHref(colorwaySlug),
+      imageUrl: coverUrl,
+      inStock,
+      current,
+    })),
   };
 }
 
@@ -307,7 +315,8 @@ export async function getCatalogResults(query: CatalogQuery): Promise<CatalogRes
 // para o error.tsx, e não vira 404: um 404 por API fora do ar tiraria o produto do Google.
 export async function getProduct(slug: string): Promise<ProductDetail | null> {
   'use cache: remote';
-  cacheTag(`product:${slug}`);
+  // `catalog` também: a página lista as outras cores do modelo, e o painel invalida essa tag ao ligar ou cadastrar uma.
+  cacheTag(`product:${slug}`, 'catalog');
 
   const dto = await fetchProduct(slug);
   const product = dto && toProductDetail(dto);

@@ -2,9 +2,11 @@ import type { ReactNode } from 'react';
 
 import { PageContainer } from '@/components/store/layout/page-container';
 import { Breadcrumb } from '@/components/store/navigation/breadcrumb';
+import { colorwayPicker } from '@/features/store/catalog/model/product-detail';
 import { HOME_CRUMB } from '@/features/store/catalog/model/scope';
 import type { ProductDetail } from '@/features/store/catalog/model/types';
 
+import { ColorwayPicker } from './colorway-picker';
 import { ProductGallery } from './product-gallery';
 import { ProductInfoTabs } from './product-info-tabs';
 import { ProductJsonLd } from './product-json-ld';
@@ -24,6 +26,7 @@ export function ProductDetailView({ product, sizeChart, purchase, shipping, revi
     product.department,
     ...(product.category ? [product.category] : []),
   ];
+  const picker = colorwayPicker(product);
 
   return (
     <PageContainer className="pt-4 pb-16 lg:pt-6 lg:pb-24">
@@ -34,6 +37,7 @@ export function ProductDetailView({ product, sizeChart, purchase, shipping, revi
         </div>
         <div className="flex flex-col gap-7 lg:col-span-5">
           <ProductSummary product={product} />
+          {picker ? <ColorwayPicker colorName={picker.colorName} colorways={picker.colorways} /> : null}
           {purchase}
           {shipping}
           <ProductInfoTabs product={product} sizeChart={sizeChart} />

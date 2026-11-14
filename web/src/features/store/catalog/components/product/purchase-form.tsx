@@ -4,7 +4,7 @@ import { type ReactNode, startTransition, type SubmitEvent, useRef, useState } f
 
 import { ColorSwatch } from '@/components/common/data-display/color-swatch';
 import { FavoriteButton } from '@/components/store/data-display/favorite-button';
-import { initialColorId, isSoldOut, sizeOptions } from '@/features/store/catalog/model/product-detail';
+import { initialColorId, isSoldOut, showsColorChoice, sizeOptions } from '@/features/store/catalog/model/product-detail';
 import type { ProductDetail } from '@/features/store/catalog/model/types';
 import type { ActionResult } from '@/lib/action-result';
 import { sizeLabel } from '@/lib/size';
@@ -69,7 +69,7 @@ export function PurchaseForm({ product, sizeChart, action, pending, result }: Pu
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
       <input type="hidden" name="variantId" value={variantId ?? ''} />
-      {product.colors.length > 0
+      {showsColorChoice(product)
         ? (
             <div>
               <p id="color-label" className="text-body font-bold text-ink">

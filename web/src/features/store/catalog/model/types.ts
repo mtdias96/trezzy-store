@@ -116,6 +116,14 @@ export type ProductColor = {
   swatch: ColorSwatch | null;
 };
 
+export type ProductColorway = {
+  name: string;
+  href: Route;
+  imageUrl: string | null;
+  inStock: boolean;
+  current: boolean;
+};
+
 export type ProductVariant = {
   id: string;
   colorId: string;
@@ -166,6 +174,8 @@ export type ProductDetail = Omit<ProductSummary, 'imageUrl' | 'hoverImageUrl' | 
   sizes: string[];
   variants: ProductVariant[];
   sizeChart: { headers: string[]; rows: string[][] } | null;
+  colorName: string | null;
+  colorways: ProductColorway[];
 };
 
 // variantId null: esgotado nessa cor.
