@@ -23,6 +23,8 @@ const summary = (overrides: Partial<ProductRepository.Summary>): ProductReposito
   brandId: 'brand-1',
   categoryId: 'category-1',
   grid: 'apparel',
+  familyId: 'family-1',
+  colorName: 'Preto',
   updatedAt: new Date('2026-11-12T12:00:00Z'),
   variants: [variant('G'), variant('P')],
   coverKey: 'uploads/m-1.webp',
@@ -43,7 +45,7 @@ function makeSut(summaries: ProductRepository.Summary[]) {
 }
 
 describe('ListProductsUseCase', () => {
-  it('turns the cover key into its CDN URL and sorts the variants by the grid', async () => {
+  it('turns the cover key into its CDN URL, keeps the color of the model and sorts the variants by the grid', async () => {
     const { sut } = makeSut([summary({})]);
 
     const { products } = await sut.execute();
@@ -54,6 +56,8 @@ describe('ListProductsUseCase', () => {
       status: 'active',
       brandId: 'brand-1',
       categoryId: 'category-1',
+      familyId: 'family-1',
+      colorName: 'Preto',
       coverUrl: 'https://cdn.test/uploads/m-1.webp',
       variants: [variant('P'), variant('G')],
       updatedAt: new Date('2026-11-12T12:00:00Z'),

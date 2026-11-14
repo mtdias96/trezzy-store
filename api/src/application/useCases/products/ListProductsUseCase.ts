@@ -15,12 +15,14 @@ export class ListProductsUseCase {
     const products = await this.productRepository.findSummaries();
 
     return {
-      products: products.map(({ id, title, status, brandId, categoryId, grid, variants, coverKey, updatedAt }) => ({
+      products: products.map(({ id, title, status, brandId, categoryId, grid, familyId, colorName, variants, coverKey, updatedAt }) => ({
         id,
         title,
         status,
         brandId,
         categoryId,
+        familyId,
+        colorName,
         coverUrl: coverKey ? this.mediaStorageGateway.getPublicUrl(coverKey) : null,
         variants: sortVariants(grid, variants),
         updatedAt,
@@ -37,6 +39,8 @@ export namespace ListProductsUseCase {
       status: Product.Status;
       brandId: string;
       categoryId: string;
+      familyId: string | null;
+      colorName: string | null;
       coverUrl: string | null;
       variants: Product.Variant[];
       updatedAt: Date;

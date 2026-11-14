@@ -171,6 +171,8 @@ export class ProductRepository {
         brandId: products.brandId,
         categoryId: products.categoryId,
         grid: categories.grid,
+        familyId: products.familyId,
+        colorName: products.colorName,
         updatedAt: products.updatedAt,
       })
       .from(products)
@@ -439,7 +441,11 @@ export namespace ProductRepository {
     variants: Product.Variant[];
   };
 
-  export type Summary = Base & { coverKey: string | null };
+  export type Summary = Base & {
+    familyId: string | null;
+    colorName: string | null;
+    coverKey: string | null;
+  };
 
   export type Detail = Base & {
     description: string;

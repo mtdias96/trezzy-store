@@ -29,6 +29,9 @@ export namespace ListProductsController {
     status: 'draft' | 'active' | 'inactive' | 'archived';
     brandId: string;
     categoryId: string;
+    // Produtos com o mesmo familyId são cores do mesmo modelo. null: sem outras cores.
+    familyId: string | null;
+    colorName: string | null;
     coverUrl: string | null;
     variants: VariantResponse[];
     updatedAt: string;
