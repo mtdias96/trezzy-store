@@ -17,21 +17,9 @@ const HoodieIcon = createLucideIcon('hoodie', [
   ['rect', { x: '8.8', y: '15', width: '6.4', height: '3', key: 'pocket' }],
 ]);
 
-const JacketIcon = createLucideIcon('jacket', [
-  ['path', { d: 'M3.1 19.9 4 6.2c.7-1.8 2-3 4-3 1.6 0 3 .6 4 1.6 1-1 2.4-1.6 4-1.6 2 0 3.3 1.2 4 3l.9 13.7z', key: 'body' }],
-  ['path', { d: 'M8.2 3h7.6', key: 'collar' }],
-  ['path', { d: 'M12 3v18.7', key: 'zipper' }],
-  ['path', { d: 'M14.6 13h1.8', key: 'pocket' }],
-]);
-
 const PantsIcon = createLucideIcon('pants', [
   ['path', { d: 'M6 3h12l.9 17.9h-5.3L12 9.5l-1.6 11.4H5.1z', key: 'legs' }],
   ['path', { d: 'M5.8 7.1h12.4', key: 'waist' }],
-]);
-
-const ShortsIcon = createLucideIcon('shorts', [
-  ['path', { d: 'M5 5h14l1 11.9h-5.9L12 11.5l-2.1 5.4H4z', key: 'legs' }],
-  ['path', { d: 'M4.7 8.8h14.6', key: 'waist' }],
 ]);
 
 const CapIcon = createLucideIcon('cap', [
@@ -44,9 +32,7 @@ export const PIECE_ICONS = {
   sneaker: SneakerIcon,
   shirt: ShirtIcon,
   hoodie: HoodieIcon,
-  jacket: JacketIcon,
   pants: PantsIcon,
-  shorts: ShortsIcon,
   glasses: GlassesIcon,
   cap: CapIcon,
   tag: TagIcon,

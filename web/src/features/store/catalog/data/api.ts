@@ -6,7 +6,7 @@ import { http, HttpError } from '@/lib/http';
 
 // Contrato das rotas públicas do catálogo da vitrine. Ainda não existem na API (web/AGENTS.md, Pendências).
 
-// Vira parte da URL (/streetwear, /produtos/moletom-patio): só minúsculas, números e hífen.
+// Vira parte da URL (/roupas, /produtos/moletom-patio): só minúsculas, números e hífen.
 const slugSchema = z.string().regex(/^[a-z0-9-]+$/);
 
 // O name vem do painel, mas a vitrine mostra o de model/taxonomy.ts até a árvore da loja vir da API.

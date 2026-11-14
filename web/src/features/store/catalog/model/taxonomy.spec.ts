@@ -50,29 +50,29 @@ describe('STORE_DEPARTMENTS', () => {
 
 describe('findDepartment and findCategory', () => {
   it('find by slug, and only inside the department', () => {
-    const streetwear = findDepartment('streetwear');
+    const clothing = findDepartment('roupas');
 
-    expect(streetwear?.name).toBe('Streetwear');
-    expect(streetwear && findCategory(streetwear, 'camisetas')?.name).toBe('Camisetas');
-    expect(streetwear && findCategory(streetwear, 'skate')).toBeUndefined();
+    expect(clothing?.name).toBe('Roupas');
+    expect(clothing && findCategory(clothing, 'camisetas')?.name).toBe('Camisetas');
+    expect(clothing && findCategory(clothing, 'bones')).toBeUndefined();
     expect(findDepartment('camisetas')).toBeUndefined();
   });
 });
 
 describe('departmentLinks', () => {
-  const tree = [{ slug: 'eyewear', name: 'Óculos', categories: [{ slug: 'solar', name: 'Sol' }] }];
+  const tree = [{ slug: 'oculos', name: 'Óculos', categories: [{ slug: 'solar', name: 'Sol' }] }];
 
   it('feeds the menu with the taxonomy names, so a rename reaches the header', () => {
     expect(departmentLinks(tree)).toEqual([
       {
-        id: 'eyewear',
+        id: 'oculos',
         label: 'Óculos',
-        href: '/eyewear',
-        categories: [{ label: 'Sol', href: '/eyewear/solar' }],
+        href: '/oculos',
+        categories: [{ label: 'Sol', href: '/oculos/solar' }],
         shortcuts: [
-          { label: 'Novidades', href: '/eyewear?ordem=novidades' },
-          { label: 'Mais vendidos', href: '/eyewear?ordem=mais-vendidos' },
-          { label: 'Outlet', href: '/eyewear?promocao=true' },
+          { label: 'Novidades', href: '/oculos?ordem=novidades' },
+          { label: 'Mais vendidos', href: '/oculos?ordem=mais-vendidos' },
+          { label: 'Outlet', href: '/oculos?promocao=true' },
         ],
       },
     ]);

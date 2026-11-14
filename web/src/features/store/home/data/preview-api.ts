@@ -19,10 +19,10 @@ export async function fetchHomeBanners(): Promise<HomeBannerDto[]> {
 }
 
 const COLLECTIONS: HomeCollectionDto[] = [
-  { id: 'runner-series', title: 'Runner Series', caption: 'Forte Athletics · 3 modelos', imageUrl: null, href: '/sneakers/corrida' },
-  { id: 'camisetas-boxy', title: 'Camisetas Boxy', caption: 'A partir de R$ 189,90', imageUrl: null, href: '/streetwear/camisetas' },
-  { id: 'skate', title: 'Skate', caption: 'Tênis de skate', imageUrl: null, href: '/sneakers/skate' },
-  { id: 'lentes-de-metal', title: 'Lentes de metal', caption: 'UV400 · Lente Crua', imageUrl: null, href: '/eyewear/metal' },
+  { id: 'runner-series', title: 'Runner Series', caption: 'Forte Athletics · 3 modelos', imageUrl: null, href: '/tenis' },
+  { id: 'camisetas-boxy', title: 'Camisetas Boxy', caption: 'A partir de R$ 189,90', imageUrl: null, href: '/roupas/camisetas' },
+  { id: 'skate', title: 'Skate', caption: 'Tênis de skate', imageUrl: null, href: '/tenis' },
+  { id: 'lentes-de-metal', title: 'Lentes de metal', caption: 'UV400 · Lente Crua', imageUrl: null, href: '/oculos' },
   { id: 'outlet', title: 'Outlet até -20%', caption: 'Preços de/por', imageUrl: null, href: '/produtos?promocao=true' },
 ];
 
@@ -31,7 +31,7 @@ export async function fetchHomeCollections(): Promise<HomeCollectionDto[]> {
 }
 
 const EDITORIAL: HomeEditorialDto = {
-  badge: 'Editorial · Eyewear',
+  badge: 'Editorial · Óculos',
   eyebrow: 'Lente Crua',
   title: 'Ver a cidade sem filtro',
   description: 'Coleção Órbita, da Lente Crua: metal escovado, lente mineral e UV400. Pra quem passa o dia na rua.',
@@ -42,8 +42,8 @@ const EDITORIAL: HomeEditorialDto = {
   ],
   imageUrl: null,
   imageAlt: '',
-  linkLabel: 'Explorar eyewear',
-  href: '/eyewear',
+  linkLabel: 'Explorar óculos',
+  href: '/oculos',
 };
 
 export async function fetchHomeEditorial(): Promise<HomeEditorialDto | null> {

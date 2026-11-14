@@ -11,15 +11,15 @@ function product(slug: string, title: string, brandName: string, priceInCents: n
 
 // Os mesmos slugs do catálogo de exemplo: o card do menu abre a página do produto.
 const FEATURED: Record<string, FeaturedProductDto[]> = {
-  streetwear: [
+  roupas: [
     product('camiseta-pesada-galeria', 'Camiseta Pesada “Galeria”', 'Pátio 9', 27990),
     product('jaqueta-coach-norte', 'Jaqueta Coach “Norte”', 'Norte/Sul', 63990),
   ],
-  sneakers: [
+  tenis: [
     product('tenis-low-court-couro-branco', 'Tênis Low Court Couro Branco', 'KAIRO', 64990),
     product('tenis-runner-03-lima-acida', 'Tênis Runner 03 “Lima Ácida”', 'Forte Athletics', 119990),
   ],
-  eyewear: [
+  oculos: [
     product('oculos-shield-lima', 'Óculos Shield “Lima”', 'Lente Crua', 42990),
     product('oculos-vidro-02-acetato-preto', 'Óculos Vidro 02 Acetato Preto', 'Lente Crua', 59990),
   ],

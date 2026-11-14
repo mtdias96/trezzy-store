@@ -34,10 +34,11 @@ function toNavDepartment({ id, label, href, categories, shortcuts }: MenuDepartm
     label,
     href,
     allLabel: `Ver tudo em ${label}`,
+    // Departamento sem subcategoria (Tênis) abre sem a seção de categorias.
     sections: [
       { title: 'Categorias', links: categories },
       { title: 'Destaques', links: shortcuts },
-    ],
+    ].filter(({ links: sectionLinks }) => sectionLinks.length > 0),
   };
 }
 

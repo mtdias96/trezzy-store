@@ -19,9 +19,13 @@ export function CatalogView({ scope, count, children }: CatalogViewProps) {
   return (
     <PageContainer className="pt-4 pb-16 lg:pt-6 lg:pb-24">
       <CatalogHeading scope={scope} count={count} />
-      <div className="mt-4 lg:mt-5">
-        <PillNav label={scope.tabsLabel} items={scope.tabs} prefetch />
-      </div>
+      {scope.tabs.length > 0
+        ? (
+            <div className="mt-4 lg:mt-5">
+              <PillNav label={scope.tabsLabel} items={scope.tabs} prefetch />
+            </div>
+          )
+        : null}
       {children}
     </PageContainer>
   );

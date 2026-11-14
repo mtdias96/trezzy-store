@@ -60,6 +60,13 @@ describe('storeNav', () => {
     });
   });
 
+  it('drops an empty section, as a department without subcategories has no "Categorias"', () => {
+    const shoes: MenuDepartment = { id: 'tenis', label: 'Tênis', href: route('/tenis'), categories: [], shortcuts: [] };
+    const [, entry] = storeNav([shoes]);
+
+    expect(entry).toMatchObject({ id: 'tenis', sections: [] });
+  });
+
   it('has unique hrefs, so no two links in the menu point to the same page', () => {
     const hrefs = storeNav(departments).flatMap((entry) =>
       entry.kind === 'link'

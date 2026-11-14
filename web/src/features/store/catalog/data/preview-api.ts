@@ -18,9 +18,9 @@ import type {
 // da taxonomia.
 
 const DEPARTMENTS: Omit<DepartmentDto, 'categories'>[] = [
-  { slug: 'streetwear', name: 'Streetwear', productCount: 8, imageUrl: null },
-  { slug: 'sneakers', name: 'Sneakers', productCount: 4, imageUrl: null },
-  { slug: 'eyewear', name: 'Eyewear', productCount: 4, imageUrl: null },
+  { slug: 'roupas', name: 'Roupas', productCount: 8, imageUrl: null },
+  { slug: 'tenis', name: 'Tênis', productCount: 4, imageUrl: null },
+  { slug: 'oculos', name: 'Óculos', productCount: 4, imageUrl: null },
 ];
 
 // Todas as marcas ativas, na ordem do filtro do design.
@@ -77,24 +77,24 @@ function product({ slug, brand, compareAtPriceInCents, rating, tag, coverUrl, ..
 
 // Do mais novo para o mais antigo.
 const PRODUCTS = [
-  product({ slug: 'camiseta-treezy-core-tee', title: 'Camiseta Treezy Core Tee', brand: 'treezy', department: 'streetwear', category: 'camisetas', priceInCents: 17990, rating: 4.8, tag: 'drop', coverUrl: '/preview/treezy-core-tee.jpg' }),
-  product({ slug: 'camiseta-boxy-concreto', title: 'Camiseta Boxy “Concreto”', brand: 'mormaco', department: 'streetwear', category: 'camisetas', priceInCents: 22990, rating: 4.7, tag: 'new' }),
-  product({ slug: 'oculos-orbita-metal-prata', title: 'Óculos Órbita Metal Prata', brand: 'lente-crua', department: 'eyewear', category: 'metal', priceInCents: 109990, rating: 4.6, tag: 'drop' }),
-  product({ slug: 'moletom-heavyweight-patio', title: 'Moletom Heavyweight “Pátio”', brand: 'patio-9', department: 'streetwear', category: 'moletons', priceInCents: 48990, compareAtPriceInCents: 58990, rating: 4.9 }),
-  product({ slug: 'camiseta-pesada-galeria', title: 'Camiseta Pesada “Galeria”', brand: 'patio-9', department: 'streetwear', category: 'camisetas', priceInCents: 27990, rating: 4.6, tag: 'new' }),
-  product({ slug: 'tenis-runner-03-lima-acida', title: 'Tênis Runner 03 “Lima Ácida”', brand: 'forte-athletics', department: 'sneakers', category: 'corrida', priceInCents: 119990, rating: 4.6, tag: 'drop' }),
-  product({ slug: 'jaqueta-coach-norte', title: 'Jaqueta Coach “Norte”', brand: 'norte-sul', department: 'streetwear', category: 'jaquetas', priceInCents: 63990, rating: 4.8, tag: 'last-units' }),
-  product({ slug: 'oculos-vidro-02-acetato-preto', title: 'Óculos Vidro 02 Acetato Preto', brand: 'lente-crua', department: 'eyewear', category: 'acetato', priceInCents: 59990, rating: 4.8, tag: 'new' }),
-  product({ slug: 'tenis-low-court-couro-branco', title: 'Tênis Low Court Couro Branco', brand: 'kairo', department: 'sneakers', category: 'casual', priceInCents: 64990, rating: 4.7, tag: 'last-units' }),
-  product({ slug: 'bermuda-cargo-asfalto', title: 'Bermuda Cargo “Asfalto”', brand: 'mormaco', department: 'streetwear', category: 'shorts', priceInCents: 25990, compareAtPriceInCents: 32990, rating: 4.6 }),
-  product({ slug: 'oculos-recorte-tartaruga', title: 'Óculos Recorte Tartaruga', brand: 'kairo', department: 'eyewear', category: 'solar', priceInCents: 48990, compareAtPriceInCents: 58990, rating: 4.9 }),
-  product({ slug: 'calca-wide-leg-grafite', title: 'Calça Wide Leg “Grafite”', brand: 'vandalo', department: 'streetwear', category: 'calcas', priceInCents: 34990, rating: 4.5 }),
-  product({ slug: 'tenis-trail-mid-grafite', title: 'Tênis Trail Mid Grafite', brand: 'forte-athletics', department: 'sneakers', category: 'trail', priceInCents: 89990, rating: 4.8, tag: 'sold-out' }),
-  product({ slug: 'oculos-shield-lima', title: 'Óculos Shield “Lima”', brand: 'lente-crua', department: 'eyewear', category: 'esportivo', priceInCents: 42990, rating: 4.4 }),
-  product({ slug: 'tenis-skate-vulc-preto', title: 'Tênis Skate Vulc “Preto”', brand: 'forte-athletics', department: 'sneakers', category: 'skate', priceInCents: 39990, compareAtPriceInCents: 44990, rating: 4.7 }),
-  product({ slug: 'kit-meias-cano-alto', title: 'Kit Meias Cano Alto', brand: 'mormaco', department: 'streetwear', category: 'acessorios', priceInCents: 8990, rating: 4.9 }),
-  product({ slug: 'tenis-skate-pro-suede-areia', title: 'Tênis Skate Pro Suede Areia', brand: 'vandalo', department: 'sneakers', category: 'skate', priceInCents: 44990, rating: 4.8 }),
-  product({ slug: 'oculos-orbita-titanio', title: 'Óculos Órbita Titânio', brand: 'lente-crua', department: 'eyewear', category: 'metal', priceInCents: 129990, rating: 4.7 }),
+  product({ slug: 'camiseta-treezy-core-tee', title: 'Camiseta Treezy Core Tee', brand: 'treezy', department: 'roupas', category: 'camisetas', priceInCents: 17990, rating: 4.8, tag: 'drop', coverUrl: '/preview/treezy-core-tee.jpg' }),
+  product({ slug: 'camiseta-boxy-concreto', title: 'Camiseta Boxy “Concreto”', brand: 'mormaco', department: 'roupas', category: 'camisetas', priceInCents: 22990, rating: 4.7, tag: 'new' }),
+  product({ slug: 'oculos-orbita-metal-prata', title: 'Óculos Órbita Metal Prata', brand: 'lente-crua', department: 'oculos', category: 'metal', priceInCents: 109990, rating: 4.6, tag: 'drop' }),
+  product({ slug: 'moletom-heavyweight-patio', title: 'Moletom Heavyweight “Pátio”', brand: 'patio-9', department: 'roupas', category: 'moletons', priceInCents: 48990, compareAtPriceInCents: 58990, rating: 4.9 }),
+  product({ slug: 'camiseta-pesada-galeria', title: 'Camiseta Pesada “Galeria”', brand: 'patio-9', department: 'roupas', category: 'camisetas', priceInCents: 27990, rating: 4.6, tag: 'new' }),
+  product({ slug: 'tenis-runner-03-lima-acida', title: 'Tênis Runner 03 “Lima Ácida”', brand: 'forte-athletics', department: 'tenis', category: 'corrida', priceInCents: 119990, rating: 4.6, tag: 'drop' }),
+  product({ slug: 'jaqueta-coach-norte', title: 'Jaqueta Coach “Norte”', brand: 'norte-sul', department: 'roupas', category: 'jaquetas', priceInCents: 63990, rating: 4.8, tag: 'last-units' }),
+  product({ slug: 'oculos-vidro-02-acetato-preto', title: 'Óculos Vidro 02 Acetato Preto', brand: 'lente-crua', department: 'oculos', category: 'acetato', priceInCents: 59990, rating: 4.8, tag: 'new' }),
+  product({ slug: 'tenis-low-court-couro-branco', title: 'Tênis Low Court Couro Branco', brand: 'kairo', department: 'tenis', category: 'casual', priceInCents: 64990, rating: 4.7, tag: 'last-units' }),
+  product({ slug: 'bermuda-cargo-asfalto', title: 'Bermuda Cargo “Asfalto”', brand: 'mormaco', department: 'roupas', category: 'shorts', priceInCents: 25990, compareAtPriceInCents: 32990, rating: 4.6 }),
+  product({ slug: 'oculos-recorte-tartaruga', title: 'Óculos Recorte Tartaruga', brand: 'kairo', department: 'oculos', category: 'solar', priceInCents: 48990, compareAtPriceInCents: 58990, rating: 4.9 }),
+  product({ slug: 'calca-wide-leg-grafite', title: 'Calça Wide Leg “Grafite”', brand: 'vandalo', department: 'roupas', category: 'calcas', priceInCents: 34990, rating: 4.5 }),
+  product({ slug: 'tenis-trail-mid-grafite', title: 'Tênis Trail Mid Grafite', brand: 'forte-athletics', department: 'tenis', category: 'trail', priceInCents: 89990, rating: 4.8, tag: 'sold-out' }),
+  product({ slug: 'oculos-shield-lima', title: 'Óculos Shield “Lima”', brand: 'lente-crua', department: 'oculos', category: 'esportivo', priceInCents: 42990, rating: 4.4 }),
+  product({ slug: 'tenis-skate-vulc-preto', title: 'Tênis Skate Vulc “Preto”', brand: 'forte-athletics', department: 'tenis', category: 'skate', priceInCents: 39990, compareAtPriceInCents: 44990, rating: 4.7 }),
+  product({ slug: 'kit-meias-cano-alto', title: 'Kit Meias Cano Alto', brand: 'mormaco', department: 'roupas', category: 'acessorios', priceInCents: 8990, rating: 4.9 }),
+  product({ slug: 'tenis-skate-pro-suede-areia', title: 'Tênis Skate Pro Suede Areia', brand: 'vandalo', department: 'tenis', category: 'skate', priceInCents: 44990, rating: 4.8 }),
+  product({ slug: 'oculos-orbita-titanio', title: 'Óculos Órbita Titânio', brand: 'lente-crua', department: 'oculos', category: 'metal', priceInCents: 129990, rating: 4.7 }),
 ];
 
 // Os quatro primeiros são os do design. Quem não está aqui vem depois, na ordem da vitrine.
@@ -208,7 +208,7 @@ const OFF_WHITE = { id: 'off-white', name: 'Off-white', swatch: 'off-white' } as
 const WHITE = { id: 'branco', name: 'Branco', swatch: 'white' } as const;
 
 const GRIDS: Record<string, Grid> = {
-  streetwear: {
+  roupas: {
     colors: [BLACK, OFF_WHITE],
     sizes: ['PP', 'P', 'M', 'G', 'GG', 'XGG'],
     composition: ['100% algodão, malha 30.1 penteada', 'Gramatura 240 g/m²', 'Lavar à mão ou na máquina, do avesso'],
@@ -218,7 +218,7 @@ const GRIDS: Record<string, Grid> = {
       rows: [['PP', '50', '68', '20'], ['P', '53', '70', '21'], ['M', '56', '72', '22'], ['G', '59', '74', '23'], ['GG', '62', '76', '24'], ['XGG', '65', '78', '25']],
     },
   },
-  sneakers: {
+  tenis: {
     colors: [BLACK, WHITE],
     sizes: ['37', '38', '39', '40', '41', '42', '43', '44'],
     composition: ['Cabedal em camurça e lona', 'Entressola de EVA', 'Solado de borracha vulcanizada'],
@@ -228,7 +228,7 @@ const GRIDS: Record<string, Grid> = {
       rows: [['37', '24,0'], ['38', '24,7'], ['39', '25,3'], ['40', '26,0'], ['41', '26,7'], ['42', '27,3'], ['43', '28,0'], ['44', '28,7']],
     },
   },
-  eyewear: {
+  oculos: {
     colors: [BLACK],
     sizes: ['U'],
     composition: ['Armação em acetato', 'Lentes com proteção UV400', 'Acompanha estojo e flanela'],
@@ -260,7 +260,7 @@ function reviewSummaryOf(index: number, rating: number | null, department: strin
   const five = Math.round((total - low) * ((rating ?? 4) - 4));
   const shares: ProductDetailDto['reviewSummary']['distribution'] = [five, total - low - five, Math.ceil(low / 2), Math.floor(low / 4), low - Math.ceil(low / 2) - Math.floor(low / 4)];
 
-  return { distribution: shares, fit: department === 'eyewear' ? null : 'true-to-size' };
+  return { distribution: shares, fit: department === 'oculos' ? null : 'true-to-size' };
 }
 
 // Estoque de exemplo: a primeira cor esgotou o menor e o maior tamanho, e a segunda tem tudo.
@@ -369,17 +369,17 @@ export async function fetchCatalogPage(query: CatalogPageQuery): Promise<Catalog
 const daysBefore = (days: number) => new Date(Date.UTC(2026, 9, 27 - days, 15)).toISOString().replace('Z', '+00:00');
 
 const REVIEWS: Record<string, Omit<ReviewDto, 'id'>[]> = {
-  sneakers: [
+  tenis: [
     { rating: 5, title: 'Conforto pra andar o dia inteiro', body: 'Usei numa sessão de rolê pelo centro e voltei sem dor no pé. Forma normal, peguei meu número de sempre.', createdAt: daysBefore(3), size: '41', verified: true, author: 'Lucas M.', location: 'Recife, PE' },
     { rating: 4, title: 'O verde é mais bonito pessoalmente', body: 'Chegou em 3 dias, caixa impecável. Só achei o cadarço um pouco longo.', createdAt: daysBefore(7), size: '42', verified: true, author: 'Bia R.', location: 'Curitiba, PR' },
     { rating: 5, title: 'Valeu cada parcela', body: 'Comprei no Pix com desconto. Material de primeira, nada de cola aparecendo.', createdAt: daysBefore(15), size: '43', verified: true, author: 'Diego S.', location: 'São Paulo, SP' },
   ],
-  streetwear: [
+  roupas: [
     { rating: 5, title: 'Malha pesada de verdade', body: 'Caimento oversize sem ficar sobrando. Lavei três vezes e a estampa continua igual.', createdAt: daysBefore(3), size: 'M', verified: true, author: 'Lucas M.', location: 'Recife, PE' },
     { rating: 4, title: 'A estampa é mais bonita pessoalmente', body: 'Chegou em 3 dias, bem embalada. Só achei a gola um pouco justa no começo.', createdAt: daysBefore(7), size: 'G', verified: true, author: 'Bia R.', location: 'Curitiba, PR' },
     { rating: 5, title: 'Valeu cada parcela', body: 'Comprei no Pix com desconto. Costura reforçada e tecido que não amassa.', createdAt: daysBefore(15), size: 'GG', verified: false, author: 'Diego S.', location: 'São Paulo, SP' },
   ],
-  eyewear: [
+  oculos: [
     { rating: 5, title: 'Leve e não aperta', body: 'Uso o dia inteiro na rua e não marca o nariz. A lente escurece bem no sol forte.', createdAt: daysBefore(3), size: null, verified: true, author: 'Lucas M.', location: 'Recife, PE' },
     { rating: 4, title: 'Estojo caprichado', body: 'Chegou em 3 dias. A armação é mais fina do que parece na foto.', createdAt: daysBefore(7), size: null, verified: true, author: 'Bia R.', location: 'Curitiba, PR' },
     { rating: 5, title: 'Valeu cada parcela', body: 'Comprei no Pix com desconto. Proteção UV de verdade, testei na ótica.', createdAt: daysBefore(15), size: null, verified: true, author: 'Diego S.', location: 'São Paulo, SP' },

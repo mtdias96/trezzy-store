@@ -71,7 +71,7 @@ const COMPANY_LINKS = [
 // A coluna Loja segue a ordem do header: Novidades, os departamentos do catálogo, Marcas, Drops e Outlet.
 export function storeFooter(departments: readonly ShopLink[]) {
   return {
-    tagline: 'Streetwear, sneakers e eyewear das marcas que fazem a rua. Drop novo toda sexta, às 19h.',
+    tagline: 'Roupas, tênis e óculos das marcas que fazem a rua. Drop novo toda sexta, às 19h.',
     newsletter: {
       eyebrow: 'Newsletter',
       title: 'Chega primeiro no próximo drop',

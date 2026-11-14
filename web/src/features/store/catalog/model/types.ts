@@ -16,7 +16,7 @@ export type DepartmentCategory = {
   productCount: number;
 };
 
-export type PieceIconName = 'sneaker' | 'shirt' | 'hoodie' | 'jacket' | 'pants' | 'shorts' | 'glasses' | 'cap' | 'tag';
+export type PieceIconName = 'sneaker' | 'shirt' | 'hoodie' | 'pants' | 'glasses' | 'cap' | 'tag';
 
 export type PieceShortcut = {
   name: string;

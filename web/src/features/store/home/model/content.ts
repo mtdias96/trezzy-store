@@ -2,7 +2,7 @@ import { pendingRoute } from '@/lib/route';
 
 import type { StorePerk } from './types';
 
-export const STREET_TAGLINE = 'Feito pra rua · Skate · Sneakers · Eyewear';
+export const STREET_TAGLINE = 'Feito pra rua · Roupas · Tênis · Óculos · Bonés';
 
 export const DEPARTMENTS_HEADING = {
   eyebrow: 'Categorias',

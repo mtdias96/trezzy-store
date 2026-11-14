@@ -34,38 +34,30 @@ describe('STORE_PIECES', () => {
       }
     },
   );
-
-  it('names every whole department, whose taxonomy name is not a piece', () => {
-    expect(STORE_PIECES.filter((piece) => piece.category === undefined && piece.name === undefined)).toEqual([]);
-  });
 });
 
 describe('toPieceShortcuts', () => {
-  it('counts a whole department and links to it', () => {
-    expect(toPieceShortcuts([department('sneakers', 4)])).toEqual([
-      { name: 'Tênis', icon: 'sneaker', href: '/sneakers', productCount: 4 },
+  it('counts a whole department, with its taxonomy name, and links to it', () => {
+    expect(toPieceShortcuts([department('tenis', 4)])).toEqual([
+      { name: 'Nome de tenis', icon: 'sneaker', href: '/tenis', productCount: 4 },
     ]);
   });
 
   it('counts a category and keeps its taxonomy name', () => {
-    expect(toPieceShortcuts([department('streetwear', 9, { camisetas: 3 })])).toEqual([
-      { name: 'Nome de camisetas', icon: 'shirt', href: '/streetwear/camisetas', productCount: 3 },
+    expect(toPieceShortcuts([department('roupas', 9, { camisetas: 3 })])).toEqual([
+      { name: 'Nome de camisetas', icon: 'shirt', href: '/roupas/camisetas', productCount: 3 },
     ]);
   });
 
-  it('prefers the name of the piece over the taxonomy name', () => {
-    expect(toPieceShortcuts([department('streetwear', 1, { acessorios: 1 })])[0]?.name).toBe('Bonés e acessórios');
-  });
-
   it('follows the order of the grid, not the order of the departments', () => {
-    const shortcuts = toPieceShortcuts([department('eyewear', 4), department('streetwear', 1, { shorts: 1 }), department('sneakers', 4)]);
+    const shortcuts = toPieceShortcuts([department('oculos', 4), department('roupas', 1, { calcas: 1 }), department('tenis', 4)]);
 
-    expect(shortcuts.map(({ icon }) => icon)).toEqual(['sneaker', 'shorts', 'glasses']);
+    expect(shortcuts.map(({ icon }) => icon)).toEqual(['sneaker', 'pants', 'glasses']);
   });
 
   it('skips pieces without products or missing from the response', () => {
-    const shortcuts = toPieceShortcuts([department('sneakers', 0), department('streetwear', 1, { moletons: 0, jaquetas: 1 })]);
+    const shortcuts = toPieceShortcuts([department('tenis', 0), department('acessorios', 1, { bones: 1 }), department('roupas', 1, { moletons: 0 })]);
 
-    expect(shortcuts.map(({ icon }) => icon)).toEqual(['jacket']);
+    expect(shortcuts.map(({ icon }) => icon)).toEqual(['cap']);
   });
 });

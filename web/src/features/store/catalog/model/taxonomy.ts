@@ -17,39 +17,25 @@ export type TaxonomyDepartment = {
 // Departamentos e categorias da vitrine, na ordem do menu. É a única fonte desses nomes: o menu, o catálogo, a home
 // e a trilha do produto leem daqui, e a API é consultada só pelo slug.
 // - name: só texto, muda à vontade.
-// - slug: a URL (/streetwear/camisetas) e a chave da API. Trocá-lo muda um endereço que o Google já conhece.
+// - slug: a URL (/roupas/camisetas). Trocá-lo muda um endereço que o Google já conhece.
+// - O slug da categoria é o da categoria no banco. Departamento sem subcategoria é uma categoria do banco inteira, com
+//   o mesmo slug (Tênis = categoria `tenis`).
 export const STORE_DEPARTMENTS: readonly TaxonomyDepartment[] = [
   {
-    slug: 'streetwear',
-    name: 'Streetwear',
+    slug: 'roupas',
+    name: 'Roupas',
     categories: [
       { slug: 'camisetas', name: 'Camisetas' },
       { slug: 'moletons', name: 'Moletons' },
-      { slug: 'jaquetas', name: 'Jaquetas' },
       { slug: 'calcas', name: 'Calças' },
-      { slug: 'shorts', name: 'Shorts' },
-      { slug: 'acessorios', name: 'Acessórios' },
     ],
   },
+  { slug: 'tenis', name: 'Tênis', categories: [] },
+  { slug: 'oculos', name: 'Óculos', categories: [] },
   {
-    slug: 'sneakers',
-    name: 'Sneakers',
-    categories: [
-      { slug: 'casual', name: 'Casual' },
-      { slug: 'corrida', name: 'Corrida' },
-      { slug: 'skate', name: 'Skate' },
-      { slug: 'trail', name: 'Trail' },
-    ],
-  },
-  {
-    slug: 'eyewear',
-    name: 'Eyewear',
-    categories: [
-      { slug: 'solar', name: 'Solar' },
-      { slug: 'esportivo', name: 'Esportivo' },
-      { slug: 'metal', name: 'Metal' },
-      { slug: 'acetato', name: 'Acetato' },
-    ],
+    slug: 'acessorios',
+    name: 'Acessórios',
+    categories: [{ slug: 'bones', name: 'Bonés' }],
   },
 ];
 

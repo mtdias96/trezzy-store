@@ -45,7 +45,12 @@ function sentence(text: string): string {
   return `${text.charAt(0).toLocaleUpperCase('pt-BR')}${text.slice(1)}`;
 }
 
+// Departamento sem subcategoria não tem abas: só haveria o "Tudo".
 function categoryTabs({ slug: department, categories }: TaxonomyDepartment, active: string | null): CatalogTab[] {
+  if (categories.length === 0) {
+    return [];
+  }
+
   return [
     { label: CATALOG_LABELS.allCategories, href: departmentHref(department), active: active === null },
     ...categories.map(({ slug, name }) => ({ label: name, href: categoryHref(department, slug), active: slug === active })),
@@ -81,7 +86,9 @@ export function departmentScope(slug: string): CatalogScope | null {
     category: null,
     title: department.name,
     metaTitle: department.name,
-    description: `${department.name} ${TAGLINE}: ${listFormat.format(department.categories.map(({ name }) => lower(name)))}.`,
+    description: department.categories.length > 0
+      ? `${department.name} ${TAGLINE}: ${listFormat.format(department.categories.map(({ name }) => lower(name)))}.`
+      : `${department.name} ${TAGLINE}.`,
     trail: [HOME_CRUMB],
     href: departmentHref(department.slug),
     tabsLabel: `Categorias de ${department.name}`,

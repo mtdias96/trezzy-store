@@ -15,21 +15,28 @@ const noFilters: CatalogFilters = { tamanho: [], marca: [], preco: null, promoca
 
 describe('departmentScope', () => {
   it('titles the page with the department and opens on "Tudo"', () => {
-    const scope = departmentScope('streetwear');
+    const scope = departmentScope('roupas');
 
     expect(scope).toMatchObject({
-      department: 'streetwear',
+      department: 'roupas',
       category: null,
-      title: 'Streetwear',
+      title: 'Roupas',
       trail: [{ name: 'Início', href: '/' }],
-      href: '/streetwear',
+      href: '/roupas',
     });
-    expect(scope?.tabs.filter(({ active }) => active)).toEqual([{ label: 'Tudo', href: '/streetwear', active: true }]);
-    expect(scope?.tabs.map(({ label }) => label)).toEqual(['Tudo', 'Camisetas', 'Moletons', 'Jaquetas', 'Calças', 'Shorts', 'Acessórios']);
+    expect(scope?.tabs.filter(({ active }) => active)).toEqual([{ label: 'Tudo', href: '/roupas', active: true }]);
+    expect(scope?.tabs.map(({ label }) => label)).toEqual(['Tudo', 'Camisetas', 'Moletons', 'Calças']);
   });
 
   it('describes the page with its categories', () => {
-    expect(departmentScope('sneakers')?.description).toBe('Sneakers das marcas que fazem a rua: casual, corrida, skate e trail.');
+    expect(departmentScope('roupas')?.description).toBe('Roupas das marcas que fazem a rua: camisetas, moletons e calças.');
+  });
+
+  it('has no tabs and no category list for a department without subcategories', () => {
+    const scope = departmentScope('tenis');
+
+    expect(scope?.tabs).toEqual([]);
+    expect(scope?.description).toBe('Tênis das marcas que fazem a rua.');
   });
 
   it('returns null for a slug outside the taxonomy', () => {
@@ -39,22 +46,22 @@ describe('departmentScope', () => {
 
 describe('categoryScope', () => {
   it('titles the page with the category, under the department in the trail', () => {
-    const scope = categoryScope('streetwear', 'camisetas');
+    const scope = categoryScope('roupas', 'camisetas');
 
     expect(scope).toMatchObject({
-      department: 'streetwear',
+      department: 'roupas',
       category: 'camisetas',
       title: 'Camisetas',
-      metaTitle: 'Camisetas · Streetwear',
-      trail: [{ name: 'Início', href: '/' }, { name: 'Streetwear', href: '/streetwear' }],
-      href: '/streetwear/camisetas',
+      metaTitle: 'Camisetas · Roupas',
+      trail: [{ name: 'Início', href: '/' }, { name: 'Roupas', href: '/roupas' }],
+      href: '/roupas/camisetas',
     });
     expect(scope?.tabs.find(({ active }) => active)?.label).toBe('Camisetas');
   });
 
   it('returns null for a category of another department', () => {
-    expect(categoryScope('streetwear', 'skate')).toBeNull();
-    expect(categoryScope('skate', 'streetwear')).toBeNull();
+    expect(categoryScope('roupas', 'bones')).toBeNull();
+    expect(categoryScope('bones', 'roupas')).toBeNull();
   });
 });
 
@@ -65,40 +72,42 @@ describe('allProductsScope', () => {
     expect(scope).toMatchObject({ department: null, category: null, href: '/produtos' });
     expect(scope.tabs.map(({ label, active }) => [label, active])).toEqual([
       ['Tudo', true],
-      ['Streetwear', false],
-      ['Sneakers', false],
-      ['Eyewear', false],
+      ['Roupas', false],
+      ['Tênis', false],
+      ['Óculos', false],
+      ['Acessórios', false],
     ]);
   });
 });
 
 describe('departmentFilterItems', () => {
-  const scope = departmentScope('sneakers');
+  const scope = departmentScope('tenis');
 
   it('counts every department and their sum in "Todos", marking the current one', () => {
     const items = scope && departmentFilterItems(scope, [
-      { slug: 'streetwear', productCount: 8 },
-      { slug: 'sneakers', productCount: 4 },
+      { slug: 'roupas', productCount: 8 },
+      { slug: 'tenis', productCount: 4 },
     ]);
 
     expect(items).toEqual([
       { label: 'Todos', href: '/produtos', count: 12, active: false },
-      { label: 'Streetwear', href: '/streetwear', count: 8, active: false },
-      { label: 'Sneakers', href: '/sneakers', count: 4, active: true },
-      { label: 'Eyewear', href: '/eyewear', count: 0, active: false },
+      { label: 'Roupas', href: '/roupas', count: 8, active: false },
+      { label: 'Tênis', href: '/tenis', count: 4, active: true },
+      { label: 'Óculos', href: '/oculos', count: 0, active: false },
+      { label: 'Acessórios', href: '/acessorios', count: 0, active: false },
     ]);
   });
 
   it('keeps the links without numbers when the API is down', () => {
     const items = scope && departmentFilterItems(scope, []);
 
-    expect(items?.map(({ count }) => count)).toEqual([null, null, null, null]);
+    expect(items?.map(({ count }) => count)).toEqual([null, null, null, null, null]);
   });
 });
 
 describe('toCatalogQuery', () => {
   it('sorts and dedupes the filters, so the same choice hits the same cache entry', () => {
-    const scope = categoryScope('streetwear', 'camisetas');
+    const scope = categoryScope('roupas', 'camisetas');
     const query = scope && toCatalogQuery(scope, {
       tamanho: ['M', 'G', 'M'],
       marca: ['patio-9', 'mormaco'],
@@ -109,7 +118,7 @@ describe('toCatalogQuery', () => {
     });
 
     expect(query).toEqual({
-      department: 'streetwear',
+      department: 'roupas',
       category: 'camisetas',
       sizes: ['G', 'M'],
       brands: ['mormaco', 'patio-9'],
