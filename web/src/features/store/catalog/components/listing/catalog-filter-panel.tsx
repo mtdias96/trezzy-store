@@ -2,14 +2,13 @@ import { FilterChecklist } from '@/components/store/forms/filter-checklist';
 import { FilterChips } from '@/components/store/forms/filter-chips';
 import { FilterRadios } from '@/components/store/forms/filter-radios';
 import { FilterSection } from '@/components/store/forms/filter-section';
-import { FilterSwitch } from '@/components/store/forms/filter-switch';
 import { FilterLinks } from '@/components/store/navigation/filter-links';
 import { CATALOG_LABELS, type CatalogFilters, PRICE_RANGES, toggleValue } from '@/features/store/catalog/model/listing';
 import type { DepartmentFilterItem } from '@/features/store/catalog/model/scope';
 import type { BrandFacet } from '@/features/store/catalog/model/types';
 import { sizeLabel } from '@/lib/size';
 
-export type PanelFilters = Pick<CatalogFilters, 'tamanho' | 'marca' | 'preco' | 'promocao'>;
+export type PanelFilters = Pick<CatalogFilters, 'tamanho' | 'marca' | 'preco'>;
 
 type CatalogFilterPanelProps = {
   // O painel aparece duas vezes (lateral e gaveta): cada uma com os próprios ids.
@@ -83,11 +82,6 @@ export function CatalogFilterPanel({ idPrefix, departments, sizes, brands, filte
           onValueChange={(preco) => onChange({ preco })}
         />
       </FilterSection>
-      <FilterSwitch
-        label={CATALOG_LABELS.onSale}
-        checked={filters.promocao}
-        onCheckedChange={(promocao) => onChange({ promocao })}
-      />
     </div>
   );
 }

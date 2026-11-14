@@ -11,7 +11,7 @@ import {
   toCatalogQuery,
 } from './scope';
 
-const noFilters: CatalogFilters = { tamanho: [], marca: [], preco: null, promocao: false, ordem: 'relevancia', pagina: 1 };
+const noFilters: CatalogFilters = { tamanho: [], marca: [], preco: null, ordem: 'relevancia', pagina: 1 };
 
 describe('departmentScope', () => {
   it('titles the page with the department and opens on "Tudo"', () => {
@@ -112,7 +112,6 @@ describe('toCatalogQuery', () => {
       tamanho: ['M', 'G', 'M'],
       marca: ['patio-9', 'mormaco'],
       preco: null,
-      promocao: false,
       ordem: 'menor-preco',
       pagina: 0,
     });
@@ -124,24 +123,23 @@ describe('toCatalogQuery', () => {
       brands: ['mormaco', 'patio-9'],
       priceAboveInCents: null,
       priceUpToInCents: null,
-      onSale: false,
       sort: 'menor-preco',
       page: 1,
     });
   });
 
-  it('turns the price range into limits in cents and keeps the sale switch', () => {
-    const query = toCatalogQuery(allProductsScope(), { ...noFilters, preco: '300-700', promocao: true });
+  it('turns the price range into limits in cents', () => {
+    const query = toCatalogQuery(allProductsScope(), { ...noFilters, preco: '300-700' });
 
-    expect(query).toMatchObject({ priceAboveInCents: 30000, priceUpToInCents: 70000, onSale: true });
+    expect(query).toMatchObject({ priceAboveInCents: 30000, priceUpToInCents: 70000 });
   });
 });
 
 describe('isSharedQuery', () => {
   const scope = allProductsScope();
 
-  it('shares the page as the links open it, in any order, page or sale switch', () => {
-    expect(isSharedQuery(toCatalogQuery(scope, { ...noFilters, ordem: 'novidades', pagina: 3, promocao: true }))).toBe(true);
+  it('shares the page as the links open it, in any order or page', () => {
+    expect(isSharedQuery(toCatalogQuery(scope, { ...noFilters, ordem: 'novidades', pagina: 3 }))).toBe(true);
   });
 
   it('does not share a size, brand or price choice', () => {

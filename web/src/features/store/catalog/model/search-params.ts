@@ -2,7 +2,6 @@ import {
   createLoader,
   createSerializer,
   parseAsArrayOf,
-  parseAsBoolean,
   parseAsInteger,
   parseAsString,
   parseAsStringLiteral,
@@ -14,7 +13,6 @@ export const catalogParsers = {
   tamanho: parseAsArrayOf(parseAsString).withDefault([]),
   marca: parseAsArrayOf(parseAsString).withDefault([]),
   preco: parseAsStringLiteral(PRICE_RANGES.map(({ value }) => value)),
-  promocao: parseAsBoolean.withDefault(false),
   ordem: parseAsStringLiteral(CATALOG_SORTS).withDefault(DEFAULT_CATALOG_SORT),
   pagina: parseAsInteger.withDefault(1),
 };

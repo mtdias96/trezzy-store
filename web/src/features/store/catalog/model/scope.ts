@@ -155,7 +155,6 @@ export type CatalogQuery = {
   brands: string[];
   priceAboveInCents: number | null;
   priceUpToInCents: number | null;
-  onSale: boolean;
   sort: CatalogSort;
   page: number;
 };
@@ -171,14 +170,13 @@ export function toCatalogQuery({ department, category }: CatalogScope, filters: 
     brands: [...new Set(filters.marca)].sort(),
     priceAboveInCents: price?.aboveInCents ?? null,
     priceUpToInCents: price?.upToInCents ?? null,
-    onSale: filters.promocao,
     sort: filters.ordem,
     page: currentPage(filters.pagina),
   };
 }
 
 // A página como os links a abrem (abas, departamentos, menu e paginação), em qualquer ordem: poucas combinações,
-// repetidas por todo visitante. A promoção entra porque é o "Outlet" do menu.
+// repetidas por todo visitante.
 export function isSharedQuery({ sizes, brands, priceAboveInCents, priceUpToInCents }: CatalogQuery): boolean {
   return sizes.length === 0 && brands.length === 0 && priceAboveInCents === null && priceUpToInCents === null;
 }

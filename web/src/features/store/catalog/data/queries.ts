@@ -228,7 +228,6 @@ export async function getPriceBands(): Promise<PriceBand[]> {
         brands: [],
         priceAboveInCents: range.aboveInCents,
         priceUpToInCents: range.upToInCents,
-        onSale: false,
         sort: 'best-selling',
         page: 1,
         limit: PRICE_BAND_PHOTOS,

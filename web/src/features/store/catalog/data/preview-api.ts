@@ -337,13 +337,12 @@ function inPriceRange({ priceInCents }: PreviewProduct, above: number | null, up
 const isOnSale = ({ priceInCents, compareAtPriceInCents }: PreviewProduct) => (compareAtPriceInCents ?? 0) > priceInCents;
 
 export async function fetchCatalogPage(query: CatalogPageQuery): Promise<CatalogPageDto> {
-  const { department, category, sizes, brands, priceAboveInCents, priceUpToInCents, onSale, sort, page, limit } = query;
-  // Preço e promoção não têm contagem: entram no recorte de todas as outras.
+  const { department, category, sizes, brands, priceAboveInCents, priceUpToInCents, sort, page, limit } = query;
+  // Preço não tem contagem: entra no recorte de todas as outras.
   const scoped = PRODUCTS.filter((item) =>
     (department === null || item.department === department)
     && (category === null || item.category === category)
-    && inPriceRange(item, priceAboveInCents, priceUpToInCents)
-    && (!onSale || isOnSale(item)));
+    && inPriceRange(item, priceAboveInCents, priceUpToInCents));
   const bySize = (item: PreviewProduct) => sizes.length === 0 || sizes.some((size) => hasSize(item, size));
   const byBrand = (item: PreviewProduct) => brands.length === 0 || brands.includes(item.brand);
   const matching = scoped.filter((item) => bySize(item) && byBrand(item)).sort(SORTS[sort]);

@@ -10,9 +10,9 @@ describe('toggleValue', () => {
 });
 
 describe('activeFilterCount', () => {
-  it('counts each size and brand chosen, plus the price range and the sale switch', () => {
-    expect(activeFilterCount({ tamanho: ['P', 'M'], marca: ['kairo'], preco: '300-700', promocao: true })).toBe(5);
-    expect(activeFilterCount({ tamanho: [], marca: [], preco: null, promocao: false })).toBe(0);
+  it('counts each size and brand chosen, plus the price range', () => {
+    expect(activeFilterCount({ tamanho: ['P', 'M'], marca: ['kairo'], preco: '300-700' })).toBe(4);
+    expect(activeFilterCount({ tamanho: [], marca: [], preco: null })).toBe(0);
   });
 });
 

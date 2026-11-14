@@ -72,7 +72,6 @@ describe('departmentLinks', () => {
         shortcuts: [
           { label: 'Novidades', href: '/oculos?ordem=novidades' },
           { label: 'Mais vendidos', href: '/oculos?ordem=mais-vendidos' },
-          { label: 'Outlet', href: '/oculos?promocao=true' },
         ],
       },
     ]);

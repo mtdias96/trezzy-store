@@ -1,12 +1,9 @@
-import type { Route } from 'next';
-
 import { discountPercent } from '@/lib/money';
+import { pendingRoute } from '@/lib/route';
 
-import { serializeCatalogFilters } from './search-params';
-import { ALL_PRODUCTS_HREF } from './taxonomy';
 import type { OutletProduct, OutletShowcase } from './types';
 
-export const OUTLET_HREF = serializeCatalogFilters(ALL_PRODUCTS_HREF, { promocao: true }) as Route;
+export const OUTLET_HREF = pendingRoute('/outlet');
 
 export const OUTLET_TILES = 4;
 

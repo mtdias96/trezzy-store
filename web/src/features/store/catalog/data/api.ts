@@ -125,18 +125,17 @@ export type CatalogPageQuery = {
   brands: string[];
   priceAboveInCents: number | null;
   priceUpToInCents: number | null;
-  onSale: boolean;
   sort: CatalogSortDto;
   page: number;
   limit: number;
 };
 
-// GET /store/products?department=&category=&size=M&size=G&brand=&priceAboveInCents=&priceUpToInCents=&onSale=true
+// GET /store/products?department=&category=&size=M&size=G&brand=&priceAboveInCents=&priceUpToInCents=
 //   &sort=relevance&page=1&limit=24 → { products, total, facets: { sizes, brands } }
-// Preço: acima de priceAboveInCents (exclusivo) e até priceUpToInCents (inclusivo). Promoção: preço "de" maior que o
-// preço. As contagens de cada filtro ignoram o próprio filtro: marcar uma marca não zera as outras.
+// Preço: acima de priceAboveInCents (exclusivo) e até priceUpToInCents (inclusivo). As contagens de cada filtro
+// ignoram o próprio filtro: marcar uma marca não zera as outras.
 export async function fetchCatalogPage(params: CatalogPageQuery): Promise<CatalogPageDto> {
-  const { department, category, sizes, brands, priceAboveInCents, priceUpToInCents, onSale, sort, page, limit } = params;
+  const { department, category, sizes, brands, priceAboveInCents, priceUpToInCents, sort, page, limit } = params;
   const query = new URLSearchParams({ sort, page: String(page), limit: String(limit) });
 
   if (department) {
@@ -153,10 +152,6 @@ export async function fetchCatalogPage(params: CatalogPageQuery): Promise<Catalo
 
   if (priceUpToInCents !== null) {
     query.set('priceUpToInCents', String(priceUpToInCents));
-  }
-
-  if (onSale) {
-    query.set('onSale', 'true');
   }
 
   sizes.forEach((size) => query.append('size', size));

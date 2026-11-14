@@ -1,6 +1,6 @@
 import type { Route } from 'next';
 
-import { CATALOG_LABELS, type CatalogSort, SORT_LABELS } from './listing';
+import { type CatalogSort, SORT_LABELS } from './listing';
 import { serializeCatalogFilters } from './search-params';
 
 export type TaxonomyCategory = {
@@ -80,7 +80,6 @@ export function departmentLinks(departments: readonly TaxonomyDepartment[] = STO
         label: SORT_LABELS[ordem],
         href: serializeCatalogFilters(departmentHref(slug), { ordem }) as Route,
       })),
-      { label: CATALOG_LABELS.outlet, href: serializeCatalogFilters(departmentHref(slug), { promocao: true }) as Route },
     ],
   }));
 }

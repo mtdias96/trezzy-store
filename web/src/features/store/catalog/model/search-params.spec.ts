@@ -3,12 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { loadCatalogFilters, serializeCatalogFilters } from './search-params';
 
 describe('loadCatalogFilters', () => {
-  it('reads the lists and falls back to the defaults', () => {
+  it('reads the lists and falls back to the defaults, ignoring the old sale switch', () => {
     expect(loadCatalogFilters({ tamanho: 'P,M', marca: 'kairo', preco: 'acima-1200', promocao: 'true' })).toEqual({
       tamanho: ['P', 'M'],
       marca: ['kairo'],
       preco: 'acima-1200',
-      promocao: true,
       ordem: 'relevancia',
       pagina: 1,
     });
@@ -25,7 +24,7 @@ describe('loadCatalogFilters', () => {
 
 describe('serializeCatalogFilters', () => {
   it('leaves the defaults out of the URL', () => {
-    expect(serializeCatalogFilters('/streetwear', { tamanho: [], promocao: false, ordem: 'relevancia', pagina: 1 })).toBe('/streetwear');
-    expect(serializeCatalogFilters('/streetwear', { ordem: 'menor-preco' })).toBe('/streetwear?ordem=menor-preco');
+    expect(serializeCatalogFilters('/roupas', { tamanho: [], ordem: 'relevancia', pagina: 1 })).toBe('/roupas');
+    expect(serializeCatalogFilters('/roupas', { ordem: 'menor-preco' })).toBe('/roupas?ordem=menor-preco');
   });
 });

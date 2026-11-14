@@ -12,9 +12,6 @@ export const CATALOG_LABELS = {
   sizes: 'Tamanho',
   brands: 'Marca',
   price: 'Preço',
-  onSale: 'Só promoções',
-  // Atalho do menu para as promoções de um departamento.
-  outlet: 'Outlet',
   clear: 'Limpar',
   sort: 'Ordenar',
   filters: 'Filtrar',
@@ -80,13 +77,12 @@ export type CatalogFilters = {
   tamanho: string[];
   marca: string[];
   preco: string | null;
-  promocao: boolean;
   ordem: CatalogSort;
   pagina: number;
 };
 
-export function activeFilterCount({ tamanho, marca, preco, promocao }: Omit<CatalogFilters, 'ordem' | 'pagina'>): number {
-  return tamanho.length + marca.length + (preco === null ? 0 : 1) + (promocao ? 1 : 0);
+export function activeFilterCount({ tamanho, marca, preco }: Omit<CatalogFilters, 'ordem' | 'pagina'>): number {
+  return tamanho.length + marca.length + (preco === null ? 0 : 1);
 }
 
 export function toggleValue(values: readonly string[], value: string): string[] {

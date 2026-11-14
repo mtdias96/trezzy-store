@@ -23,7 +23,7 @@ const COLLECTIONS: HomeCollectionDto[] = [
   { id: 'camisetas-boxy', title: 'Camisetas Boxy', caption: 'A partir de R$ 189,90', imageUrl: null, href: '/roupas/camisetas' },
   { id: 'skate', title: 'Skate', caption: 'Tênis de skate', imageUrl: null, href: '/tenis' },
   { id: 'lentes-de-metal', title: 'Lentes de metal', caption: 'UV400 · Lente Crua', imageUrl: null, href: '/oculos' },
-  { id: 'outlet', title: 'Outlet até -20%', caption: 'Preços de/por', imageUrl: null, href: '/produtos?promocao=true' },
+  { id: 'bones', title: 'Bonés', caption: 'Aba curva e aba reta', imageUrl: null, href: '/acessorios/bones' },
 ];
 
 export async function fetchHomeCollections(): Promise<HomeCollectionDto[]> {
