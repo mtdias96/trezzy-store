@@ -50,6 +50,12 @@ export const categories = pgTable('categories', {
   check('categories_grid_check', sql`${t.grid} in ('num', 'apparel', 'one')`),
 ]);
 
+// Liga as cores de um mesmo modelo: cada cor com fotos próprias é um produto (ADR-018).
+export const productFamilies = pgTable('product_families', {
+  id: uuid().primaryKey().defaultRandom(),
+  ...timestamps,
+});
+
 // Preço, tamanho, cor e estoque moram na variante. Tamanhos/cores do produto e "a partir de R$" são derivados dela.
 export const products = pgTable('products', {
   id: uuid().primaryKey().defaultRandom(),
@@ -64,11 +70,19 @@ export const products = pgTable('products', {
   categoryId: uuid().notNull().references(() => categories.id, { onDelete: 'restrict' }),
   // Preenchido na primeira ativação: "novidades" ordena por aqui, não pela criação do rascunho.
   publishedAt: timestamp({ withTimezone: true }),
+  // Cores do mesmo modelo. A API só liga produtos da mesma marca e categoria.
+  familyId: uuid().references(() => productFamilies.id, { onDelete: 'set null' }),
+  // Nome comercial da cor no seletor da loja ("Reflective Black"). Obrigatório em produto com família.
+  colorName: text(),
   ...timestamps,
 }, (t) => [
   slugFormatCheck('products_slug_format_check', t.slug),
   check('products_status_check', sql`${t.status} in ('draft', 'active', 'inactive', 'archived')`),
   check('products_published_check', sql`${t.status} <> 'active' or ${t.publishedAt} is not null`),
+  check('products_family_color_check', sql`${t.familyId} is null or ${t.colorName} is not null`),
+  check('products_color_name_check', sql`${t.colorName} is null or (${t.colorName} = btrim(${t.colorName}) and ${t.colorName} <> '')`),
+  // Duas cores da mesma família com o mesmo nome confundiriam o seletor. Também é o índice da FK para product_families.
+  uniqueIndex('products_family_color_unique').on(t.familyId, sql`lower(${t.colorName})`).where(sql`${t.familyId} is not null`),
   // "Mais novos" = ORDER BY published_at DESC, id DESC: índice crescente lido de trás para frente, sem Sort.
   // Não use .desc() aqui: ele gera NULLS LAST, que não casa com o DESC (NULLS FIRST) da query.
   // O id desempata datas iguais (cadastro em lote) e permite paginar por cursor (published_at, id).
